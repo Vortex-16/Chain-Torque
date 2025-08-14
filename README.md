@@ -5,6 +5,17 @@
 
 > **ChainTorque** revolutionizes 3D model marketplaces by combining blockchain technology, AI-driven optimization, and real-time 3D interaction to create a secure, transparent, and intelligent platform for engineering assets.
 
+## 🏗️ **Current Development Status**
+
+**Phase 1: Frontend Foundation** *(Completed)*
+- ✅ **Project Structure**: Clean frontend-focused architecture
+- ✅ **Landing Page**: Express.js + EJS templating engine
+- ✅ **Marketplace Frontend**: React + TypeScript + Vite setup
+- ✅ **Development Environment**: Concurrent development setup
+- 🔄 **Backend Integration**: Ready for API implementation
+
+**Next Steps**: Implement backend APIs and blockchain integration
+
 ---
 
 ## 🚀 **The Problem We're Solving**
@@ -146,17 +157,11 @@ ChainTorque transforms the marketplace experience through cutting-edge Web3 and 
 git clone https://github.com/your-username/ChainTorque.git
 cd ChainTorque
 
-# Install dependencies
-npm install
-
-# Set up environment variables
-cp .env.example .env.local
-# Edit .env.local with your configuration
+# Install dependencies for both frontends
+npm run install:all
 
 # Start development servers
-npm run dev        # Frontend
-npm run server     # Backend
-npm run blockchain # Local blockchain
+npm run dev  # Starts both Landing Page (port 3000) and Marketplace (port 8080)
 ```
 
 ### **Smart Contract Deployment**

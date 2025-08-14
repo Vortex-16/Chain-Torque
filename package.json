@@ -1,0 +1,51 @@
+{
+  "name": "chaintorque-monorepo",
+  "version": "1.0.0",
+  "description": "ChainTorque - Web3 CAD Engineering Marketplace",
+  "private": true,
+  "workspaces": [
+    "Marketplace (Frontend)"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev:landing\" \"npm run dev:marketplace\"",
+    "dev:landing": "cd \"Landing Page (Frontend)\" && npm run dev",
+    "dev:marketplace": "cd \"Marketplace (Frontend)\" && npm run dev",
+    "build": "npm run build:marketplace",
+    "build:marketplace": "cd \"Marketplace (Frontend)\" && npm run build",
+    "install:all": "npm run install:frontend",
+    "install:frontend": "cd \"Landing Page (Frontend)\" && npm install && cd ../\"Marketplace (Frontend)\" && npm install",
+    "clean": "rimraf node_modules \"Landing Page (Frontend)/node_modules\" \"Marketplace (Frontend)/node_modules\"",
+    "clean:build": "rimraf \"Marketplace (Frontend)/dist\"",
+    "lint": "cd \"Marketplace (Frontend)\" && npm run lint",
+    "test": "echo \"Tests to be implemented\"",
+    "start:landing": "cd \"Landing Page (Frontend)\" && npm start",
+    "start:marketplace": "cd \"Marketplace (Frontend)\" && npm run preview"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "rimraf": "^5.0.5"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Dealer-09/Chain-Torque.git"
+  },
+  "keywords": [
+    "web3",
+    "nft",
+    "3d",
+    "cad",
+    "marketplace",
+    "blockchain",
+    "ai",
+    "engineering",
+    "express",
+    "react",
+    "vite"
+  ],
+  "author": "ChainTorque Team",
+  "license": "MIT"
+}

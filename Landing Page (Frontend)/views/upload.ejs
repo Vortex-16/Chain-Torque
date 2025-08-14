@@ -1,0 +1,27 @@
+<%- include('partials/header') %>
+
+<section class="py-12 bg-gray-50">
+    <div class="max-w-4xl mx-auto bg-white p-8 shadow rounded-xl">
+        <h2 class="text-2xl font-bold mb-6 text-center text-gray-800">Upload New CAD Model</h2>
+        <form action="/upload" method="POST" enctype="multipart/form-data" class="space-y-6">
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Title</label>
+                <input type="text" name="title" required class="mt-1 block w-full px-4 py-2 border rounded-lg shadow-sm focus:outline-none">
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Image</label>
+                <input type="file" name="image" accept="image/*" required class="mt-1 block w-full">
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700">CAD File(.stl, .obj, etc.)</label>
+                <input type="file" name="cadfile" required class="mt-1 block w-full">
+            </div>
+
+            <button type="submit" class="w-full bg-gray-800 hover:bg-blue-500 text-white py-2 px-4 rounded-lg ">Upload Model</button>
+        </form>
+    </div>
+</section>
+
+<%- include('partials/footer') %>
