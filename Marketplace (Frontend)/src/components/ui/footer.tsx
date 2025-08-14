@@ -1,87 +1,51 @@
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Separator } from "@/components/ui/separator";
-import { Github, Twitter, Linkedin, Mail } from "lucide-react";
-
 export function Footer() {
   return (
-    <footer className="bg-card border-t">
-      <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {/* Company Info */}
-          <div>
-            <div className="flex items-center space-x-2 mb-4">
-              <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center">
-                <span className="text-primary-foreground font-bold text-sm">CAD</span>
-              </div>
-              <span className="text-xl font-bold text-foreground">CAD Market</span>
-            </div>
-            <p className="text-muted-foreground text-sm mb-4">
-              The premier marketplace for professional CAD models, connecting engineers and designers worldwide.
-            </p>
-            <div className="flex space-x-2">
-              <Button variant="outline" size="sm" className="h-8 w-8 p-0">
-                <Github className="h-4 w-4" />
-              </Button>
-              <Button variant="outline" size="sm" className="h-8 w-8 p-0">
-                <Twitter className="h-4 w-4" />
-              </Button>
-              <Button variant="outline" size="sm" className="h-8 w-8 p-0">
-                <Linkedin className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-
-          {/* Marketplace */}
-          <div>
-            <h3 className="font-semibold text-foreground mb-4">Marketplace</h3>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><a href="#" className="hover:text-foreground transition-colors">Browse Models</a></li>
-              <li><a href="#" className="hover:text-foreground transition-colors">Upload & Sell</a></li>
-              <li><a href="#" className="hover:text-foreground transition-colors">Popular Categories</a></li>
-              <li><a href="#" className="hover:text-foreground transition-colors">Pricing</a></li>
-            </ul>
-          </div>
-
-          {/* Support */}
-          <div>
-            <h3 className="font-semibold text-foreground mb-4">Support</h3>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><a href="#" className="hover:text-foreground transition-colors">Help Center</a></li>
-              <li><a href="#" className="hover:text-foreground transition-colors">Community</a></li>
-              <li><a href="#" className="hover:text-foreground transition-colors">File Formats</a></li>
-              <li><a href="#" className="hover:text-foreground transition-colors">Contact Us</a></li>
-            </ul>
-          </div>
-
-          {/* Newsletter */}
-          <div>
-            <h3 className="font-semibold text-foreground mb-4">Stay Updated</h3>
-            <p className="text-sm text-muted-foreground mb-4">
-              Get notified about new models and marketplace updates.
-            </p>
-            <div className="flex space-x-2">
-              <Input 
-                placeholder="Enter your email" 
-                className="flex-1"
-              />
-              <Button size="sm" className="bg-gradient-primary hover:bg-primary-hover">
-                <Mail className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
+    <footer className="bg-card border-t border-border pt-10 pb-6 mt-auto">
+      <div className="max-w-7xl mx-auto px-6 md:px-12 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
+        
+        {/* Brand */}
+        <div>
+          <h3 className="text-foreground text-xl font-semibold mb-4">CAD Marketplace</h3>
+          <p className="text-sm text-muted-foreground">A platform to upload, explore, and download 3D CAD models easily. Connect with designers and engineers across the globe.</p>
         </div>
 
-        <Separator className="my-8" />
-
-        <div className="flex flex-col md:flex-row justify-between items-center text-sm text-muted-foreground">
-          <p>&copy; 2024 CAD Market. All rights reserved.</p>
-          <div className="flex space-x-6 mt-4 md:mt-0">
-            <a href="#" className="hover:text-foreground transition-colors">Privacy Policy</a>
-            <a href="#" className="hover:text-foreground transition-colors">Terms of Service</a>
-            <a href="#" className="hover:text-foreground transition-colors">Cookie Policy</a>
-          </div>
+        {/* Links */}
+        <div>
+          <h4 className="text-foreground font-semibold mb-4">Quick Links</h4>
+          <ul className="space-y-2 text-sm">
+            <li><a href="/" className="text-muted-foreground hover:text-foreground transition-colors">Home</a></li>
+            <li><a href="/library" className="text-muted-foreground hover:text-foreground transition-colors">Library</a></li>
+            <li><a href="/upload" className="text-muted-foreground hover:text-foreground transition-colors">Upload Model</a></li>
+            <li><a href="/contact" className="text-muted-foreground hover:text-foreground transition-colors">Contact</a></li>
+          </ul>
         </div>
+
+        {/* Resources */}
+        <div>
+          <h4 className="text-foreground font-semibold mb-4">Resources</h4>
+          <ul className="space-y-2 text-sm">
+            <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors">Documentation</a></li>
+            <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors">API Access</a></li>
+            <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors">License Info</a></li>
+            <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors">Terms of Service</a></li>
+          </ul>
+        </div>
+
+        {/* Follow Us */}
+        <div>
+          <h4 className="text-foreground font-semibold mb-4">Follow Us</h4>
+          <ul className="space-y-2 text-sm">
+            <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors">Instagram</a></li>
+            <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors">LinkedIn</a></li>
+            <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors">GitHub</a></li>
+            <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors">X (Twitter)</a></li>
+          </ul>
+        </div>
+
+      </div>
+
+      <div className="border-t border-border mt-10 pt-4 text-center text-sm text-muted-foreground">
+        &copy; 2025 CAD Marketplace. All rights reserved.
       </div>
     </footer>
   );

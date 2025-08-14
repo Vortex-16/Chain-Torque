@@ -8,112 +8,123 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    /* Light Mode Variables */
+    --background: 0 0% 100%;
+    --foreground: 224 71.4% 4.1%;
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 0 0% 100%;
+    --card-foreground: 224 71.4% 4.1%;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 224 71.4% 4.1%;
 
-    /* Vibrant electric purple */
-    --primary: 259 94% 51%;
+    /* Blue primary matching Landing Page */
+    --primary: 217 91% 60%;
     --primary-foreground: 0 0% 100%;
-    --primary-hover: 259 94% 46%;
+    --primary-hover: 217 91% 55%;
 
-    /* Coral pink accent */
-    --secondary: 340 82% 52%;
+    /* Purple/Indigo accent for gradients */
+    --secondary: 259 94% 51%;
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 220 14.3% 95.9%;
+    --muted-foreground: 220 8.9% 46.1%;
 
-    --accent: 172 76% 41%;
+    --accent: 259 94% 51%;
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 259 94% 51%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 217 91% 60%;
 
-    /* CAD Market vibrant tokens */
+    /* CAD Market specific colors - Light Mode */
     --engineering-blue: 217 91% 60%;
-    --technical-gray: 215 25% 45%;
+    --technical-gray: 220 8.9% 46.1%;
     --success-green: 142 76% 36%;
     --warning-orange: 25 95% 53%;
-    --electric-purple: 259 94% 51%;
-    --coral-pink: 340 82% 52%;
-    --teal-accent: 172 76% 41%;
     
-    /* Dark mode optimized gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(259 94% 51%), hsl(340 82% 52%));
-    --gradient-hero: linear-gradient(135deg, hsl(222.2 84% 4.9%), hsl(259 94% 51%), hsl(172 76% 41%));
-    --gradient-card: linear-gradient(145deg, hsl(222.2 84% 4.9%), hsl(217.2 32.6% 17.5%));
-    --gradient-accent: linear-gradient(135deg, hsl(172 76% 41%), hsl(142 76% 36%));
-    --gradient-glow: radial-gradient(ellipse at center, hsl(259 94% 51% / 0.2), transparent);
+    /* Light mode gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(217 91% 60%), hsl(259 94% 51%));
+    --gradient-hero: linear-gradient(135deg, hsl(259 94% 51%), hsl(217 91% 60%), hsl(172 76% 41%));
+    --gradient-card: linear-gradient(145deg, hsl(0 0% 100%), hsl(220 14.3% 95.9%));
     
-    /* Enhanced dark shadows with glow */
-    --shadow-card: 0 4px 20px -2px hsl(259 94% 51% / 0.2);
-    --shadow-card-hover: 0 12px 40px -4px hsl(259 94% 51% / 0.4);
-    --shadow-professional: 0 2px 10px -2px hsl(0 0% 0% / 0.3);
-    --shadow-glow: 0 0 30px hsl(259 94% 51% / 0.5);
-    
-    /* Smooth animations */
-    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    --transition-card: transform 0.3s ease, box-shadow 0.3s ease;
-    --transition-bounce: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    /* Light shadows */
+    --shadow-card: 0 1px 3px 0 hsl(0 0% 0% / 0.1), 0 1px 2px -1px hsl(0 0% 0% / 0.1);
+    --shadow-card-hover: 0 4px 6px -1px hsl(0 0% 0% / 0.1), 0 2px 4px -2px hsl(0 0% 0% / 0.1);
+    --shadow-professional: 0 10px 15px -3px hsl(0 0% 0% / 0.1), 0 4px 6px -4px hsl(0 0% 0% / 0.1);
 
     --radius: 0.5rem;
 
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 259 94% 51%;
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 217 91% 60%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 259 94% 51%;
+    --sidebar-accent: 220 14.3% 95.9%;
+    --sidebar-accent-foreground: 240 5.3% 26.1%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217 91% 60%;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    /* Dark Mode Variables */
+    --background: 224 71.4% 4.1%;
+    --foreground: 210 20% 98%;
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 224 71.4% 4.1%;
+    --card-foreground: 210 20% 98%;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 224 71.4% 4.1%;
+    --popover-foreground: 210 20% 98%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    /* Bright primary for dark mode */
+    --primary: 217 91% 65%;
+    --primary-foreground: 224 71.4% 4.1%;
+    --primary-hover: 217 91% 70%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    /* Purple secondary */
+    --secondary: 259 94% 65%;
+    --secondary-foreground: 224 71.4% 4.1%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 215 27.9% 16.9%;
+    --muted-foreground: 217.9 10.6% 64.9%;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 259 94% 65%;
+    --accent-foreground: 224 71.4% 4.1%;
 
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 210 20% 98%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
+    --border: 215 27.9% 16.9%;
+    --input: 215 27.9% 16.9%;
+    --ring: 217 91% 65%;
+
+    /* CAD Market specific colors - Dark Mode */
+    --engineering-blue: 217 91% 65%;
+    --technical-gray: 217.9 10.6% 64.9%;
+    --success-green: 142 76% 46%;
+    --warning-orange: 25 95% 63%;
+    
+    /* Dark mode gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(217 91% 65%), hsl(259 94% 65%));
+    --gradient-hero: linear-gradient(135deg, hsl(259 94% 65%), hsl(217 91% 65%), hsl(172 76% 51%));
+    --gradient-card: linear-gradient(145deg, hsl(224 71.4% 4.1%), hsl(215 27.9% 16.9%));
+    
+    /* Dark shadows with glow */
+    --shadow-card: 0 4px 6px -1px hsl(0 0% 0% / 0.3), 0 2px 4px -2px hsl(0 0% 0% / 0.3);
+    --shadow-card-hover: 0 10px 15px -3px hsl(217 91% 65% / 0.2), 0 4px 6px -4px hsl(0 0% 0% / 0.3);
+    --shadow-professional: 0 25px 50px -12px hsl(0 0% 0% / 0.5);
+
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-primary: 217 91% 65%;
+    --sidebar-primary-foreground: 224 71.4% 4.1%;
     --sidebar-accent: 240 3.7% 15.9%;
     --sidebar-accent-foreground: 240 4.8% 95.9%;
     --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-ring: 217 91% 65%;
   }
 }
 

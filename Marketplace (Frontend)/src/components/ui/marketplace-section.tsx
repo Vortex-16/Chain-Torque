@@ -79,15 +79,15 @@ export function MarketplaceSection() {
           </div>
           
           <div className="flex items-center gap-3 mt-4 lg:mt-0">
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" className="border-border text-foreground hover:bg-accent">
               <Filter className="h-4 w-4 mr-2" />
               Filters
             </Button>
-            <div className="flex border rounded-lg p-1">
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+            <div className="flex border border-border rounded-lg p-1 bg-card">
+              <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-muted-foreground hover:bg-accent">
                 <Grid className="h-4 w-4" />
               </Button>
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+              <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-muted-foreground hover:bg-accent">
                 <List className="h-4 w-4" />
               </Button>
             </div>
@@ -96,9 +96,13 @@ export function MarketplaceSection() {
 
         {/* Categories */}
         <Tabs defaultValue="all" className="mb-8">
-          <TabsList className="grid grid-cols-4 lg:grid-cols-7 w-full">
+          <TabsList className="grid grid-cols-4 lg:grid-cols-7 w-full bg-muted">
             {categories.map((category, index) => (
-              <TabsTrigger key={index} value={category.toLowerCase().replace(" ", "-")} className="text-xs">
+              <TabsTrigger 
+                key={index} 
+                value={category.toLowerCase().replace(" ", "-")} 
+                className="text-xs text-muted-foreground data-[state=active]:bg-background data-[state=active]:text-primary"
+              >
                 {category}
               </TabsTrigger>
             ))}
@@ -125,7 +129,11 @@ export function MarketplaceSection() {
 
         {/* Load More */}
         <div className="text-center mt-12">
-          <Button size="lg" variant="outline" className="hover:bg-primary hover:text-primary-foreground">
+          <Button 
+            size="lg" 
+            variant="outline" 
+            className="border-primary text-primary hover:bg-primary hover:text-primary-foreground"
+          >
             Load More Models
           </Button>
         </div>
