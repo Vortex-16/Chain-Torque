@@ -64,3 +64,16 @@ temp/
 # Logs
 logs/
 *.log
+
+# Test files and debugging
+test-*.html
+test-*.js
+debug-*.html
+*.test.local
+test/temp/
+coverage/
+
+# Development artifacts
+.cache/
+.temp/
+.tmp/

@@ -2,11 +2,11 @@ import { useEffect, useState } from "react";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { User, LogOut } from "lucide-react";
+import { useAuthContext } from "@/hooks/useAuth";
 
 export function Navigation() {
   const [showScrollButton, setShowScrollButton] = useState(false);
-  const [user, setUser] = useState(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const { user, isAuthenticated, signOut } = useAuthContext();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -17,30 +17,7 @@ export function Navigation() {
       }
     };
 
-    // Check authentication status
-    const checkAuth = async () => {
-      try {
-        const response = await fetch('http://localhost:3000/api/auth-status', {
-          credentials: 'include'
-        });
-        const data = await response.json();
-        
-        if (data.authenticated) {
-          setUser(data.user);
-          setIsAuthenticated(true);
-        } else {
-          // Redirect to landing page if not authenticated
-          window.location.href = 'http://localhost:3000/login';
-        }
-      } catch (error) {
-        console.error('Auth check failed:', error);
-        window.location.href = 'http://localhost:3000/login';
-      }
-    };
-
     window.addEventListener("scroll", handleScroll);
-    checkAuth();
-    
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
@@ -53,14 +30,8 @@ export function Navigation() {
 
   const handleLogout = async () => {
     try {
-      const response = await fetch('http://localhost:3000/auth/logout', {
-        method: 'POST',
-        credentials: 'include'
-      });
-      
-      if (response.ok) {
-        window.location.href = 'http://localhost:3000';
-      }
+      await signOut();
+      // User will be redirected to landing page automatically by Clerk
     } catch (error) {
       console.error('Logout failed:', error);
     }
@@ -83,8 +54,10 @@ export function Navigation() {
               <div className="flex items-center gap-2">
                 <div className="flex items-center gap-2 text-sm text-foreground">
                   <User className="h-4 w-4" />
-                  <span className="hidden md:inline">{user.fullName}</span>
-                  <span className="text-xs text-muted-foreground bg-accent px-2 py-1 rounded">{user.userType}</span>
+                  <span className="hidden md:inline">{user.firstName} {user.lastName}</span>
+                  <span className="text-xs text-muted-foreground bg-accent px-2 py-1 rounded">
+                    {String(user.publicMetadata?.userType) || 'Member'}
+                  </span>
                 </div>
                 <Button
                   variant="outline"
