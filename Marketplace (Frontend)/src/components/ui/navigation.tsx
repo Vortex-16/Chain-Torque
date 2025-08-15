@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Button } from "@/components/ui/button";
-import { User, LogOut } from "lucide-react";
+import { User, LogOut, Activity } from "lucide-react";
 import { useAuthContext } from "@/hooks/useAuth";
+import { useBackendHealth } from "@/hooks/useWeb3";
 
 export function Navigation() {
   const [showScrollButton, setShowScrollButton] = useState(false);
   const { user, isAuthenticated, signOut } = useAuthContext();
+  const health = useBackendHealth();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -49,6 +51,17 @@ export function Navigation() {
             <li><a href="/upload" className="text-foreground hover:text-primary transition-colors">Upload</a></li>
           </ul>
           <div className="flex items-center gap-3">
+            {/* Backend Status Indicator */}
+            <div className="flex items-center gap-2">
+              <Activity className={`h-4 w-4 ${
+                health.status === 'OK' ? 'text-green-500' : 
+                health.loading ? 'text-yellow-500 animate-pulse' : 
+                'text-red-500'
+              }`} />
+              <span className="text-xs text-muted-foreground hidden md:inline">
+                {health.loading ? 'Checking...' : health.status}
+              </span>
+            </div>
             <ThemeToggle />
             {isAuthenticated && user && (
               <div className="flex items-center gap-2">

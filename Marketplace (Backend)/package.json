@@ -1,0 +1,16 @@
+{
+  "name": "chaintorque-web3-backend",
+  "version": "1.0.0",
+  "description": "ChainTorque Web3 Marketplace Backend",
+  "main": "server-simple.js",
+  "scripts": {
+    "start": "node server-simple.js",
+    "dev": "nodemon server-simple.js",
+    "compile": "hardhat compile",
+    "deploy": "hardhat run scripts/deploy.js --network mumbai",
+    "deploy-local": "hardhat run scripts/deploy.js --network localhost"
+  },
+  "keywords": ["web3", "marketplace", "backend", "blockchain"],
+  "author": "ChainTorque Team",
+  "license": "ISC"
+}
