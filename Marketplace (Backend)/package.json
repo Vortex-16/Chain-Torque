@@ -10,7 +10,12 @@
     "deploy": "hardhat run scripts/deploy.js --network mumbai",
     "deploy-local": "hardhat run scripts/deploy.js --network localhost"
   },
-  "keywords": ["web3", "marketplace", "backend", "blockchain"],
+  "keywords": [
+    "web3",
+    "marketplace",
+    "backend",
+    "blockchain"
+  ],
   "author": "ChainTorque Team",
   "license": "ISC"
 }

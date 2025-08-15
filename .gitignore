@@ -2,17 +2,29 @@
 node_modules/
 */node_modules/
 **/node_modules/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+bun.lockb
 
 # Environment variables
 .env
 .env.local
+.env.development
 .env.production
+.env.test
 *.log
 
 # Build outputs
 dist/
 build/
 .next/
+out/
+
+# Vite
+.vite/
+vite.config.js.timestamp-*
+vite.config.ts.timestamp-*
 
 # Service-specific
 services/*/dist/
@@ -45,6 +57,12 @@ Thumbs.db
 services/blockchain/artifacts/
 services/blockchain/cache/
 services/blockchain/typechain/
+**/artifacts/
+**/cache/
+**/typechain/
+contracts/artifacts/
+contracts/cache/
+hardhat.config.js.bak
 
 # AI Models
 services/ai-engine/models/
@@ -60,6 +78,15 @@ temp/
 *.iges
 *.igs
 *.stl
+*.glb
+*.gltf
+*.obj
+*.fbx
+public/uploads/
+
+# Backend specific
+"Marketplace (Backend)/uploads/"
+"Marketplace (Backend)/.env"
 
 # Logs
 logs/
@@ -77,3 +104,20 @@ coverage/
 .cache/
 .temp/
 .tmp/
+
+# Mock and test data
+web3-mock.js.bak
+mock-data/
+*.mock.js
+*.test.local
+
+# Private keys (security)
+private-key.txt
+*.pem
+*.key
+wallet.json
+
+# Windows specific
+desktop.ini
+$RECYCLE.BIN/
+*.lnk

@@ -9,7 +9,6 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import BackendStatus from "./components/BackendStatus";
-import ApiTestPanel from "./components/ApiTestPanel";
 
 const queryClient = new QueryClient();
 
@@ -37,7 +36,6 @@ const App = () => (
         <AuthProvider>
           <TooltipProvider>
             <BackendStatus />
-            <ApiTestPanel />
             <Toaster />
             <Sonner />
             <BrowserRouter

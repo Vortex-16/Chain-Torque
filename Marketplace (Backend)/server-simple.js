@@ -8,10 +8,14 @@ const path = require('path');
 require('dotenv').config();
 
 const web3Manager = require('./web3');
+const MockWeb3Manager = require('./web3-mock');
 const apiRoutes = require('./routes');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+// Initialize Web3 or Mock
+let web3Instance;
 
 // Security middleware
 app.use(helmet({
@@ -79,12 +83,25 @@ async function startServer() {
   try {
     console.log('🚀 Starting ChainTorque Web3 Marketplace Backend...');
     
-    // Initialize Web3
+    // Try to initialize real Web3 first
     const web3Connected = await web3Manager.initialize();
+    
+    if (web3Connected) {
+      web3Instance = web3Manager;
+      console.log('✅ Using real Web3 connection');
+    } else {
+      console.log('⚠️  Web3 connection failed, switching to Mock Mode...');
+      web3Instance = new MockWeb3Manager();
+      await web3Instance.initialize();
+      console.log('🎭 Using Mock Web3 for testing');
+    }
+    
+    // Make web3Instance available to routes
+    app.locals.web3 = web3Instance;
     
     app.listen(PORT, () => {
       console.log(`\n✅ Server running on http://localhost:${PORT}`);
-      console.log(`🌐 Web3 Status: ${web3Connected ? 'Connected' : 'Disconnected'}`);
+      console.log(`🌐 Web3 Status: ${web3Connected ? 'Connected' : 'Mock Mode'}`);
       console.log(`\n📋 Available endpoints:`);
       console.log(`   GET  /health - Health check`);
       console.log(`   GET  /api/web3/status - Web3 status`);

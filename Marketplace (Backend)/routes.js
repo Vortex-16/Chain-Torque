@@ -3,17 +3,9 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const { ethers } = require('ethers');
-const { ClerkExpressRequireAuth } = require('@clerk/clerk-sdk-node');
-const web3Manager = require('./web3');
+const { requireAuth, optionalAuth, requireAdmin, requireWallet } = require('./middleware/auth');
 
 const router = express.Router();
-
-// Simple auth middleware (you can make this more robust)
-const requireAuth = (req, res, next) => {
-  // For testing, we'll skip auth - in production use Clerk properly
-  req.user = { id: 'test-user', walletAddress: '0x742d35Cc6563Ac2b58D54a1E4c8A5c8e6e8e8e8e' };
-  next();
-};
 
 // File upload setup
 const storage = multer.diskStorage({
@@ -50,11 +42,12 @@ const upload = multer({
 // Get Web3 status
 router.get('/web3/status', async (req, res) => {
   try {
-    const networkInfo = await web3Manager.getNetworkInfo();
+    const web3 = req.app.locals.web3;
+    const networkInfo = await web3.getNetworkInfo();
     res.json({
       success: true,
       data: {
-        connected: web3Manager.connected,
+        connected: web3.connected,
         ...networkInfo
       }
     });
@@ -66,7 +59,8 @@ router.get('/web3/status', async (req, res) => {
 // Initialize Web3 connection
 router.post('/web3/connect', async (req, res) => {
   try {
-    const connected = await web3Manager.initialize();
+    const web3 = req.app.locals.web3;
+    const connected = await web3.initialize();
     res.json({
       success: connected,
       message: connected ? 'Web3 connected successfully' : 'Web3 connection failed'
@@ -79,8 +73,9 @@ router.post('/web3/connect', async (req, res) => {
 // Validate wallet address
 router.post('/web3/validate-address', (req, res) => {
   try {
+    const web3 = req.app.locals.web3;
     const { address } = req.body;
-    const result = web3Manager.validateAddress(address);
+    const result = web3.validateAddress(address);
     res.json({ success: true, data: result });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -90,8 +85,9 @@ router.post('/web3/validate-address', (req, res) => {
 // Get wallet balance
 router.get('/web3/balance/:address', async (req, res) => {
   try {
+    const web3 = req.app.locals.web3;
     const { address } = req.params;
-    const result = await web3Manager.getBalance(address);
+    const result = await web3.getBalance(address);
     res.json({ success: true, data: result });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -103,8 +99,9 @@ router.get('/web3/balance/:address', async (req, res) => {
 // Get marketplace statistics
 router.get('/marketplace/stats', async (req, res) => {
   try {
+    const web3 = req.app.locals.web3;
     // Get items from web3 to calculate real stats
-    const itemsResult = await web3Manager.getMarketplaceItems();
+    const itemsResult = await web3.getMarketplaceItems();
     const itemsCount = itemsResult.success ? itemsResult.data.length : 0;
     
     const stats = {
@@ -123,7 +120,8 @@ router.get('/marketplace/stats', async (req, res) => {
 // Get all marketplace items (TRUE WEB3)
 router.get('/marketplace', async (req, res) => {
   try {
-    const result = await web3Manager.getMarketplaceItems();
+    const web3 = req.app.locals.web3;
+    const result = await web3.getMarketplaceItems();
     
     if (!result.success) {
       return res.json({
@@ -153,16 +151,17 @@ router.get('/marketplace', async (req, res) => {
 // Get marketplace item by ID (TRUE WEB3)
 router.get('/marketplace/:tokenId', async (req, res) => {
   try {
+    const web3 = req.app.locals.web3;
     const { tokenId } = req.params;
     
-    if (!web3Manager.contract) {
+    if (!web3.contract) {
       return res.status(404).json({ 
         error: 'Contract not deployed yet',
         isWeb3: false 
       });
     }
     
-    const item = await web3Manager.contract.getMarketItem(tokenId);
+    const item = await web3.contract.getMarketItem(tokenId);
     
     if (item.tokenId.toString() === '0') {
       return res.status(404).json({ error: 'Item not found' });
@@ -195,11 +194,12 @@ router.get('/marketplace/:tokenId', async (req, res) => {
 });
 
 // Create new marketplace item (TRUE WEB3)
-router.post('/marketplace/create', requireAuth, upload.fields([
+router.post('/marketplace/create', requireAuth, requireWallet, upload.fields([
   { name: 'model', maxCount: 1 },
   { name: 'image', maxCount: 1 }
 ]), async (req, res) => {
   try {
+    const web3 = req.app.locals.web3;
     const {
       title,
       description,
@@ -221,7 +221,7 @@ router.post('/marketplace/create', requireAuth, upload.fields([
       });
     }
 
-    if (!web3Manager.isContractDeployed()) {
+    if (!web3.isContractDeployed()) {
       return res.status(400).json({ 
         error: 'Smart contract not deployed. Run "npm run deploy" first.',
         isWeb3: false 
@@ -238,7 +238,7 @@ router.post('/marketplace/create', requireAuth, upload.fields([
     };
 
     // TRUE WEB3: Mint NFT and list on marketplace
-    const result = await web3Manager.createMarketItem(itemData, process.env.PRIVATE_KEY);
+    const result = await web3.createMarketItem(itemData, process.env.PRIVATE_KEY);
     
     res.json({
       success: true,
@@ -269,8 +269,9 @@ router.post('/marketplace/create', requireAuth, upload.fields([
 });
 
 // Purchase marketplace item (TRUE WEB3)
-router.post('/marketplace/purchase/:tokenId', requireAuth, async (req, res) => {
+router.post('/marketplace/purchase/:tokenId', requireAuth, requireWallet, async (req, res) => {
   try {
+    const web3 = req.app.locals.web3;
     const { tokenId } = req.params;
     
     if (!process.env.PRIVATE_KEY) {
@@ -280,7 +281,7 @@ router.post('/marketplace/purchase/:tokenId', requireAuth, async (req, res) => {
       });
     }
 
-    if (!web3Manager.isContractDeployed()) {
+    if (!web3.isContractDeployed()) {
       return res.status(400).json({ 
         error: 'Smart contract not deployed',
         isWeb3: false 
@@ -288,7 +289,7 @@ router.post('/marketplace/purchase/:tokenId', requireAuth, async (req, res) => {
     }
 
     // TRUE WEB3: Purchase NFT through smart contract
-    const result = await web3Manager.purchaseMarketItem(tokenId, process.env.PRIVATE_KEY);
+    const result = await web3.purchaseMarketItem(tokenId, process.env.PRIVATE_KEY);
     
     res.json({
       success: true,
@@ -312,13 +313,14 @@ router.post('/marketplace/purchase/:tokenId', requireAuth, async (req, res) => {
 // Get user's NFTs (TRUE WEB3)
 router.get('/user/:address/nfts', async (req, res) => {
   try {
+    const web3 = req.app.locals.web3;
     const { address } = req.params;
     
-    if (!web3Manager.isValidAddress(address)) {
+    if (!web3.isValidAddress(address)) {
       return res.status(400).json({ error: 'Invalid wallet address' });
     }
 
-    if (!web3Manager.isContractDeployed()) {
+    if (!web3.isContractDeployed()) {
       return res.json({
         success: true,
         data: [],
@@ -329,7 +331,7 @@ router.get('/user/:address/nfts', async (req, res) => {
     }
 
     // TRUE WEB3: Get user's NFTs from smart contract
-    const result = await web3Manager.getUserNFTs(address);
+    const result = await web3.getUserNFTs(address);
     
     res.json({
       success: true,
@@ -349,7 +351,8 @@ router.get('/user/:address/nfts', async (req, res) => {
 // Get marketplace statistics (TRUE WEB3)
 router.get('/marketplace/stats', async (req, res) => {
   try {
-    const stats = await web3Manager.getMarketplaceStats();
+    const web3 = req.app.locals.web3;
+    const stats = await web3.getMarketplaceStats();
     
     res.json({
       success: true,

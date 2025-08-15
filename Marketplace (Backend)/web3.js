@@ -1,7 +1,7 @@
 const { ethers } = require('ethers');
 
 // Contract configuration - UPDATE AFTER DEPLOYMENT
-const CONTRACT_ADDRESS = '0x0000000000000000000000000000000000000000'; // Will be updated after deployment
+const CONTRACT_ADDRESS = '0x5FbDB2315678afecb367f032d93F642f64180aa3'; // Will be updated after deployment
 const CONTRACT_ABI = [
   // Marketplace functions
   "function createToken(string memory tokenURI, uint256 price, string memory category, string memory title, string memory description) public payable returns (uint)",
@@ -121,7 +121,7 @@ class Web3Manager {
     }
   }
 
-  // TRUE WEB3: Create NFT and list on marketplace
+  //Create NFT and list on marketplace
   async createMarketItem(itemData, privateKey) {
     if (!this.contract) {
       throw new Error('Contract not initialized. Deploy contract first.');
@@ -168,7 +168,7 @@ class Web3Manager {
     }
   }
 
-  // TRUE WEB3: Purchase NFT from marketplace
+  //Purchase NFT from marketplace
   async purchaseMarketItem(tokenId, privateKey) {
     if (!this.contract) {
       throw new Error('Contract not initialized');
@@ -199,7 +199,7 @@ class Web3Manager {
     }
   }
 
-  // TRUE WEB3: Get user's NFTs
+  //Get user's NFTs
   async getUserNFTs(userAddress) {
     if (!this.contract) {
       throw new Error('Contract not initialized');
