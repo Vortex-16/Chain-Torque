@@ -21,6 +21,8 @@
     "compile:contracts": "cd \"Marketplace (Backend)\" && npx hardhat compile",
     "deploy:contracts": "cd \"Marketplace (Backend)\" && npx hardhat run scripts/deploy.js --network mumbai",
     "deploy:local": "cd \"Marketplace (Backend)\" && npx hardhat run scripts/deploy.js --network localhost",
+    "node:start": "cd \"Marketplace (Backend)\" && npx hardhat node",
+    "node:persistent": "cd \"Marketplace (Backend)\" && npm run node:persistent",
     "install:all": "npm install && cd \"Landing Page (Frontend)\" && npm install && cd ../\"Marketplace (Frontend)\" && npm install",
     "clean": "rimraf node_modules \"Landing Page (Frontend)/node_modules\" \"Marketplace (Frontend)/node_modules\" \"Marketplace (Backend)/node_modules\""
   },

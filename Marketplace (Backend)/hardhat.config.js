@@ -14,12 +14,20 @@ module.exports = {
   },
   networks: {
     hardhat: {
-      chainId: 1337
+      chainId: 1337,
+      // Enable state persistence
+      initialBaseFeePerGas: 0, // Disable EIP-1559 for easier debugging
+      accounts: {
+        count: 20, // Number of accounts to generate
+        accountsBalance: "10000000000000000000000" // 10000 ETH per account
+      }
     },
     localhost: {
       url: "http://127.0.0.1:8545",
       chainId: 1337,
-      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : []
+      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
+      // Add timeout for better reliability
+      timeout: 60000
     },
     sepolia: {
       url: process.env.SEPOLIA_RPC_URL || "https://ethereum-sepolia-rpc.publicnode.com",

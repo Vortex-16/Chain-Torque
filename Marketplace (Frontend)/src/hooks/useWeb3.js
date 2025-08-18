@@ -17,16 +17,19 @@ export const useWeb3Status = () => {
         
         const response = await apiService.getWeb3Status();
         
+        console.log('📡 Web3 status response:', response);
+        
         // Map the backend response to frontend expected format
         setStatus({
-          initialized: response.data.connected, // Use 'connected' instead of 'initialized'
+          initialized: response.data?.connected || response.connected, 
           network: {
-            name: response.data.name,
-            chainId: response.data.chainId,
+            name: response.data?.name || response.name,
+            chainId: response.data?.chainId || response.chainId,
+            networkName: response.data?.name || response.name,
           },
           contract: {
-            address: response.data.contractAddress,
-            deployed: response.data.contractDeployed,
+            address: response.data?.contractAddress || response.contractAddress,
+            deployed: response.data?.contractDeployed || response.contractDeployed,
           },
           loading: false,
           error: null,
@@ -106,9 +109,14 @@ export const useMarketplace = () => {
         apiService.getMarketplaceStats(),
       ]);
       
+      console.log('📦 Raw marketplace response:', itemsResponse);
+      
+      // Fix: Handle the nested response structure from backend
+      const items = itemsResponse.items?.items || itemsResponse.items || [];
+      
       setMarketplace({
-        items: itemsResponse.data || [],
-        stats: statsResponse.data || null,
+        items: items,
+        stats: statsResponse.data || statsResponse || null,
         loading: false,
         error: null,
       });

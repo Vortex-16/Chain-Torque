@@ -202,7 +202,7 @@ const ProductDetail = () => {
       try {
         const response = await apiService.getMarketplaceItem(id);
         if (response.success) {
-          const transformedModel = transformBackendData(response.data);
+          const transformedModel = transformBackendData(response.item); // Changed from response.data to response.item
           setModel(transformedModel);
         } else {
           throw new Error(response.error || 'Failed to fetch product');

@@ -35,7 +35,7 @@ app.use(cors({
 // Rate limiting
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
+  max: 10000, // limit each IP to 10000 requests per windowMs (much higher for development)
   message: 'Too many requests from this IP, please try again later.'
 });
 app.use('/api/', limiter);
@@ -95,7 +95,7 @@ app.get('/api/marketplace', async (req, res) => {
   }
 });
 
-// Marketplace stats endpoint
+// Marketplace stats endpoint (MUST come before /:id route)
 app.get('/api/marketplace/stats', async (req, res) => {
   try {
     const result = await web3Instance.getMarketplaceItems();
@@ -127,6 +127,39 @@ app.get('/api/marketplace/stats', async (req, res) => {
     res.json({ success: true, stats });
   } catch (error) {
     console.error('❌ Error fetching marketplace stats:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Individual marketplace item by ID (MUST come after specific routes like /stats)
+app.get('/api/marketplace/:id', async (req, res) => {
+  try {
+    const itemId = req.params.id;
+    console.log(`🔍 Fetching item with ID: ${itemId}`);
+    
+    // Get all items first
+    const items = await web3Instance.getMarketplaceItems();
+    
+    // Handle different response structures  
+    const itemsArray = items.items || items || [];
+    
+    if (!Array.isArray(itemsArray)) {
+      console.log('⚠️ Items is not an array:', typeof itemsArray);
+      return res.status(404).json({ success: false, error: 'Item not found' });
+    }
+    
+    // Find the specific item by ID
+    const item = itemsArray.find(item => item.id === itemId || item.tokenId === itemId);
+    
+    if (!item) {
+      console.log(`❌ Item not found for ID: ${itemId}`);
+      return res.status(404).json({ success: false, error: 'Item not found' });
+    }
+    
+    console.log(`✅ Found item:`, item);
+    res.json({ success: true, item });
+  } catch (error) {
+    console.error(`❌ Error fetching marketplace item ${req.params.id}:`, error);
     res.status(500).json({ success: false, error: error.message });
   }
 });
@@ -238,6 +271,7 @@ async function startServer() {
       console.log('📋 Available routes:');
       console.log('   GET  /health');
       console.log('   GET  /api/marketplace');
+      console.log('   GET  /api/marketplace/:id');
       console.log('   GET  /api/marketplace/items');
       console.log('   GET  /api/marketplace/stats');
       console.log('   GET  /api/web3/status');
