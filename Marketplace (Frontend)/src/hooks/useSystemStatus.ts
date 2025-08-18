@@ -1,0 +1,112 @@
+import { useState, useEffect } from 'react';
+
+interface SystemStatus {
+  backend: string;
+  web3: string;
+  contract: string;
+  lastCheck: string;
+  marketplaceItems: number;
+}
+
+export const useSystemStatus = () => {
+  const [status, setStatus] = useState<SystemStatus>({
+    backend: 'checking...',
+    web3: 'checking...',
+    contract: 'checking...',
+    lastCheck: new Date().toLocaleTimeString(),
+    marketplaceItems: 0
+  });
+
+  const [isLoading, setIsLoading] = useState(true);
+
+  const checkBackend = async () => {
+    setIsLoading(true);
+    try {
+      // Check basic health
+      const healthResponse = await fetch('http://localhost:5000/health');
+      const backendStatus = healthResponse.ok ? 'connected' : 'error';
+      
+      // Check web3 status
+      let web3Status = 'disconnected';
+      let contractStatus = 'not deployed';
+      try {
+        const web3Response = await fetch('http://localhost:5000/api/web3/status');
+        if (web3Response.ok) {
+          const web3Data = await web3Response.json();
+          web3Status = web3Data.data?.connected ? 'connected' : 'disconnected';
+          contractStatus = web3Data.data?.contractDeployed ? 'deployed' : 'not deployed';
+        }
+      } catch (error) {
+        web3Status = 'error';
+      }
+
+      // Check marketplace API
+      let itemCount = 0;
+      try {
+        const marketplaceResponse = await fetch('http://localhost:5000/api/marketplace');
+        if (marketplaceResponse.ok) {
+          const marketplaceData = await marketplaceResponse.json();
+          itemCount = marketplaceData.total || 0;
+        }
+      } catch (error) {
+        console.log('Marketplace API error:', error);
+      }
+
+      setStatus({
+        backend: backendStatus,
+        web3: web3Status,
+        contract: contractStatus,
+        lastCheck: new Date().toLocaleTimeString(),
+        marketplaceItems: itemCount
+      });
+    } catch (error) {
+      setStatus({
+        backend: 'disconnected',
+        web3: 'disconnected',
+        contract: 'unknown',
+        lastCheck: new Date().toLocaleTimeString(),
+        marketplaceItems: 0
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    checkBackend();
+    const interval = setInterval(checkBackend, 30000); // Check every 30 seconds
+    return () => clearInterval(interval);
+  }, []);
+
+  // Determine overall system status
+  const getOverallStatus = () => {
+    if (isLoading) return 'checking';
+    if (status.backend === 'connected' && status.web3 === 'connected') return 'healthy';
+    if (status.backend === 'connected') return 'partial';
+    return 'error';
+  };
+
+  const getStatusColor = (statusValue: string) => {
+    switch (statusValue) {
+      case 'connected':
+      case 'deployed': 
+        return 'text-green-500';
+      case 'disconnected':
+      case 'not deployed': 
+        return 'text-red-500';
+      case 'error':
+      case 'unknown': 
+        return 'text-orange-500';
+      default: 
+        return 'text-gray-500';
+    }
+  };
+
+  return {
+    status,
+    isLoading,
+    checkBackend,
+    getOverallStatus,
+    getStatusColor
+  };
+};

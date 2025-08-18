@@ -3,12 +3,14 @@ import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { User, LogOut, Activity } from "lucide-react";
 import { useAuthContext } from "@/hooks/useAuth";
-import { useBackendHealth } from "@/hooks/useWeb3";
+import { useSystemStatus } from "@/hooks/useSystemStatus";
+import { useStatusPanel } from "@/contexts/StatusPanelContext";
 
 export function Navigation() {
   const [showScrollButton, setShowScrollButton] = useState(false);
   const { user, isAuthenticated, signOut } = useAuthContext();
-  const health = useBackendHealth();
+  const { getOverallStatus } = useSystemStatus();
+  const { toggleStatusPanel } = useStatusPanel();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -39,6 +41,28 @@ export function Navigation() {
     }
   };
 
+  const getStatusColor = () => {
+    const overallStatus = getOverallStatus();
+    switch (overallStatus) {
+      case 'healthy': return 'text-green-500';
+      case 'partial': return 'text-yellow-500';
+      case 'checking': return 'text-yellow-500 animate-pulse';
+      case 'error': return 'text-red-500';
+      default: return 'text-gray-500';
+    }
+  };
+
+  const getStatusText = () => {
+    const overallStatus = getOverallStatus();
+    switch (overallStatus) {
+      case 'healthy': return 'All Systems';
+      case 'partial': return 'Partial';
+      case 'checking': return 'Checking...';
+      case 'error': return 'Error';
+      default: return 'Unknown';
+    }
+  };
+
   return (
     <>
       <nav className="bg-background border-b border-border shadow-sm p-4 flex justify-between items-center">
@@ -51,17 +75,17 @@ export function Navigation() {
             <li><a href="/upload" className="text-foreground hover:text-primary transition-colors">Upload</a></li>
           </ul>
           <div className="flex items-center gap-3">
-            {/* Backend Status Indicator */}
-            <div className="flex items-center gap-2">
-              <Activity className={`h-4 w-4 ${
-                health.status === 'OK' ? 'text-green-500' : 
-                health.loading ? 'text-yellow-500 animate-pulse' : 
-                'text-red-500'
-              }`} />
+            {/* Backend Status Indicator - Clickable */}
+            <button
+              onClick={toggleStatusPanel}
+              className="flex items-center gap-2 px-2 py-1 rounded hover:bg-accent transition-colors"
+              title="Click to view detailed system status"
+            >
+              <Activity className={`h-4 w-4 ${getStatusColor()}`} />
               <span className="text-xs text-muted-foreground hidden md:inline">
-                {health.loading ? 'Checking...' : health.status}
+                {getStatusText()}
               </span>
-            </div>
+            </button>
             <ThemeToggle />
             {isAuthenticated && user && (
               <div className="flex items-center gap-2">

@@ -195,6 +195,7 @@ export function MarketplaceSection() {
                 {displayItems.map((model) => (
                   <CadCard
                     key={model.id}
+                    id={model.id}
                     title={model.title}
                     image={model.image}
                     price={model.price}

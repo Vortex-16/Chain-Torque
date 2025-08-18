@@ -3,8 +3,10 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Heart, Download, Star, ShoppingCart } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useNavigate } from "react-router-dom";
 
 interface CadCardProps {
+  id?: string | number;
   title: string;
   image: string;
   price: string;
@@ -17,6 +19,7 @@ interface CadCardProps {
 }
 
 export function CadCard({ 
+  id = 1,
   title, 
   image, 
   price, 
@@ -27,11 +30,31 @@ export function CadCard({
   software,
   className 
 }: CadCardProps) {
+  const navigate = useNavigate();
+
+  const handleCardClick = () => {
+    navigate(`/product/${id}`);
+  };
+
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent card click when clicking the button
+    // Add to cart logic here
+    console.log(`Added ${title} to cart`);
+  };
+
+  const handleToggleWishlist = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent card click when clicking the button
+    // Wishlist logic here
+    console.log(`Toggled wishlist for ${title}`);
+  };
   return (
-    <Card className={cn(
-      "group cursor-pointer bg-gradient-card border-border/50 hover:animate-card-hover transition-all duration-300 hover:shadow-glow hover:border-primary/20",
-      className
-    )}>
+    <Card 
+      className={cn(
+        "group cursor-pointer bg-gradient-card border-border/50 hover:animate-card-hover transition-all duration-300 hover:shadow-glow hover:border-primary/20",
+        className
+      )}
+      onClick={handleCardClick}
+    >
       <CardContent className="p-0">
         {/* Image */}
         <div className="relative overflow-hidden rounded-t-lg">
@@ -41,7 +64,13 @@ export function CadCard({
             className="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105"
           />
           <div className="absolute top-3 right-3">
-            <Button size="sm" variant="secondary" className="h-8 w-8 p-0 bg-background/80 backdrop-blur-sm hover:bg-secondary hover:scale-110 transition-all">
+            <Button 
+              size="sm" 
+              variant="secondary" 
+              className="h-8 w-8 p-0 bg-background/80 backdrop-blur-sm hover:bg-secondary hover:scale-110 transition-all"
+              onClick={handleToggleWishlist}
+              aria-label="Add to wishlist"
+            >
               <Heart className="h-4 w-4 transition-colors group-hover:text-secondary" />
             </Button>
           </div>
@@ -92,7 +121,12 @@ export function CadCard({
                 {downloads} downloads
               </span>
             </div>
-            <Button size="sm" className="bg-gradient-primary hover:bg-primary-hover transition-all hover:scale-105 animate-glow-pulse">
+            <Button 
+              size="sm" 
+              className="bg-gradient-primary hover:bg-primary-hover transition-all hover:scale-105 animate-glow-pulse"
+              onClick={handleAddToCart}
+              aria-label="Add to cart"
+            >
               <ShoppingCart className="h-4 w-4 mr-1" />
               Add
             </Button>
