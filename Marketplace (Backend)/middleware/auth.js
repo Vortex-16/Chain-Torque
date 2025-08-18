@@ -1,4 +1,4 @@
-const { clerkClient } = require('@clerk/clerk-sdk-node');
+const { clerkClient, verifyToken } = require('@clerk/clerk-sdk-node');
 
 /**
  * Clerk Authentication Middleware
@@ -6,6 +6,22 @@ const { clerkClient } = require('@clerk/clerk-sdk-node');
  */
 const requireAuth = async (req, res, next) => {
   try {
+    // TEMPORARY: Skip authentication for development/testing
+    if (process.env.NODE_ENV === 'development') {
+      console.log('⚠️  DEVELOPMENT MODE: Skipping authentication');
+      req.user = {
+        id: 'dev-user-123',
+        email: 'developer@chainforge.com',
+        firstName: 'Development',
+        lastName: 'User',
+        walletAddress: '0x742d35cc6565C42cAc78A3Ee83BDf47EF2065E4b',
+        fullName: 'Development User',
+        createdAt: new Date(),
+        lastSignInAt: new Date()
+      };
+      return next();
+    }
+
     // Extract token from Authorization header
     const authHeader = req.headers.authorization;
     
@@ -18,10 +34,27 @@ const requireAuth = async (req, res, next) => {
 
     const token = authHeader.substring(7); // Remove 'Bearer ' prefix
     
-    // Verify the JWT token with Clerk
-    const decoded = await clerkClient.verifyJwt(token);
+    // Verify the JWT token with Clerk using the correct method
+    let decoded;
+    try {
+      // Try the newer verifyToken method first
+      if (verifyToken) {
+        decoded = await verifyToken(token, {
+          secretKey: process.env.CLERK_SECRET_KEY
+        });
+      } else {
+        // Fallback to older method if available
+        decoded = await clerkClient.verifyToken(token);
+      }
+    } catch (verifyError) {
+      console.error('Token verification failed:', verifyError);
+      return res.status(401).json({ 
+        error: 'Invalid authentication token',
+        message: 'Token verification failed'
+      });
+    }
     
-    if (!decoded) {
+    if (!decoded || !decoded.sub) {
       return res.status(401).json({ 
         error: 'Invalid authentication token' 
       });
@@ -157,6 +190,32 @@ const requireAdmin = async (req, res, next) => {
  * Ensures user has a connected wallet address
  */
 const requireWallet = (req, res, next) => {
+  // Development bypass - allow wallet-less operations in development
+  if (process.env.NODE_ENV === 'development' || process.env.BYPASS_WALLET_AUTH === 'true') {
+    console.log('⚠️  Development mode: Bypassing wallet requirement');
+    
+    // If user doesn't exist (due to auth bypass), create a mock user
+    if (!req.user) {
+      req.user = {
+        id: 'dev-user-123',
+        email: 'dev@example.com',
+        firstName: 'Developer',
+        lastName: 'User',
+        walletAddress: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266', // Mock wallet
+        fullName: 'Developer User',
+        createdAt: new Date(),
+        lastSignInAt: new Date()
+      };
+    }
+    
+    // Ensure user has a mock wallet address
+    if (!req.user.walletAddress) {
+      req.user.walletAddress = '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266';
+    }
+    
+    return next();
+  }
+
   if (!req.user) {
     return res.status(401).json({ 
       error: 'Authentication required' 

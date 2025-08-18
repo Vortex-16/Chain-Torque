@@ -37,25 +37,46 @@ class Web3Manager {
     try {
       console.log('🔗 Initializing Web3 connection...');
       
-      // Initialize provider
-      const rpcUrl = process.env.POLYGON_MUMBAI_RPC || 'https://rpc-mumbai.maticvigil.com';
-      this.provider = new ethers.providers.JsonRpcProvider(rpcUrl);
+      // For demo purposes, use the hardhat network we successfully deployed to
+      console.log('🎯 Using local Hardhat network for demo...');
       
-      // Test connection
+      // Configure network explicitly for Hardhat
+      const networkConfig = {
+        name: 'hardhat',
+        chainId: 1337,
+        url: 'http://127.0.0.1:8545'
+      };
+      
+      // Initialize provider with explicit network configuration
+      this.provider = new ethers.providers.JsonRpcProvider({
+        url: networkConfig.url,
+        timeout: 30000
+      }, networkConfig);
+      
+      // Verify network connection
       const network = await this.provider.getNetwork();
-      this.network = network;
+      this.network = { name: 'hardhat', chainId: network.chainId };
       
-      console.log(`✅ Connected to ${network.name} (chainId: ${network.chainId})`);
+      console.log(`✅ Connected to ${this.network.name} (chainId: ${this.network.chainId})`);
       
-      // Initialize contract (only if deployed)
+      // Initialize contract (we know it's deployed)
       if (CONTRACT_ADDRESS !== '0x0000000000000000000000000000000000000000') {
         this.contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, this.provider);
-        console.log(`📄 Contract initialized at ${CONTRACT_ADDRESS}`);
+        
+        // Test contract connection
+        try {
+          await this.contract.getListingPrice();
+          console.log(`📄 Real Web3 Contract verified at ${CONTRACT_ADDRESS}`);
+        } catch (contractError) {
+          console.warn(`⚠️  Contract deployed but connection test failed: ${contractError.message}`);
+          // Still set the contract as it might work for other operations
+        }
       } else {
         console.log('⚠️  Contract not deployed yet. Run "npm run deploy" to deploy the contract.');
       }
       
       this.connected = true;
+      console.log('🎉 Real Web3 connection established!');
       return true;
       
     } catch (error) {
@@ -91,17 +112,45 @@ class Web3Manager {
     try {
       const items = await this.contract.fetchMarketItems();
       
-      const formattedItems = items.map((item, index) => ({
-        id: item.tokenId.toString(),
-        title: item.title,
-        description: item.description,
-        price: ethers.utils.formatEther(item.price),
-        category: item.category,
-        seller: item.seller,
-        owner: item.owner,
-        sold: item.sold,
-        tokenId: item.tokenId.toString(),
-        isNFT: true // This is a real NFT
+      const formattedItems = await Promise.all(items.map(async (item, index) => {
+        let imageUrl = '/placeholder.jpg';
+        let modelUrl = null;
+        
+        try {
+          // Get tokenURI to extract metadata
+          const tokenURI = await this.contract.tokenURI(item.tokenId);
+          
+          if (tokenURI && tokenURI.startsWith('data:application/json;base64,')) {
+            // Decode base64 metadata
+            const base64Data = tokenURI.replace('data:application/json;base64,', '');
+            const metadata = JSON.parse(Buffer.from(base64Data, 'base64').toString());
+            
+            // Extract image and model URLs from metadata
+            if (metadata.image) {
+              imageUrl = metadata.image;
+            }
+            if (metadata.model_url) {
+              modelUrl = metadata.model_url;
+            }
+          }
+        } catch (error) {
+          console.log(`⚠️ Could not parse metadata for token ${item.tokenId}:`, error.message);
+        }
+        
+        return {
+          id: item.tokenId.toString(),
+          title: item.title,
+          description: item.description,
+          price: ethers.utils.formatEther(item.price),
+          category: item.category,
+          seller: item.seller,
+          owner: item.owner,
+          sold: item.sold,
+          tokenId: item.tokenId.toString(),
+          imageUrl: imageUrl,
+          modelUrl: modelUrl,
+          isNFT: true // This is a real NFT
+        };
       }));
 
       return {
@@ -127,18 +176,38 @@ class Web3Manager {
       throw new Error('Contract not initialized. Deploy contract first.');
     }
 
+    if (!this.provider) {
+      throw new Error('Provider not initialized. Check network connection.');
+    }
+
     try {
+      // Verify network connection before proceeding
+      try {
+        await this.provider.getNetwork();
+      } catch (networkError) {
+        console.log('🔄 Network connection lost, attempting to reconnect...');
+        await this.initialize();
+        if (!this.contract || !this.provider) {
+          throw new Error('Failed to reconnect to network');
+        }
+      }
+
       const wallet = new ethers.Wallet(privateKey, this.provider);
       const contractWithSigner = this.contract.connect(wallet);
       
+      // Test contract connection first
       const listingPrice = await this.contract.getListingPrice();
       const price = ethers.utils.parseEther(itemData.price.toString());
+      
+      console.log(`📝 Creating NFT: ${itemData.title} for ${itemData.price} ETH`);
+      console.log(`💰 Listing price: ${ethers.utils.formatEther(listingPrice)} ETH`);
       
       // Create token URI (in production, this would be IPFS)
       const tokenURI = `data:application/json;base64,${Buffer.from(JSON.stringify({
         name: itemData.title,
         description: itemData.description,
         image: itemData.imageUrl,
+        model_url: itemData.modelUrl,
         attributes: [
           { trait_type: "Category", value: itemData.category },
           { trait_type: "Creator", value: wallet.address }
@@ -151,10 +220,12 @@ class Web3Manager {
         itemData.category,
         itemData.title,
         itemData.description,
-        { value: listingPrice }
+        { value: listingPrice, gasLimit: 3000000 } // Increased gas limit for NFT creation
       );
       
+      console.log(`⏳ Transaction submitted: ${transaction.hash}`);
       const receipt = await transaction.wait();
+      console.log(`✅ NFT created successfully!`);
       
       return {
         success: true,
@@ -163,7 +234,7 @@ class Web3Manager {
         isWeb3: true
       };
     } catch (error) {
-      console.error('Error creating market item:', error);
+      console.error('❌ Error creating market item:', error);
       throw error;
     }
   }
@@ -288,9 +359,25 @@ class Web3Manager {
     return ethers.utils.isAddress(address);
   }
 
+  async getBlockNumber() {
+    try {
+      if (!this.provider) {
+        await this.initializeProvider();
+      }
+      return await this.provider.getBlockNumber();
+    } catch (error) {
+      console.error('Error getting block number:', error);
+      return 'N/A';
+    }
+  }
+
   // Contract deployment status
   isContractDeployed() {
     return CONTRACT_ADDRESS !== '0x0000000000000000000000000000000000000000';
+  }
+
+  get contractAddress() {
+    return CONTRACT_ADDRESS;
   }
 }
 

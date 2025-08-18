@@ -9,17 +9,35 @@ class ApiService {
   // Helper method for making requests
   async request(endpoint, options = {}) {
     const url = `${this.baseUrl}${endpoint}`;
+    console.log('🌐 API Request:', { url, method: options.method || 'GET', endpoint, baseUrl: this.baseUrl });
+    
     const config = {
       headers: {
         'Content-Type': 'application/json',
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
         ...options.headers,
       },
       ...options,
     };
 
     try {
+      console.log('📤 Making fetch request to:', url);
+      console.log('📤 Request config:', { method: config.method, headers: config.headers });
+      
       const response = await fetch(url, config);
+      
+      console.log('📥 Response received:', { 
+        status: response.status, 
+        statusText: response.statusText,
+        ok: response.ok,
+        url: response.url 
+      });
+      
       const data = await response.json();
+      
+      console.log('📦 Response data:', data);
 
       if (!response.ok) {
         throw new Error(data.error || `HTTP error! status: ${response.status}`);
@@ -27,7 +45,7 @@ class ApiService {
 
       return data;
     } catch (error) {
-      console.error(`API request failed for ${endpoint}:`, error);
+      console.error(`❌ API request failed for ${endpoint}:`, error);
       throw error;
     }
   }
@@ -60,7 +78,15 @@ class ApiService {
 
   // Marketplace endpoints (FIXED to match backend)
   async getMarketplaceItems() {
-    return this.request('/marketplace', { method: 'GET' });
+    // Add cache-busting parameter to force fresh data
+    const timestamp = Date.now();
+    return this.request(`/marketplace?_t=${timestamp}`, { 
+      method: 'GET',
+      headers: {
+        'Cache-Control': 'no-cache',
+        'Pragma': 'no-cache'
+      }
+    });
   }
 
   async getMarketplaceItem(tokenId) {

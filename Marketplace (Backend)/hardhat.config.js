@@ -21,9 +21,15 @@ module.exports = {
       chainId: 1337,
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : []
     },
+    sepolia: {
+      url: process.env.SEPOLIA_RPC_URL || "https://ethereum-sepolia-rpc.publicnode.com",
+      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
+      chainId: 11155111
+    },
     mumbai: {
-      url: process.env.POLYGON_MUMBAI_RPC || "https://rpc-mumbai.maticvigil.com",
-      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : []
+      url: process.env.POLYGON_MUMBAI_RPC || "https://polygon-mumbai.g.alchemy.com/v2/demo",
+      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
+      chainId: 80001
     },
     polygon: {
       url: process.env.POLYGON_MAINNET_RPC || "https://polygon-rpc.com",

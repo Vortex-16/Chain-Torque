@@ -17,10 +17,17 @@ export const useWeb3Status = () => {
         
         const response = await apiService.getWeb3Status();
         
+        // Map the backend response to frontend expected format
         setStatus({
-          initialized: response.data.initialized,
-          network: response.data.network,
-          contract: response.data.contract,
+          initialized: response.data.connected, // Use 'connected' instead of 'initialized'
+          network: {
+            name: response.data.name,
+            chainId: response.data.chainId,
+          },
+          contract: {
+            address: response.data.contractAddress,
+            deployed: response.data.contractDeployed,
+          },
           loading: false,
           error: null,
         });
@@ -51,9 +58,15 @@ export const useWeb3Status = () => {
       // Refresh status after initialization
       const response = await apiService.getWeb3Status();
       setStatus({
-        initialized: response.data.initialized,
-        network: response.data.network,
-        contract: response.data.contract,
+        initialized: response.data.connected,
+        network: {
+          name: response.data.name,
+          chainId: response.data.chainId,
+        },
+        contract: {
+          address: response.data.contractAddress,
+          deployed: response.data.contractDeployed,
+        },
         loading: false,
         error: null,
       });

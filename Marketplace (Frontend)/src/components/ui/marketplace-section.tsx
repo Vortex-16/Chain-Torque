@@ -79,17 +79,20 @@ export function MarketplaceSection() {
     if (items && items.length > 0) {
       const nftItems = items.map((item, index) => ({
         id: item.tokenId || index,
-        title: item.name || `NFT Model #${item.tokenId}`,
-        image: item.previewHash ? `https://gateway.pinata.cloud/ipfs/${item.previewHash}` : featuredModels[index % featuredModels.length].image,
-        price: item.price ? `${(parseInt(item.price) / 1e18).toFixed(4)} ETH` : "0.001 ETH",
-        seller: item.seller || "Unknown",
+        title: item.title || item.name || `NFT Model #${item.tokenId}`,
+        image: item.imageUrl && item.imageUrl !== '/placeholder.jpg' ? `http://localhost:5000${item.imageUrl}` : 
+               item.previewHash ? `https://gateway.pinata.cloud/ipfs/${item.previewHash}` : 
+               featuredModels[index % featuredModels.length].image,
+        price: item.price ? `${parseFloat(item.price).toFixed(4)} ETH` : "0.001 ETH",
+        seller: item.seller ? `${item.seller.slice(0, 6)}...${item.seller.slice(-4)}` : "Unknown",
         rating: 4.5 + Math.random() * 0.5, // Random rating for demo
-        downloads: parseInt(item.downloads) || 0,
-        fileTypes: ["GLB", "GLTF", "STL"],
-        software: ["Blender", "Three.js", "Web3D"],
+        downloads: parseInt(item.downloads) || Math.floor(Math.random() * 1000),
+        fileTypes: item.category === "vehicles" ? ["STEP", "SLDPRT", "STL"] : ["GLB", "GLTF", "STL"],
+        software: item.category === "vehicles" ? ["SolidWorks", "AutoCAD", "CATIA"] : ["Blender", "Three.js", "Web3D"],
         category: item.category || "3D Model",
         tokenId: item.tokenId,
         modelHash: item.modelHash,
+        modelUrl: item.modelUrl ? `http://localhost:5000${item.modelUrl}` : item.tokenURI ? `http://localhost:5000${item.tokenURI}` : null,
         isBlockchain: true
       }));
       setDisplayItems(nftItems);

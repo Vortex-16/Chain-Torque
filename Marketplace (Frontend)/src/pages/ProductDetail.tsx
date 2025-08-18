@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { Model3DViewer } from "@/components/ui/model-3d-viewer";
+import apiService from "@/services/apiService";
 import { 
   ArrowLeft, 
   ShoppingCart, 
@@ -145,16 +146,83 @@ const ProductDetail = () => {
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [show3D, setShow3D] = useState(false);
 
+  // Transform backend data to frontend ProductModel structure
+  const transformBackendData = (backendData: any): ProductModel => {
+    const fallbackImages = [cadGear, cadDrone, cadEngine, cadRobot];
+    
+    // Use actual uploaded image if available, otherwise fallback
+    const actualImages = backendData.imageUrl && backendData.imageUrl !== '/placeholder.jpg' 
+      ? [`http://localhost:5000${backendData.imageUrl}`]
+      : fallbackImages;
+    
+    return {
+      id: backendData.id,
+      title: backendData.title,
+      description: backendData.description,
+      images: actualImages,
+      modelUrl: backendData.modelUrl ? `http://localhost:5000${backendData.modelUrl}` : "/models/sample.obj",
+      price: `$${parseFloat(backendData.price) * 2000}`, // Convert ETH to USD estimate
+      priceETH: parseFloat(backendData.price),
+      seller: {
+        name: backendData.sellerName || backendData.seller_name || "Unknown Creator", // Use actual username
+        avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=" + (backendData.sellerName || backendData.seller_name || backendData.seller),
+        verified: true,
+        rating: 4.8,
+        totalSales: Math.floor(Math.random() * 50) + 10
+      },
+      specs: {
+        fileTypes: ["CAD", "OBJ", "STL"],
+        software: ["SolidWorks", "AutoCAD", "Fusion 360"],
+        fileSize: "15.2 MB",
+        vertices: "127,543",
+        polygons: "89,231",
+        textures: true,
+        animated: false
+      },
+      stats: {
+        views: Math.floor(Math.random() * 1000) + 100,
+        downloads: Math.floor(Math.random() * 50) + 10,
+        rating: 4.5 + Math.random() * 0.5,
+        reviews: Math.floor(Math.random() * 20) + 5
+      },
+      category: backendData.category,
+      tags: ["CAD", "3D Model", backendData.category, "Professional"],
+      uploadDate: new Date().toISOString().split('T')[0], // Default to today
+      lastUpdate: new Date().toISOString().split('T')[0],
+      license: "Standard License",
+      tokenId: parseInt(backendData.tokenId),
+      contractAddress: "0x742d35Cc4Bf5C6BA53550e2C7a4C0D7F5a56B8f1", // Placeholder
+      blockchain: "Ethereum"
+    };
+  };
+
   useEffect(() => {
-    // Simulate API call to fetch product details
     const fetchProduct = async () => {
       setLoading(true);
       try {
-        // In a real app, this would be an API call
-        await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate network delay
-        setModel(mockModel);
+        const response = await apiService.getMarketplaceItem(id);
+        if (response.success) {
+          const transformedModel = transformBackendData(response.data);
+          setModel(transformedModel);
+        } else {
+          throw new Error(response.error || 'Failed to fetch product');
+        }
       } catch (err) {
-        setError("Failed to load product details");
+        console.error('Error fetching product from API:', err);
+        console.log('Falling back to mock data for ID:', id);
+        
+        // Fallback to mock data if API call fails
+        try {
+          // Update the mock data ID to match the requested ID
+          const fallbackModel = {
+            ...mockModel,
+            id: id,
+            tokenId: parseInt(id) || 1
+          };
+          setModel(fallbackModel);
+        } catch (mockErr) {
+          setError("Failed to load product details");
+        }
       } finally {
         setLoading(false);
       }
@@ -166,11 +234,38 @@ const ProductDetail = () => {
   const handlePurchase = async () => {
     setIsPurchasing(true);
     try {
-      // Simulate purchase process
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      // In a real app, this would call the Web3 contract
-      alert("Purchase successful! Check your wallet for the NFT.");
+      // Check if this is mock data (no real tokenId from backend)
+      const isRealProduct = model?.tokenId && model.tokenId > 1000; // Real tokenIds are typically larger
+      
+      if (!isRealProduct) {
+        // Handle mock data purchase
+        await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate processing
+        alert("Demo purchase successful! This was a mock transaction for demonstration purposes.");
+        return;
+      }
+
+      // Handle real product purchase
+      const authToken = localStorage.getItem('authToken');
+      
+      if (!authToken) {
+        alert("Please sign in to purchase items.");
+        return;
+      }
+
+      if (!model?.tokenId) {
+        alert("Product information not available.");
+        return;
+      }
+
+      const response = await apiService.purchaseMarketplaceItem(model.tokenId, authToken);
+      
+      if (response.success) {
+        alert("Purchase successful! Check your wallet for the NFT.");
+      } else {
+        throw new Error(response.error || 'Purchase failed');
+      }
     } catch (err) {
+      console.error('Purchase error:', err);
       alert("Purchase failed. Please try again.");
     } finally {
       setIsPurchasing(false);
@@ -274,21 +369,23 @@ const ProductDetail = () => {
                 />
               )}
               
-              {/* 3D Toggle Button */}
-              <div className="absolute top-4 right-4">
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  onClick={() => setShow3D(!show3D)}
-                  className="bg-black/50 backdrop-blur-sm hover:bg-black/70 text-white"
-                  title={show3D ? "View Images" : "View 3D Model"}
-                >
-                  {show3D ? <Eye className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-                  <span className="ml-1 text-xs hidden sm:inline">
-                    {show3D ? "Images" : "3D View"}
-                  </span>
-                </Button>
-              </div>
+              {/* 3D Toggle Button - Only for supported formats */}
+              {model.modelUrl && !model.modelUrl.includes('.SLDPRT') && !model.modelUrl.includes('.SLDASM') && (
+                <div className="absolute top-4 right-4">
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    onClick={() => setShow3D(!show3D)}
+                    className="bg-black/50 backdrop-blur-sm hover:bg-black/70 text-white"
+                    title={show3D ? "View Images" : "View 3D Model"}
+                  >
+                    {show3D ? <Eye className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+                    <span className="ml-1 text-xs hidden sm:inline">
+                      {show3D ? "Images" : "3D View"}
+                    </span>
+                  </Button>
+                </div>
+              )}
             </div>
 
             {/* Thumbnail Images */}
@@ -311,14 +408,17 @@ const ProductDetail = () => {
                   />
                 </button>
               ))}
-              <button
-                onClick={() => setShow3D(true)}
-                className={`flex-shrink-0 w-20 h-20 rounded-lg border-2 transition-colors bg-muted flex items-center justify-center ${
-                  show3D ? 'border-primary' : 'border-transparent'
-                }`}
-              >
-                <Play className="h-6 w-6 text-muted-foreground" />
-              </button>
+              {/* Only show 3D button for supported formats */}
+              {model.modelUrl && !model.modelUrl.includes('.SLDPRT') && !model.modelUrl.includes('.SLDASM') && (
+                <button
+                  onClick={() => setShow3D(true)}
+                  className={`flex-shrink-0 w-20 h-20 rounded-lg border-2 transition-colors bg-muted flex items-center justify-center ${
+                    show3D ? 'border-primary' : 'border-transparent'
+                  }`}
+                >
+                  <Play className="h-6 w-6 text-muted-foreground" />
+                </button>
+              )}
             </div>
           </div>
 

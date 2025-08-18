@@ -9,6 +9,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import ProductDetail from "./pages/ProductDetail";
+import Upload from "./pages/Upload";
+import Dashboard from "./pages/Dashboard";
+import Edit from "./pages/Edit";
 import NotFound from "./pages/NotFound";
 import BackendStatus from "./components/BackendStatus";
 
@@ -47,6 +50,21 @@ const AppContent = () => {
           <Route path="/product/:id" element={
             <SignedIn>
               <ProductDetail />
+            </SignedIn>
+          } />
+          <Route path="/dashboard" element={
+            <SignedIn>
+              <Dashboard />
+            </SignedIn>
+          } />
+          <Route path="/edit" element={
+            <SignedIn>
+              <Edit />
+            </SignedIn>
+          } />
+          <Route path="/upload" element={
+            <SignedIn>
+              <Upload />
             </SignedIn>
           } />
           <Route path="*" element={<NotFound />} />

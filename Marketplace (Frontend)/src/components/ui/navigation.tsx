@@ -70,8 +70,8 @@ export function Navigation() {
         <div className="flex items-center gap-6">
           <ul className="flex gap-6">
             <li><a href="/" className="text-foreground hover:text-primary transition-colors">Home</a></li>
-            <li><a href="/library" className="text-foreground hover:text-primary transition-colors">Library</a></li>
-            <li><a href="/models" className="text-foreground hover:text-primary transition-colors">Models</a></li>
+            <li><a href="/dashboard" className="text-foreground hover:text-primary transition-colors">Dashboard</a></li>
+            <li><a href="/edit" className="text-foreground hover:text-primary transition-colors">Edit</a></li>
             <li><a href="/upload" className="text-foreground hover:text-primary transition-colors">Upload</a></li>
           </ul>
           <div className="flex items-center gap-3">
