@@ -9,14 +9,19 @@ class ApiService {
   // Helper method for making requests
   async request(endpoint, options = {}) {
     const url = `${this.baseUrl}${endpoint}`;
-    console.log('🌐 API Request:', { url, method: options.method || 'GET', endpoint, baseUrl: this.baseUrl });
-    
+    console.log('🌐 API Request:', {
+      url,
+      method: options.method || 'GET',
+      endpoint,
+      baseUrl: this.baseUrl,
+    });
+
     const config = {
       headers: {
         'Content-Type': 'application/json',
         'Cache-Control': 'no-cache, no-store, must-revalidate',
-        'Pragma': 'no-cache',
-        'Expires': '0',
+        Pragma: 'no-cache',
+        Expires: '0',
         ...options.headers,
       },
       ...options,
@@ -24,19 +29,22 @@ class ApiService {
 
     try {
       console.log('📤 Making fetch request to:', url);
-      console.log('📤 Request config:', { method: config.method, headers: config.headers });
-      
+      console.log('📤 Request config:', {
+        method: config.method,
+        headers: config.headers,
+      });
+
       const response = await fetch(url, config);
-      
-      console.log('📥 Response received:', { 
-        status: response.status, 
+
+      console.log('📥 Response received:', {
+        status: response.status,
         statusText: response.statusText,
         ok: response.ok,
-        url: response.url 
+        url: response.url,
       });
-      
+
       const data = await response.json();
-      
+
       console.log('📦 Response data:', data);
 
       if (!response.ok) {
@@ -80,12 +88,12 @@ class ApiService {
   async getMarketplaceItems() {
     // Add cache-busting parameter to force fresh data
     const timestamp = Date.now();
-    return this.request(`/marketplace?_t=${timestamp}`, { 
+    return this.request(`/marketplace?_t=${timestamp}`, {
       method: 'GET',
       headers: {
         'Cache-Control': 'no-cache',
-        'Pragma': 'no-cache'
-      }
+        Pragma: 'no-cache',
+      },
     });
   }
 
@@ -101,7 +109,7 @@ class ApiService {
     return this.request('/marketplace/create', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${authToken}`,
+        Authorization: `Bearer ${authToken}`,
         // Remove Content-Type for FormData
       },
       body: formData,
@@ -112,7 +120,7 @@ class ApiService {
     return this.request(`/marketplace/purchase/${tokenId}`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${authToken}`,
+        Authorization: `Bearer ${authToken}`,
       },
     });
   }
@@ -126,7 +134,7 @@ class ApiService {
     return this.request('/user/profile', {
       method: 'GET',
       headers: {
-        'Authorization': `Bearer ${authToken}`,
+        Authorization: `Bearer ${authToken}`,
       },
     });
   }
@@ -139,7 +147,7 @@ class ApiService {
     return this.request('/upload', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${authToken}`,
+        Authorization: `Bearer ${authToken}`,
         // Remove Content-Type for FormData
       },
       body: formData,
@@ -149,7 +157,12 @@ class ApiService {
   // Legacy method aliases for backward compatibility
   async getMyNFTs(authToken) {
     // This would need a user address - for now return empty
-    return { success: true, data: [], total: 0, message: 'Need user wallet address' };
+    return {
+      success: true,
+      data: [],
+      total: 0,
+      message: 'Need user wallet address',
+    };
   }
 
   async createNFT(formData, authToken) {

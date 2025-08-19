@@ -1,56 +1,60 @@
 .card-custom {
-    border-radius: 16px;
-    overflow: hidden;
-    transition: tranform 0.3s ease, box-shadow 0.3s ease;
-    box-shadow: 0 12px 20px rgba(0,0,0,0.15);
-    background: #fff;
+  border-radius: 16px;
+  overflow: hidden;
+  transition:
+    tranform 0.3s ease,
+    box-shadow 0.3s ease;
+  box-shadow: 0 12px 20px rgba(0, 0, 0, 0.15);
+  background: #fff;
 }
 
-.card-custom:hover{
-    transform: translateY(-8px) scale(1.02);
-    box-shadow: 0 20px 35px rgba(0,0,0,0.2);
+.card-custom:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 20px 35px rgba(0, 0, 0, 0.2);
 }
 
 .card-title {
-    font-weight: 600;
-    font-size: 1.2rem;
+  font-weight: 600;
+  font-size: 1.2rem;
 }
 
 .btn-custom {
-    background-color:#007bff ;
-    color: white;
-    transition: background-color 0.3s ease;
+  background-color: #007bff;
+  color: white;
+  transition: background-color 0.3s ease;
 }
 
-.btn-custom:hover{
-    background-color: #0056b3;
+.btn-custom:hover {
+  background-color: #0056b3;
 }
 
-.features-section{
-    background-color: #f8f9fa;
-    padding: 50px 0;
+.features-section {
+  background-color: #f8f9fa;
+  padding: 50px 0;
 }
 
 .features-card {
-    background-color: #fff;
-    border-radius: 15px;
-    padding: 30px;
-    text-align: center;
-    transition: transform 0.4s ease, box-shadow 0.4s ease;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  background-color: #fff;
+  border-radius: 15px;
+  padding: 30px;
+  text-align: center;
+  transition:
+    transform 0.4s ease,
+    box-shadow 0.4s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
-.features-card:hover{
-    transform: scale(1.05);
-    box-shadow: 0 6px 25px rgba(0,0,0,0.15);
+.features-card:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.15);
 }
 
-.step-card{
-    background-color: #e9ecef;
-    border-radius: 12px;
-    padding: 20px;
-    text-align: center;
-    margin-bottom: 20px;
+.step-card {
+  background-color: #e9ecef;
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  margin-bottom: 20px;
 }
 
 .testimonials-section {
@@ -151,7 +155,9 @@
   background-color: white;
   border-radius: 16px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
   overflow: hidden;
 }
 

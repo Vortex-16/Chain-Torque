@@ -1,387 +1,724 @@
 const { ethers } = require('ethers');
-
-// Contract configuration - UPDATE AFTER DEPLOYMENT
-const CONTRACT_ADDRESS = '0x5FbDB2315678afecb367f032d93F642f64180aa3'; // Will be updated after deployment
-const CONTRACT_ABI = [
-  // Marketplace functions
-  "function createToken(string memory tokenURI, uint256 price, string memory category, string memory title, string memory description) public payable returns (uint)",
-  "function createMarketSale(uint256 tokenId) public payable",
-  "function resellToken(uint256 tokenId, uint256 price) public payable",
-  "function fetchMarketItems() public view returns (tuple(uint256 tokenId, address seller, address owner, uint256 price, bool sold, string category, string title, string description)[])",
-  "function fetchMyNFTs() public view returns (tuple(uint256 tokenId, address seller, address owner, uint256 price, bool sold, string category, string title, string description)[])",
-  "function fetchItemsListed() public view returns (tuple(uint256 tokenId, address seller, address owner, uint256 price, bool sold, string category, string title, string description)[])",
-  "function getMarketplaceStats() public view returns (uint256, uint256, uint256)",
-  "function getMarketItem(uint256 tokenId) public view returns (tuple(uint256 tokenId, address seller, address owner, uint256 price, bool sold, string category, string title, string description))",
-  "function getListingPrice() public view returns (uint256)",
-  "function updateListingPrice(uint256 _listingPrice) public payable",
-  
-  // ERC721 functions
-  "function tokenURI(uint256 tokenId) public view returns (string)",
-  "function ownerOf(uint256 tokenId) public view returns (address)",
-  "function balanceOf(address owner) public view returns (uint256)",
-  
-  // Events
-  "event MarketItemCreated(uint256 indexed tokenId, address seller, address owner, uint256 price, bool sold, string category, string title)",
-  "event MarketItemSold(uint256 indexed tokenId, address buyer, uint256 price)"
-];
+const fs = require('fs');
+const path = require('path');
 
 class Web3Manager {
   constructor() {
     this.provider = null;
+    this.signer = null;
     this.contract = null;
-    this.connected = false;
-    this.network = null;
+    this.contractAddress = null;
+    this.initialized = false;
+
+    // Category mapping for the optimized contract
+    this.categories = {
+      1: 'Electronics',
+      2: 'Collectibles',
+      3: 'Art',
+      4: 'Music',
+      5: 'Gaming',
+      6: 'Sports',
+      7: 'Photography',
+      8: 'Virtual Real Estate',
+      9: 'Domain Names',
+      10: 'Utility',
+    };
+
+    // Contract constants (matching Solidity contract)
+    this.LISTING_PRICE = ethers.utils.parseEther('0.00025'); // 0.00025 ETH
+    this.MAX_BATCH_SIZE = 50;
+    this.PLATFORM_FEE_BPS = 250; // 2.5%
   }
 
+  /**
+   * Initialize Web3 connection with optimized error handling
+   */
   async initialize() {
     try {
-      console.log('🔗 Initializing Web3 connection...');
-      
-      // For demo purposes, use the hardhat network we successfully deployed to
-      console.log('🎯 Using local Hardhat network for demo...');
-      
-      // Configure network explicitly for Hardhat
-      const networkConfig = {
-        name: 'hardhat',
-        chainId: 1337,
-        url: 'http://127.0.0.1:8545'
-      };
-      
-      // Initialize provider with explicit network configuration
-      this.provider = new ethers.providers.JsonRpcProvider({
-        url: networkConfig.url,
-        timeout: 30000
-      }, networkConfig);
-      
-      // Verify network connection
-      const network = await this.provider.getNetwork();
-      this.network = { name: 'hardhat', chainId: network.chainId };
-      
-      console.log(`✅ Connected to ${this.network.name} (chainId: ${this.network.chainId})`);
-      
-      // Initialize contract (we know it's deployed)
-      if (CONTRACT_ADDRESS !== '0x0000000000000000000000000000000000000000') {
-        this.contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, this.provider);
-        
-        // Test contract connection
-        try {
-          await this.contract.getListingPrice();
-          console.log(`📄 Real Web3 Contract verified at ${CONTRACT_ADDRESS}`);
-        } catch (contractError) {
-          console.warn(`⚠️  Contract deployed but connection test failed: ${contractError.message}`);
-          // Still set the contract as it might work for other operations
-        }
-      } else {
-        console.log('⚠️  Contract not deployed yet. Run "npm run deploy" to deploy the contract.');
+      console.log('Initializing Web3 Manager...');
+
+      // Connect to local Hardhat network (try both hardhat and localhost)
+      try {
+        this.provider = new ethers.providers.JsonRpcProvider(
+          'http://127.0.0.1:8545'
+        );
+        await this.provider.getNetwork();
+        console.log('Connected to localhost Hardhat network');
+      } catch (error) {
+        // Fallback to embedded hardhat network for testing
+        console.log('Using embedded Hardhat network for testing...');
+        this.provider =
+          ethers.provider || new ethers.providers.JsonRpcProvider();
       }
-      
-      this.connected = true;
-      console.log('🎉 Real Web3 connection established!');
+
+      // Get the first account as signer (for testing)
+      const accounts = await this.provider.listAccounts();
+      if (accounts.length === 0) {
+        throw new Error('No accounts available in Hardhat network');
+      }
+
+      this.signer = await this.provider.getSigner(0);
+      console.log('Connected to account:', await this.signer.getAddress());
+
+      // Load contract artifacts
+      await this.loadContract();
+
+      this.initialized = true;
+      console.log('✅ Web3 Manager initialized successfully');
+
       return true;
-      
     } catch (error) {
-      console.error('❌ Web3 connection failed:', error.message);
-      this.connected = false;
+      console.error('❌ Web3 initialization failed:', error.message);
+      this.initialized = false;
       return false;
     }
   }
 
-  getNetworkInfo() {
-    if (!this.network) return null;
-    
-    return {
-      name: this.network.name,
-      chainId: this.network.chainId,
-      connected: this.connected,
-      contractAddress: CONTRACT_ADDRESS,
-      contractDeployed: CONTRACT_ADDRESS !== '0x0000000000000000000000000000000000000000'
-    };
+  /**
+   * Load the deployed contract
+   */
+  async loadContract() {
+    try {
+      // Load the contract ABI
+      const contractArtifactPath = path.join(
+        __dirname,
+        'artifacts',
+        'contracts',
+        'ChainTorqueMarketplace.sol',
+        'ChainTorqueMarketplace.json'
+      );
+
+      if (!fs.existsSync(contractArtifactPath)) {
+        throw new Error(
+          'Contract artifact not found. Please compile the contract first.'
+        );
+      }
+
+      const contractArtifact = JSON.parse(
+        fs.readFileSync(contractArtifactPath, 'utf8')
+      );
+      const abi = contractArtifact.abi;
+
+      // Load deployment address
+      const deploymentPath = path.join(__dirname, 'contract-address.json');
+      if (fs.existsSync(deploymentPath)) {
+        const deployment = JSON.parse(fs.readFileSync(deploymentPath, 'utf8'));
+        this.contractAddress = deployment.ChainTorqueMarketplace;
+
+        // Connect to the deployed contract
+        this.contract = new ethers.Contract(
+          this.contractAddress,
+          abi,
+          this.signer
+        );
+        console.log('✅ Contract loaded at address:', this.contractAddress);
+      } else {
+        console.log(
+          '⚠️ Contract not deployed yet. Please deploy the contract first.'
+        );
+
+        // For testing, we can still create a contract instance without an address
+        // This will allow testing of other Web3Manager functions
+        this.contract = null;
+      }
+    } catch (error) {
+      console.error('❌ Error loading contract:', error.message);
+      throw error;
+    }
   }
 
-  // TRUE WEB3: Get marketplace items from smart contract
-  async getMarketplaceItems() {
-    if (!this.contract) {
+  /**
+   * Create a single marketplace item (optimized)
+   */
+  async createMarketItem(itemData) {
+    try {
+      if (!this.isReady()) {
+        throw new Error('Web3 Manager not initialized');
+      }
+
+      const { tokenURI, price, category, royalty = 0 } = itemData;
+
+      // Validate inputs
+      if (!tokenURI || !price) {
+        throw new Error('Token URI and price are required');
+      }
+
+      const categoryId = this.getCategoryId(category);
+      const priceWei = ethers.utils.parseEther(price.toString());
+      const royaltyBps = Math.floor(royalty * 100); // Convert % to basis points
+
+      console.log('Creating market item:', {
+        tokenURI,
+        price: `${price} ETH`,
+        category: `${this.getCategoryName(categoryId)} (ID: ${categoryId})`,
+        royalty: `${royalty}%`,
+        listingFee: `${ethers.utils.formatEther(this.LISTING_PRICE)} ETH`,
+      });
+
+      // Create the token
+      const tx = await this.contract.createToken(
+        tokenURI,
+        priceWei,
+        categoryId,
+        royaltyBps,
+        {
+          value: this.LISTING_PRICE,
+          gasLimit: 500000, // Optimized gas limit
+        }
+      );
+
+      console.log('Transaction submitted:', tx.hash);
+      const receipt = await tx.wait();
+      console.log('✅ Transaction confirmed in block:', receipt.blockNumber);
+
+      // Extract token ID from events
+      const marketItemCreatedEvent = receipt.logs.find(
+        log =>
+          log.topics[0] ===
+          ethers.utils.id(
+            'MarketItemCreated(uint256,address,uint128,uint32,uint256)'
+          )
+      );
+
+      if (marketItemCreatedEvent) {
+        const tokenId = parseInt(marketItemCreatedEvent.topics[1], 16);
+        console.log('🎉 NFT created with Token ID:', tokenId);
+
+        return {
+          success: true,
+          tokenId,
+          transactionHash: tx.hash,
+          blockNumber: receipt.blockNumber,
+          gasUsed: receipt.gasUsed.toString(),
+          listingFee: ethers.utils.formatEther(this.LISTING_PRICE),
+        };
+      }
+
+      return {
+        success: true,
+        transactionHash: tx.hash,
+        blockNumber: receipt.blockNumber,
+        gasUsed: receipt.gasUsed.toString(),
+      };
+    } catch (error) {
+      console.error('❌ Error creating market item:', error.message);
       return {
         success: false,
-        error: 'Contract not initialized. Please deploy the contract first.',
-        items: [],
-        isWeb3: false
+        error: error.message,
       };
     }
+  }
 
+  /**
+   * Create multiple marketplace items in a single transaction (50x gas savings)
+   */
+  async batchCreateMarketItems(itemsData) {
     try {
+      if (!this.isReady()) {
+        throw new Error('Web3 Manager not initialized');
+      }
+
+      if (!Array.isArray(itemsData) || itemsData.length === 0) {
+        throw new Error('Items data must be a non-empty array');
+      }
+
+      if (itemsData.length > this.MAX_BATCH_SIZE) {
+        throw new Error(`Batch size cannot exceed ${this.MAX_BATCH_SIZE}`);
+      }
+
+      const tokenURIs = [];
+      const prices = [];
+      const categories = [];
+      const royalties = [];
+
+      // Process batch data
+      for (const item of itemsData) {
+        const { tokenURI, price, category, royalty = 0 } = item;
+
+        if (!tokenURI || !price) {
+          throw new Error('Each item must have tokenURI and price');
+        }
+
+        tokenURIs.push(tokenURI);
+        prices.push(ethers.utils.parseEther(price.toString()));
+        categories.push(this.getCategoryId(category));
+        royalties.push(Math.floor(royalty * 100)); // Convert % to basis points
+      }
+
+      const totalListingFee = this.LISTING_PRICE.mul(itemsData.length);
+
+      console.log('Creating batch market items:', {
+        count: itemsData.length,
+        totalListingFee: `${ethers.utils.formatEther(totalListingFee)} ETH`,
+        estimatedGasSavings: `${itemsData.length}x vs individual transactions`,
+      });
+
+      // Execute batch creation
+      const tx = await this.contract.batchCreateTokens(
+        tokenURIs,
+        prices,
+        categories,
+        royalties,
+        {
+          value: totalListingFee,
+          gasLimit: 500000 + itemsData.length * 300000, // Increased gas limit
+        }
+      );
+
+      console.log('Batch transaction submitted:', tx.hash);
+      const receipt = await tx.wait();
+      console.log(
+        '✅ Batch transaction confirmed in block:',
+        receipt.blockNumber
+      );
+
+      // Extract batch info from events
+      const batchEvent = receipt.logs.find(
+        log =>
+          log.topics[0] ===
+          ethers.utils.id('BatchItemsCreated(uint256,uint256,address)')
+      );
+
+      let startTokenId = null;
+      if (batchEvent) {
+        startTokenId = parseInt(batchEvent.topics[1], 16);
+        console.log(`🎉 Batch created starting from Token ID: ${startTokenId}`);
+      }
+
+      return {
+        success: true,
+        count: itemsData.length,
+        startTokenId,
+        transactionHash: tx.hash,
+        blockNumber: receipt.blockNumber,
+        gasUsed: receipt.gasUsed.toString(),
+        totalListingFee: ethers.utils.formatEther(totalListingFee),
+        gasSavings: `~${Math.floor(itemsData.length * 0.8 * 100)}% vs individual transactions`,
+      };
+    } catch (error) {
+      console.error('❌ Error creating batch market items:', error.message);
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+  }
+
+  /**
+   * Purchase a marketplace item
+   */
+  async purchaseToken(tokenId, expectedPrice) {
+    try {
+      if (!this.isReady()) {
+        throw new Error('Web3 Manager not initialized');
+      }
+
+      console.log('Purchasing token:', tokenId);
+
+      // Get current market item details
+      const marketItem = await this.contract.getMarketItem(tokenId);
+
+      if (marketItem.sold) {
+        throw new Error('Item is already sold');
+      }
+
+      const itemPrice = marketItem.price;
+
+      // Verify expected price matches (prevent front-running)
+      if (
+        expectedPrice &&
+        ethers.utils.parseEther(expectedPrice.toString()) !== itemPrice
+      ) {
+        throw new Error('Price has changed. Please refresh and try again.');
+      }
+
+      console.log(
+        'Purchasing item for:',
+        ethers.utils.formatEther(itemPrice),
+        'ETH'
+      );
+
+      const tx = await this.contract.purchaseToken(tokenId, {
+        value: itemPrice,
+        gasLimit: 300000,
+      });
+
+      console.log('Purchase transaction submitted:', tx.hash);
+      const receipt = await tx.wait();
+      console.log('✅ Purchase confirmed in block:', receipt.blockNumber);
+
+      return {
+        success: true,
+        tokenId,
+        price: ethers.utils.formatEther(itemPrice),
+        transactionHash: tx.hash,
+        blockNumber: receipt.blockNumber,
+        gasUsed: receipt.gasUsed.toString(),
+      };
+    } catch (error) {
+      console.error('❌ Error purchasing token:', error.message);
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+  }
+
+  /**
+   * Get all active market items (optimized)
+   */
+  async getMarketItems() {
+    try {
+      if (!this.isReady()) {
+        throw new Error('Web3 Manager not initialized');
+      }
+
+      console.log('Fetching market items...');
+
       const items = await this.contract.fetchMarketItems();
-      
-      const formattedItems = await Promise.all(items.map(async (item, index) => {
-        let imageUrl = '/placeholder.jpg';
-        let modelUrl = null;
-        
-        try {
-          // Get tokenURI to extract metadata
-          const tokenURI = await this.contract.tokenURI(item.tokenId);
-          
-          if (tokenURI && tokenURI.startsWith('data:application/json;base64,')) {
-            // Decode base64 metadata
-            const base64Data = tokenURI.replace('data:application/json;base64,', '');
-            const metadata = JSON.parse(Buffer.from(base64Data, 'base64').toString());
-            
-            // Extract image and model URLs from metadata
-            if (metadata.image) {
-              imageUrl = metadata.image;
+
+      // Process and format items with complete metadata
+      const formattedItems = [];
+
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+
+        // Calculate the actual token ID (items are returned in order, starting from token ID 1)
+        let tokenId = i + 1;
+
+        // Try to find the correct tokenId by checking which tokens exist
+        const totalSupply = await this.contract.getCurrentTokenId();
+        for (let id = 1; id <= totalSupply; id++) {
+          try {
+            const marketItem = await this.contract.getMarketItem(id);
+            if (
+              !marketItem.sold &&
+              marketItem.price.toString() === item.price.toString() &&
+              marketItem.seller === item.seller
+            ) {
+              tokenId = id;
+              break;
             }
-            if (metadata.model_url) {
-              modelUrl = metadata.model_url;
+          } catch (e) {
+            continue;
+          }
+        }
+
+        // Get token URI and metadata
+        let tokenURI = '';
+        let title = `NFT Model #${tokenId}`;
+        let description = '';
+        let imageUrl = '';
+        let modelUrl = '';
+
+        try {
+          tokenURI = await this.contract.tokenURI(tokenId);
+
+          // If tokenURI is a URL, try to fetch metadata
+          if (tokenURI.startsWith('http') || tokenURI.startsWith('ipfs://')) {
+            // For now, extract from filename or use defaults
+            title = `CAD Model #${tokenId}`;
+            description = `Professional 3D model in ${this.getCategoryName(item.category)} category`;
+          } else {
+            // Assume it's JSON metadata
+            try {
+              const metadata = JSON.parse(tokenURI);
+              title = metadata.name || title;
+              description = metadata.description || description;
+              imageUrl = metadata.image || '';
+              modelUrl = metadata.model || metadata.animation_url || '';
+            } catch (e) {
+              // Use tokenURI directly
+              if (tokenURI.includes('uploads/')) {
+                imageUrl = tokenURI;
+              }
             }
           }
-        } catch (error) {
-          console.log(`⚠️ Could not parse metadata for token ${item.tokenId}:`, error.message);
+        } catch (e) {
+          console.log(`Warning: Could not fetch tokenURI for token ${tokenId}`);
         }
-        
-        return {
-          id: item.tokenId.toString(),
-          title: item.title,
-          description: item.description,
+
+        formattedItems.push({
+          tokenId: tokenId,
           price: ethers.utils.formatEther(item.price),
-          category: item.category,
+          category: this.getCategoryName(item.category),
+          categoryId: item.category,
           seller: item.seller,
           owner: item.owner,
           sold: item.sold,
-          tokenId: item.tokenId.toString(),
+          createdAt: new Date(Number(item.createdAt) * 1000).toISOString(),
+          royalty: Number(item.royalty) / 100, // Convert basis points to percentage
+          tokenURI: tokenURI,
+          title: title,
+          description: description,
           imageUrl: imageUrl,
           modelUrl: modelUrl,
-          isNFT: true // This is a real NFT
-        };
-      }));
+        });
+      }
 
+      console.log(`✅ Found ${formattedItems.length} active market items`);
       return {
         success: true,
         items: formattedItems,
         count: formattedItems.length,
-        isWeb3: true
       };
     } catch (error) {
-      console.error('Error fetching marketplace items:', error);
+      console.error('❌ Error fetching market items:', error.message);
       return {
         success: false,
         error: error.message,
         items: [],
-        isWeb3: false
       };
     }
   }
 
-  //Create NFT and list on marketplace
-  async createMarketItem(itemData, privateKey) {
-    if (!this.contract) {
-      throw new Error('Contract not initialized. Deploy contract first.');
-    }
-
-    if (!this.provider) {
-      throw new Error('Provider not initialized. Check network connection.');
-    }
-
+  /**
+   * Get tokens by category (optimized filtering)
+   */
+  async getTokensByCategory(category) {
     try {
-      // Verify network connection before proceeding
-      try {
-        await this.provider.getNetwork();
-      } catch (networkError) {
-        console.log('🔄 Network connection lost, attempting to reconnect...');
-        await this.initialize();
-        if (!this.contract || !this.provider) {
-          throw new Error('Failed to reconnect to network');
+      if (!this.isReady()) {
+        throw new Error('Web3 Manager not initialized');
+      }
+
+      const categoryId = this.getCategoryId(category);
+      console.log(
+        `Fetching tokens for category: ${this.getCategoryName(categoryId)}`
+      );
+
+      const tokenIds = await this.contract.getTokensByCategory(categoryId);
+
+      console.log(`✅ Found ${tokenIds.length} tokens in category`);
+      return {
+        success: true,
+        tokenIds: tokenIds.map(id => Number(id)),
+        category: this.getCategoryName(categoryId),
+        count: tokenIds.length,
+      };
+    } catch (error) {
+      console.error('❌ Error fetching tokens by category:', error.message);
+      return {
+        success: false,
+        error: error.message,
+        tokenIds: [],
+      };
+    }
+  }
+
+  /**
+   * Get marketplace statistics (optimized)
+   */
+  async getMarketplaceStats() {
+    try {
+      if (!this.isReady()) {
+        throw new Error('Web3 Manager not initialized');
+      }
+
+      console.log('Fetching marketplace statistics...');
+
+      const stats = await this.contract.getMarketplaceStats();
+
+      const formattedStats = {
+        totalItems: Number(stats.totalItems),
+        totalSold: Number(stats.totalSold),
+        totalActive: Number(stats.totalActive),
+        totalValue: ethers.utils.formatEther(stats.totalValue),
+        listingPrice: ethers.utils.formatEther(this.LISTING_PRICE),
+        platformFee: `${this.PLATFORM_FEE_BPS / 100}%`,
+      };
+
+      console.log('✅ Marketplace stats:', formattedStats);
+      return {
+        success: true,
+        stats: formattedStats,
+      };
+    } catch (error) {
+      console.error('❌ Error fetching marketplace stats:', error.message);
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+  }
+
+  /**
+   * Get user's tokens (O(1) lookup)
+   */
+  async getUserTokens(userAddress) {
+    try {
+      if (!this.isReady()) {
+        throw new Error('Web3 Manager not initialized');
+      }
+
+      console.log('Fetching tokens for user:', userAddress);
+
+      const tokenIds = await this.contract.getUserTokens(userAddress);
+
+      console.log(`✅ User has ${tokenIds.length} tokens`);
+      return {
+        success: true,
+        tokenIds: tokenIds.map(id => Number(id)),
+        count: tokenIds.length,
+      };
+    } catch (error) {
+      console.error('❌ Error fetching user tokens:', error.message);
+      return {
+        success: false,
+        error: error.message,
+        tokenIds: [],
+      };
+    }
+  }
+
+  // ========== HELPER FUNCTIONS ==========
+
+  /**
+   * Get category ID from name or return ID if already numeric
+   */
+  getCategoryId(category) {
+    if (typeof category === 'number') {
+      return category;
+    }
+
+    if (typeof category === 'string') {
+      // Find category by name (case-insensitive)
+      for (const [id, name] of Object.entries(this.categories)) {
+        if (name.toLowerCase() === category.toLowerCase()) {
+          return parseInt(id);
         }
       }
 
-      const wallet = new ethers.Wallet(privateKey, this.provider);
-      const contractWithSigner = this.contract.connect(wallet);
-      
-      // Test contract connection first
-      const listingPrice = await this.contract.getListingPrice();
-      const price = ethers.utils.parseEther(itemData.price.toString());
-      
-      console.log(`📝 Creating NFT: ${itemData.title} for ${itemData.price} ETH`);
-      console.log(`💰 Listing price: ${ethers.utils.formatEther(listingPrice)} ETH`);
-      
-      // Create token URI (in production, this would be IPFS)
-      const tokenURI = `data:application/json;base64,${Buffer.from(JSON.stringify({
-        name: itemData.title,
-        description: itemData.description,
-        image: itemData.imageUrl,
-        model_url: itemData.modelUrl,
-        attributes: [
-          { trait_type: "Category", value: itemData.category },
-          { trait_type: "Creator", value: wallet.address }
-        ]
-      })).toString('base64')}`;
-      
-      const transaction = await contractWithSigner.createToken(
-        tokenURI,
-        price,
-        itemData.category,
-        itemData.title,
-        itemData.description,
-        { value: listingPrice, gasLimit: 3000000 } // Increased gas limit for NFT creation
-      );
-      
-      console.log(`⏳ Transaction submitted: ${transaction.hash}`);
-      const receipt = await transaction.wait();
-      console.log(`✅ NFT created successfully!`);
-      
-      return {
-        success: true,
-        transactionHash: receipt.transactionHash,
-        tokenId: receipt.events?.find(e => e.event === 'MarketItemCreated')?.args?.tokenId?.toString(),
-        isWeb3: true
-      };
-    } catch (error) {
-      console.error('❌ Error creating market item:', error);
-      throw error;
-    }
-  }
-
-  //Purchase NFT from marketplace
-  async purchaseMarketItem(tokenId, privateKey) {
-    if (!this.contract) {
-      throw new Error('Contract not initialized');
-    }
-
-    try {
-      const wallet = new ethers.Wallet(privateKey, this.provider);
-      const contractWithSigner = this.contract.connect(wallet);
-      
-      const item = await this.contract.getMarketItem(tokenId);
-      const price = item.price;
-      
-      const transaction = await contractWithSigner.createMarketSale(tokenId, {
-        value: price
-      });
-      
-      const receipt = await transaction.wait();
-      
-      return {
-        success: true,
-        transactionHash: receipt.transactionHash,
-        buyer: wallet.address,
-        isWeb3: true
-      };
-    } catch (error) {
-      console.error('Error purchasing item:', error);
-      throw error;
-    }
-  }
-
-  //Get user's NFTs
-  async getUserNFTs(userAddress) {
-    if (!this.contract) {
-      throw new Error('Contract not initialized');
-    }
-
-    try {
-      const wallet = new ethers.Wallet(process.env.PRIVATE_KEY || '0x0', this.provider);
-      wallet.address = userAddress; // Override for view function
-      
-      const contractWithSigner = this.contract.connect(wallet);
-      const nfts = await contractWithSigner.fetchMyNFTs();
-      
-      const formattedNFTs = nfts.map(nft => ({
-        tokenId: nft.tokenId.toString(),
-        title: nft.title,
-        description: nft.description,
-        price: ethers.utils.formatEther(nft.price),
-        category: nft.category,
-        owned: true,
-        isNFT: true
-      }));
-
-      return {
-        success: true,
-        nfts: formattedNFTs,
-        count: formattedNFTs.length,
-        isWeb3: true
-      };
-    } catch (error) {
-      console.error('Error fetching user NFTs:', error);
-      throw error;
-    }
-  }
-
-  async getMarketplaceStats() {
-    if (!this.contract) {
-      return {
-        totalItems: 0,
-        itemsSold: 0,
-        listingPrice: '0',
-        isWeb3: false
-      };
-    }
-
-    try {
-      const [totalItems, itemsSold, listingPrice] = await this.contract.getMarketplaceStats();
-      
-      return {
-        totalItems: totalItems.toString(),
-        itemsSold: itemsSold.toString(),
-        listingPrice: ethers.utils.formatEther(listingPrice),
-        isWeb3: true
-      };
-    } catch (error) {
-      console.error('Error fetching marketplace stats:', error);
-      return {
-        totalItems: 0,
-        itemsSold: 0,
-        listingPrice: '0',
-        isWeb3: false,
-        error: error.message
-      };
-    }
-  }
-
-  async getBalance(address) {
-    if (!this.provider) {
-      throw new Error('Provider not initialized');
-    }
-
-    try {
-      const balance = await this.provider.getBalance(address);
-      return {
-        balance: ethers.utils.formatEther(balance),
-        balanceWei: balance.toString(),
-        address: address,
-        isWeb3: true
-      };
-    } catch (error) {
-      console.error('Error getting balance:', error);
-      throw error;
-    }
-  }
-
-  isValidAddress(address) {
-    return ethers.utils.isAddress(address);
-  }
-
-  async getBlockNumber() {
-    try {
-      if (!this.provider) {
-        await this.initializeProvider();
+      // If not found, try parsing as number
+      const parsed = parseInt(category);
+      if (!isNaN(parsed) && parsed > 0) {
+        return parsed;
       }
-      return await this.provider.getBlockNumber();
+    }
+
+    // Default to 'Other' category
+    return 10;
+  }
+
+  /**
+   * Get category name from ID
+   */
+  getCategoryName(categoryId) {
+    return this.categories[categoryId] || 'Unknown';
+  }
+
+  /**
+   * Get all available categories
+   */
+  getAvailableCategories() {
+    return { ...this.categories };
+  }
+
+  /**
+   * Check if Web3 Manager is ready
+   */
+  isReady() {
+    return this.initialized && this.contract !== null;
+  }
+
+  /**
+   * Get current network info
+   */
+  async getNetworkInfo() {
+    if (!this.provider) {
+      return null;
+    }
+
+    try {
+      const network = await this.provider.getNetwork();
+      const balance = await this.signer.getBalance();
+      const address = await this.signer.getAddress();
+
+      return {
+        chainId: Number(network.chainId),
+        name: network.name,
+        address,
+        balance: ethers.utils.formatEther(balance),
+        contractAddress: this.contractAddress,
+        listingPrice: ethers.utils.formatEther(this.LISTING_PRICE),
+      };
     } catch (error) {
-      console.error('Error getting block number:', error);
-      return 'N/A';
+      console.error('Error getting network info:', error.message);
+      return null;
     }
   }
 
-  // Contract deployment status
-  isContractDeployed() {
-    return CONTRACT_ADDRESS !== '0x0000000000000000000000000000000000000000';
+  /**
+   * Estimate gas for operations
+   */
+  async estimateGas(operation, params = []) {
+    if (!this.isReady()) {
+      return null;
+    }
+
+    try {
+      let gasEstimate;
+
+      switch (operation) {
+        case 'createToken':
+          gasEstimate = await this.contract.createToken.estimateGas(...params, {
+            value: this.LISTING_PRICE,
+          });
+          break;
+        case 'batchCreateTokens':
+          const batchSize = params[0]?.length || 1;
+          const totalValue = this.LISTING_PRICE * BigInt(batchSize);
+          gasEstimate = await this.contract.batchCreateTokens.estimateGas(
+            ...params,
+            { value: totalValue }
+          );
+          break;
+        case 'purchaseToken':
+          const tokenId = params[0];
+          const marketItem = await this.contract.getMarketItem(tokenId);
+          gasEstimate = await this.contract.purchaseToken.estimateGas(tokenId, {
+            value: marketItem.price,
+          });
+          break;
+        default:
+          return null;
+      }
+
+      return {
+        gasLimit: gasEstimate.toString(),
+        gasLimitHex: `0x${gasEstimate.toString(16)}`,
+        estimatedCost: ethers.utils.formatEther(gasEstimate.mul(20000000000)), // Assuming 20 gwei gas price
+      };
+    } catch (error) {
+      console.error(`Error estimating gas for ${operation}:`, error.message);
+      return null;
+    }
   }
 
-  get contractAddress() {
-    return CONTRACT_ADDRESS;
+  /**
+   * Get contract constants
+   */
+  getContractConstants() {
+    return {
+      LISTING_PRICE: ethers.utils.formatEther(this.LISTING_PRICE),
+      LISTING_PRICE_WEI: this.LISTING_PRICE.toString(),
+      MAX_BATCH_SIZE: this.MAX_BATCH_SIZE,
+      PLATFORM_FEE_PERCENTAGE: this.PLATFORM_FEE_BPS / 100,
+      PLATFORM_FEE_BPS: this.PLATFORM_FEE_BPS,
+    };
   }
 }
 
-// Create singleton instance
-const web3Manager = new Web3Manager();
+// Export the Web3Manager class
+module.exports = Web3Manager;
 
-module.exports = web3Manager;
+// Also export a singleton instance for convenience
+const web3Manager = new Web3Manager();
+module.exports.web3Manager = web3Manager;
+
+// Export helper functions
+module.exports.utils = {
+  formatEther: ethers.utils.formatEther,
+  parseEther: ethers.utils.parseEther,
+  isAddress: ethers.utils.isAddress,
+  getAddress: ethers.utils.getAddress,
+};

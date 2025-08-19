@@ -6,9 +6,13 @@ interface StatusPanelContextType {
   closeStatusPanel: () => void;
 }
 
-const StatusPanelContext = createContext<StatusPanelContextType | undefined>(undefined);
+const StatusPanelContext = createContext<StatusPanelContextType | undefined>(
+  undefined
+);
 
-export const StatusPanelProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const StatusPanelProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [showStatusPanel, setShowStatusPanel] = useState(false);
 
   const toggleStatusPanel = () => {
@@ -20,11 +24,13 @@ export const StatusPanelProvider: React.FC<{ children: React.ReactNode }> = ({ c
   };
 
   return (
-    <StatusPanelContext.Provider value={{
-      showStatusPanel,
-      toggleStatusPanel,
-      closeStatusPanel
-    }}>
+    <StatusPanelContext.Provider
+      value={{
+        showStatusPanel,
+        toggleStatusPanel,
+        closeStatusPanel,
+      }}
+    >
       {children}
     </StatusPanelContext.Provider>
   );

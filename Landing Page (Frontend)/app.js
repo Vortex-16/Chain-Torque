@@ -17,41 +17,41 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Routes
 app.get('/', (req, res) => {
-    res.render('index');
+  res.render('index');
 });
 
 app.get('/library', (req, res) => {
-    const dummyModels=[
-         {
-            _id: "1",
-            title: "Gear Assembly",
-            description: "A detailed CAD model of a gear assembly.",
-            imageURL: "https://via.placeholder.com/300x200"
-        },
-        {
-            _id: "2",
-            title: "Engine Block",
-            description: "3D model of a V8 engine block.",
-            imageURL: "https://via.placeholder.com/300x200"
-        }
-    ];
-    res.render('library', { models: dummyModels });
+  const dummyModels = [
+    {
+      _id: '1',
+      title: 'Gear Assembly',
+      description: 'A detailed CAD model of a gear assembly.',
+      imageURL: 'https://via.placeholder.com/300x200',
+    },
+    {
+      _id: '2',
+      title: 'Engine Block',
+      description: '3D model of a V8 engine block.',
+      imageURL: 'https://via.placeholder.com/300x200',
+    },
+  ];
+  res.render('library', { models: dummyModels });
 });
 
 app.get('/login', (req, res) => {
-    res.render('login');
+  res.render('login');
 });
 
 app.get('/signup', (req, res) => {
-    res.render('signup');
+  res.render('signup');
 });
 
 app.get('/upload', (req, res) => {
-    res.render('upload');
+  res.render('upload');
 });
 
 // Start server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`ChainTorque Landing Page running on http://localhost:${PORT}`);
+  console.log(`ChainTorque Landing Page running on http://localhost:${PORT}`);
 });

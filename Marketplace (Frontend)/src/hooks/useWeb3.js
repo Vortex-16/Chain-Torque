@@ -14,14 +14,14 @@ export const useWeb3Status = () => {
     const checkWeb3Status = async () => {
       try {
         setStatus(prev => ({ ...prev, loading: true, error: null }));
-        
+
         const response = await apiService.getWeb3Status();
-        
+
         console.log('📡 Web3 status response:', response);
-        
+
         // Map the backend response to frontend expected format
         setStatus({
-          initialized: response.data?.connected || response.connected, 
+          initialized: response.data?.connected || response.connected,
           network: {
             name: response.data?.name || response.name,
             chainId: response.data?.chainId || response.chainId,
@@ -29,7 +29,8 @@ export const useWeb3Status = () => {
           },
           contract: {
             address: response.data?.contractAddress || response.contractAddress,
-            deployed: response.data?.contractDeployed || response.contractDeployed,
+            deployed:
+              response.data?.contractDeployed || response.contractDeployed,
           },
           loading: false,
           error: null,
@@ -45,19 +46,19 @@ export const useWeb3Status = () => {
     };
 
     checkWeb3Status();
-    
+
     // Check status every 30 seconds
     const interval = setInterval(checkWeb3Status, 30000);
-    
+
     return () => clearInterval(interval);
   }, []);
 
   const initializeWeb3 = async () => {
     try {
       setStatus(prev => ({ ...prev, loading: true, error: null }));
-      
+
       await apiService.initializeWeb3();
-      
+
       // Refresh status after initialization
       const response = await apiService.getWeb3Status();
       setStatus({
@@ -73,7 +74,7 @@ export const useWeb3Status = () => {
         loading: false,
         error: null,
       });
-      
+
       return true;
     } catch (error) {
       console.error('Failed to initialize Web3:', error);
@@ -103,17 +104,17 @@ export const useMarketplace = () => {
   const fetchMarketplaceData = async () => {
     try {
       setMarketplace(prev => ({ ...prev, loading: true, error: null }));
-      
+
       const [itemsResponse, statsResponse] = await Promise.all([
         apiService.getMarketplaceItems(),
         apiService.getMarketplaceStats(),
       ]);
-      
+
       console.log('📦 Raw marketplace response:', itemsResponse);
-      
+
       // Fix: Handle the nested response structure from backend
       const items = itemsResponse.items?.items || itemsResponse.items || [];
-      
+
       setMarketplace({
         items: items,
         stats: statsResponse.data || statsResponse || null,
@@ -156,9 +157,9 @@ export const useBackendHealth = () => {
     const checkHealth = async () => {
       try {
         setHealth(prev => ({ ...prev, loading: true, error: null }));
-        
+
         const response = await apiService.healthCheck();
-        
+
         setHealth({
           status: response.status,
           services: response.services || {},
@@ -177,10 +178,10 @@ export const useBackendHealth = () => {
     };
 
     checkHealth();
-    
+
     // Check health every 60 seconds
     const interval = setInterval(checkHealth, 60000);
-    
+
     return () => clearInterval(interval);
   }, []);
 

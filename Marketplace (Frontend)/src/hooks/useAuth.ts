@@ -1,16 +1,5 @@
-import { useContext, createContext } from 'react';
-import { useUser, useAuth } from '@clerk/clerk-react';
-
-interface AuthContextType {
-  user: ReturnType<typeof useUser>['user'];
-  isAuthenticated: boolean;
-  isLoading: boolean;
-  signOut: () => void;
-}
-
-const AuthContext = createContext<AuthContextType | null>(null);
-
-export { AuthContext };
+import { useContext } from 'react';
+import { AuthContext } from '@/contexts/AuthContext';
 
 export function useAuthContext() {
   const context = useContext(AuthContext);

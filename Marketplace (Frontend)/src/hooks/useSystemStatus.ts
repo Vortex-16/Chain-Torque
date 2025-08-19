@@ -14,7 +14,7 @@ export const useSystemStatus = () => {
     web3: 'checking...',
     contract: 'checking...',
     lastCheck: new Date().toLocaleTimeString(),
-    marketplaceItems: 0
+    marketplaceItems: 0,
   });
 
   const [isLoading, setIsLoading] = useState(true);
@@ -25,16 +25,21 @@ export const useSystemStatus = () => {
       // Check basic health
       const healthResponse = await fetch('http://localhost:5000/health');
       const backendStatus = healthResponse.ok ? 'connected' : 'error';
-      
+
       // Check web3 status
       let web3Status = 'disconnected';
       let contractStatus = 'not deployed';
       try {
-        const web3Response = await fetch('http://localhost:5000/api/web3/status');
+        const web3Response = await fetch(
+          'http://localhost:5000/api/web3/status'
+        );
         if (web3Response.ok) {
           const web3Data = await web3Response.json();
-          web3Status = web3Data.data?.connected ? 'connected' : 'disconnected';
-          contractStatus = web3Data.data?.contractDeployed ? 'deployed' : 'not deployed';
+          // Backend returns data directly, not wrapped in 'data' field
+          web3Status = web3Data.connected ? 'connected' : 'disconnected';
+          contractStatus = web3Data.contractDeployed
+            ? 'deployed'
+            : 'not deployed';
         }
       } catch (error) {
         web3Status = 'error';
@@ -43,10 +48,15 @@ export const useSystemStatus = () => {
       // Check marketplace API
       let itemCount = 0;
       try {
-        const marketplaceResponse = await fetch('http://localhost:5000/api/marketplace');
+        const marketplaceResponse = await fetch(
+          'http://localhost:5000/api/marketplace'
+        );
         if (marketplaceResponse.ok) {
           const marketplaceData = await marketplaceResponse.json();
-          itemCount = marketplaceData.total || 0;
+          const items = marketplaceData.items || marketplaceData.data || [];
+          itemCount = Array.isArray(items)
+            ? items.length
+            : marketplaceData.count || 0;
         }
       } catch (error) {
         console.log('Marketplace API error:', error);
@@ -57,7 +67,7 @@ export const useSystemStatus = () => {
         web3: web3Status,
         contract: contractStatus,
         lastCheck: new Date().toLocaleTimeString(),
-        marketplaceItems: itemCount
+        marketplaceItems: itemCount,
       });
     } catch (error) {
       setStatus({
@@ -65,7 +75,7 @@ export const useSystemStatus = () => {
         web3: 'disconnected',
         contract: 'unknown',
         lastCheck: new Date().toLocaleTimeString(),
-        marketplaceItems: 0
+        marketplaceItems: 0,
       });
     } finally {
       setIsLoading(false);
@@ -81,7 +91,8 @@ export const useSystemStatus = () => {
   // Determine overall system status
   const getOverallStatus = () => {
     if (isLoading) return 'checking';
-    if (status.backend === 'connected' && status.web3 === 'connected') return 'healthy';
+    if (status.backend === 'connected' && status.web3 === 'connected')
+      return 'healthy';
     if (status.backend === 'connected') return 'partial';
     return 'error';
   };
@@ -89,15 +100,15 @@ export const useSystemStatus = () => {
   const getStatusColor = (statusValue: string) => {
     switch (statusValue) {
       case 'connected':
-      case 'deployed': 
+      case 'deployed':
         return 'text-green-500';
       case 'disconnected':
-      case 'not deployed': 
+      case 'not deployed':
         return 'text-red-500';
       case 'error':
-      case 'unknown': 
+      case 'unknown':
         return 'text-orange-500';
-      default: 
+      default:
         return 'text-gray-500';
     }
   };
@@ -107,6 +118,6 @@ export const useSystemStatus = () => {
     isLoading,
     checkBackend,
     getOverallStatus,
-    getStatusColor
+    getStatusColor,
   };
 };

@@ -1,6 +1,6 @@
-import { createRoot } from 'react-dom/client'
-import App from './App.tsx'
-import './index.css'
+import { createRoot } from 'react-dom/client';
+import App from './App.tsx';
+import './index.css';
 
 // Suppress some development warnings in development mode
 if (import.meta.env.DEV) {
@@ -19,4 +19,4 @@ if (import.meta.env.DEV) {
   };
 }
 
-createRoot(document.getElementById("root")!).render(<App />);
+createRoot(document.getElementById('root')!).render(<App />);

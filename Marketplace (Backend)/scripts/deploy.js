@@ -1,92 +1,105 @@
-const { ethers } = require("hardhat");
+const { ethers } = require('hardhat');
 const fs = require('fs');
-const path = require('path');
 
 async function main() {
-  console.log("🚀 Deploying ChainTorque Marketplace...");
+  console.log('🚀 Deploying ChainTorque Marketplace (Optimized Version)...\n');
 
   // Get the contract factory
-  const ChainTorqueMarketplace = await ethers.getContractFactory("ChainTorqueMarketplace");
-  
+  const ChainTorqueMarketplace = await ethers.getContractFactory(
+    'ChainTorqueMarketplace'
+  );
+
   // Deploy the contract
+  console.log('📦 Deploying contract...');
   const marketplace = await ChainTorqueMarketplace.deploy();
-  
-  // Wait for deployment
+
+  // Wait for deployment to complete (using older API)
   await marketplace.deployed();
-  
-  console.log("✅ ChainTorque Marketplace deployed to:", marketplace.address);
-  console.log("📝 Transaction hash:", marketplace.deployTransaction.hash);
+  const address = marketplace.address;
+
+  console.log('✅ ChainTorque Marketplace deployed successfully!');
+  console.log(`📍 Contract Address: ${address}`);
+
+  // Get deployment info
+  const deploymentTx = marketplace.deployTransaction;
+  console.log(`🔗 Deployment Transaction: ${deploymentTx.hash}`);
+
+  // Get contract constants for verification
+  const listingPrice = await marketplace.getListingPrice();
+  const currentTokenId = await marketplace.getCurrentTokenId();
+
+  console.log('\n📊 Contract Configuration:');
+  console.log(
+    `💰 Listing Price: ${ethers.utils.formatEther(listingPrice)} ETH`
+  );
+  console.log(`🔢 Current Token ID: ${currentTokenId}`);
+  console.log(`📏 Max Batch Size: 50`);
+  console.log(`💳 Platform Fee: 2.5%`);
 
   // Save deployment info
   const deploymentInfo = {
-    address: marketplace.address,
-    network: hre.network.name,
-    deployer: (await ethers.getSigners())[0].address,
+    ChainTorqueMarketplace: address,
+    deploymentTransaction: deploymentTx.hash,
+    network: 'hardhat',
+    chainId: 31337,
+    listingPrice: ethers.utils.formatEther(listingPrice),
     deployedAt: new Date().toISOString(),
-    transactionHash: marketplace.deployTransaction.hash,
-    contractName: "ChainTorqueMarketplace"
   };
 
-  // Create deployments directory if it doesn't exist
-  const deploymentsDir = path.join(__dirname, '..', 'deployments');
-  if (!fs.existsSync(deploymentsDir)) {
-    fs.mkdirSync(deploymentsDir);
-  }
+  fs.writeFileSync(
+    'contract-address.json',
+    JSON.stringify(deploymentInfo, null, 2)
+  );
+  console.log('\n💾 Contract address saved to contract-address.json');
 
-  // Save deployment info to file
-  const deploymentFile = path.join(deploymentsDir, `${hre.network.name}.json`);
-  fs.writeFileSync(deploymentFile, JSON.stringify(deploymentInfo, null, 2));
-  
-  console.log("💾 Deployment info saved to:", deploymentFile);
+  // Get the deployer account info
+  const [deployer] = await ethers.getSigners();
+  const deployerBalance = await ethers.provider.getBalance(deployer.address);
 
-  // Verify contract if on testnet/mainnet
-  if (hre.network.name !== "hardhat" && hre.network.name !== "localhost") {
-    console.log("⏳ Waiting for block confirmations...");
-    await marketplace.deployTransaction.wait(6);
-    
-    try {
-      console.log("🔍 Verifying contract...");
-      await hre.run("verify:verify", {
-        address: marketplace.address,
-        constructorArguments: [],
-      });
-      console.log("✅ Contract verified on Etherscan");
-    } catch (error) {
-      console.log("❌ Verification failed:", error.message);
-    }
-  }
+  console.log('\n👤 Deployer Info:');
+  console.log(`📍 Address: ${deployer.address}`);
+  console.log(`💰 Balance: ${ethers.utils.formatEther(deployerBalance)} ETH`);
 
-  // Update web3.js with deployed contract address
+  // Authorize the deployer as a creator (for testing)
+  console.log('\n🔐 Setting up initial permissions...');
+  const authTx = await marketplace.setCreatorAuthorization(
+    deployer.address,
+    true
+  );
+  await authTx.wait();
+  console.log(`✅ Deployer authorized as creator`);
+
+  // Verify the contract is working
+  console.log('\n🧪 Running basic contract verification...');
   try {
-    const web3FilePath = path.join(__dirname, '..', 'web3.js');
-    if (fs.existsSync(web3FilePath)) {
-      let web3Content = fs.readFileSync(web3FilePath, 'utf8');
-      
-      // Replace contract address placeholder
-      const contractAddressRegex = /CONTRACT_ADDRESS\s*=\s*['"][^'"]*['"]/;
-      const newContractAddress = `CONTRACT_ADDRESS = '${marketplace.address}'`;
-      
-      if (contractAddressRegex.test(web3Content)) {
-        web3Content = web3Content.replace(contractAddressRegex, newContractAddress);
-        fs.writeFileSync(web3FilePath, web3Content);
-        console.log("📝 Updated contract address in web3.js");
-      }
-    }
-  } catch (error) {
-    console.log("⚠️  Could not update web3.js:", error.message);
-  }
+    const isAuthorized = await marketplace.isAuthorizedCreator(
+      deployer.address
+    );
+    const stats = await marketplace.getMarketplaceStats();
 
-  console.log("\n🎉 Deployment completed successfully!");
-  console.log(`\n📋 Summary:`);
-  console.log(`   Contract: ChainTorqueMarketplace`);
-  console.log(`   Address: ${marketplace.address}`);
-  console.log(`   Network: ${hre.network.name}`);
-  console.log(`   Gas Used: ${marketplace.deployTransaction.gasLimit?.toString() || 'Unknown'}`);
+    console.log(`✅ Creator Authorization: ${isAuthorized}`);
+    console.log(`✅ Total Items: ${stats.totalItems}`);
+    console.log(`✅ Total Sold: ${stats.totalSold}`);
+    console.log(`✅ Total Active: ${stats.totalActive}`);
+    console.log(
+      `✅ Total Value: ${ethers.utils.formatEther(stats.totalValue)} ETH`
+    );
+
+    console.log('\n🎉 Deployment completed successfully!');
+    console.log('🔗 Ready for Web3 integration testing');
+  } catch (error) {
+    console.error('❌ Contract verification failed:', error.message);
+    throw error;
+  }
 }
 
+// Handle deployment errors
 main()
-  .then(() => process.exit(0))
-  .catch((error) => {
-    console.error("❌ Deployment failed:", error);
+  .then(() => {
+    console.log('\n🏁 Deployment script completed successfully!');
+    process.exit(0);
+  })
+  .catch(error => {
+    console.error('\n❌ Deployment failed:', error);
     process.exit(1);
   });

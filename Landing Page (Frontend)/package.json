@@ -7,9 +7,19 @@
     "start": "node app.js",
     "dev": "nodemon app.js"
   },
-  "keywords": ["web3", "landing", "express"],
+  "keywords": [
+    "web3",
+    "landing",
+    "express"
+  ],
   "author": "ChainTorque Team",
   "license": "ISC",
-  "dependencies": {},
-  "devDependencies": {}
+  "dependencies": {
+    "express": "*",
+    "dotenv": "*",
+    "ejs": "*"
+  },
+  "devDependencies": {
+    "nodemon": "*"
+  }
 }

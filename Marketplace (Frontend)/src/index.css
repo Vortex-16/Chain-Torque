@@ -45,16 +45,32 @@ All colors MUST be HSL.
     --technical-gray: 220 8.9% 46.1%;
     --success-green: 142 76% 36%;
     --warning-orange: 25 95% 53%;
-    
+
     /* Light mode gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(217 91% 60%), hsl(259 94% 51%));
-    --gradient-hero: linear-gradient(135deg, hsl(259 94% 51%), hsl(217 91% 60%), hsl(172 76% 41%));
-    --gradient-card: linear-gradient(145deg, hsl(0 0% 100%), hsl(220 14.3% 95.9%));
-    
+    --gradient-primary: linear-gradient(
+      135deg,
+      hsl(217 91% 60%),
+      hsl(259 94% 51%)
+    );
+    --gradient-hero: linear-gradient(
+      135deg,
+      hsl(259 94% 51%),
+      hsl(217 91% 60%),
+      hsl(172 76% 41%)
+    );
+    --gradient-card: linear-gradient(
+      145deg,
+      hsl(0 0% 100%),
+      hsl(220 14.3% 95.9%)
+    );
+
     /* Light shadows */
-    --shadow-card: 0 1px 3px 0 hsl(0 0% 0% / 0.1), 0 1px 2px -1px hsl(0 0% 0% / 0.1);
-    --shadow-card-hover: 0 4px 6px -1px hsl(0 0% 0% / 0.1), 0 2px 4px -2px hsl(0 0% 0% / 0.1);
-    --shadow-professional: 0 10px 15px -3px hsl(0 0% 0% / 0.1), 0 4px 6px -4px hsl(0 0% 0% / 0.1);
+    --shadow-card:
+      0 1px 3px 0 hsl(0 0% 0% / 0.1), 0 1px 2px -1px hsl(0 0% 0% / 0.1);
+    --shadow-card-hover:
+      0 4px 6px -1px hsl(0 0% 0% / 0.1), 0 2px 4px -2px hsl(0 0% 0% / 0.1);
+    --shadow-professional:
+      0 10px 15px -3px hsl(0 0% 0% / 0.1), 0 4px 6px -4px hsl(0 0% 0% / 0.1);
 
     --radius: 0.5rem;
 
@@ -106,15 +122,30 @@ All colors MUST be HSL.
     --technical-gray: 217.9 10.6% 64.9%;
     --success-green: 142 76% 46%;
     --warning-orange: 25 95% 63%;
-    
+
     /* Dark mode gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(217 91% 65%), hsl(259 94% 65%));
-    --gradient-hero: linear-gradient(135deg, hsl(259 94% 65%), hsl(217 91% 65%), hsl(172 76% 51%));
-    --gradient-card: linear-gradient(145deg, hsl(224 71.4% 4.1%), hsl(215 27.9% 16.9%));
-    
+    --gradient-primary: linear-gradient(
+      135deg,
+      hsl(217 91% 65%),
+      hsl(259 94% 65%)
+    );
+    --gradient-hero: linear-gradient(
+      135deg,
+      hsl(259 94% 65%),
+      hsl(217 91% 65%),
+      hsl(172 76% 51%)
+    );
+    --gradient-card: linear-gradient(
+      145deg,
+      hsl(224 71.4% 4.1%),
+      hsl(215 27.9% 16.9%)
+    );
+
     /* Dark shadows with glow */
-    --shadow-card: 0 4px 6px -1px hsl(0 0% 0% / 0.3), 0 2px 4px -2px hsl(0 0% 0% / 0.3);
-    --shadow-card-hover: 0 10px 15px -3px hsl(217 91% 65% / 0.2), 0 4px 6px -4px hsl(0 0% 0% / 0.3);
+    --shadow-card:
+      0 4px 6px -1px hsl(0 0% 0% / 0.3), 0 2px 4px -2px hsl(0 0% 0% / 0.3);
+    --shadow-card-hover:
+      0 10px 15px -3px hsl(217 91% 65% / 0.2), 0 4px 6px -4px hsl(0 0% 0% / 0.3);
     --shadow-professional: 0 25px 50px -12px hsl(0 0% 0% / 0.5);
 
     --sidebar-background: 240 5.9% 10%;
@@ -140,8 +171,12 @@ All colors MUST be HSL.
 
 /* Custom animations for 3D viewer */
 @keyframes spin-y {
-  from { transform: rotateY(0deg); }
-  to { transform: rotateY(360deg); }
+  from {
+    transform: rotateY(0deg);
+  }
+  to {
+    transform: rotateY(360deg);
+  }
 }
 
 .animate-spin-y {

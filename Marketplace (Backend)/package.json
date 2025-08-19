@@ -1,24 +1,27 @@
 {
-  "name": "chaintorque-web3-backend",
+  "name": "chaintorque-backend",
   "version": "1.0.0",
-  "description": "ChainTorque Web3 Marketplace Backend",
-  "main": "server-simple.js",
+  "description": "ChainTorque Marketplace Backend",
+  "main": "server.js",
   "scripts": {
-    "start": "node server-simple.js",
-    "dev": "nodemon server-simple.js",
+    "start": "node server.js",
+    "dev": "nodemon server.js",
     "compile": "hardhat compile",
-    "deploy": "hardhat run scripts/deploy.js --network mumbai",
-    "deploy-sepolia": "hardhat run scripts/deploy.js --network sepolia",
-    "deploy-local": "hardhat run scripts/deploy.js --network localhost",
-    "node": "hardhat node",
-    "node:persistent": "node start-persistent-node.js"
+    "deploy": "hardhat run scripts/deploy.js --network localhost",
+    "node": "hardhat node"
   },
-  "keywords": [
-    "web3",
-    "marketplace",
-    "backend",
-    "blockchain"
-  ],
-  "author": "ChainTorque Team",
-  "license": "ISC"
+  "dependencies": {
+    "express": "*",
+    "cors": "*",
+    "multer": "*",
+    "dotenv": "*",
+    "ethers": "*",
+    "@pinata/sdk": "*"
+  },
+  "devDependencies": {
+    "nodemon": "*",
+    "hardhat": "*",
+    "@nomiclabs/hardhat-ethers": "*",
+    "@openzeppelin/contracts": "*"
+  }
 }

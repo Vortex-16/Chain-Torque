@@ -9,7 +9,12 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
   },
-  "keywords": ["web3", "marketplace", "react", "vite"],
+  "keywords": [
+    "web3",
+    "marketplace",
+    "react",
+    "vite"
+  ],
   "author": "ChainTorque Team",
   "license": "ISC"
 }

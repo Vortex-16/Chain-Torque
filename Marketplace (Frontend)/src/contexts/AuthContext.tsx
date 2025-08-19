@@ -1,6 +1,14 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, createContext } from 'react';
 import { useUser, useAuth } from '@clerk/clerk-react';
-import { AuthContext } from '@/hooks/useAuth';
+
+interface AuthContextType {
+  user: ReturnType<typeof useUser>['user'];
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  signOut: () => void;
+}
+
+export const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { user, isLoaded } = useUser();
@@ -17,12 +25,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     user,
     isAuthenticated: !!user,
     isLoading,
-    signOut
+    signOut,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
