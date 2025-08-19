@@ -433,8 +433,10 @@ app.get('/api/marketplace/stats', async (req, res) => {
 
 // Get single item
 app.get('/api/marketplace/:id', (req, res) => {
+  // Match by tokenId (string or number)
+  const paramTokenId = req.params.id;
   const item = marketplaceItems.find(
-    item => item.id === parseInt(req.params.id)
+    item => String(item.tokenId) === String(paramTokenId)
   );
   if (item) {
     res.json({ success: true, data: item });

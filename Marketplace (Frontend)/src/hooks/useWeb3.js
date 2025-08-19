@@ -112,8 +112,8 @@ export const useMarketplace = () => {
 
       console.log('📦 Raw marketplace response:', itemsResponse);
 
-      // Fix: Handle the nested response structure from backend
-      const items = itemsResponse.items?.items || itemsResponse.items || [];
+  // Fix: Use backend 'data' field for marketplace items
+  const items = itemsResponse.data || [];
 
       setMarketplace({
         items: items,
