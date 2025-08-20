@@ -24,6 +24,11 @@ module.exports = {
     hardhat: {
       chainId: 31337,
     },
+    sepolia: {
+      url: process.env.RPC_URL,
+      accounts: [process.env.PRIVATE_KEY],
+      chainId: 11155111,
+    },
   },
   paths: {
     sources: './contracts',

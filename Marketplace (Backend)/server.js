@@ -5,8 +5,8 @@ const fs = require('fs');
 const Web3Manager = require('./web3');
 const path = require('path');
 const dotenv = require('dotenv');
-// Always load .env from monorepo root
-dotenv.config({ path: path.resolve(__dirname, '../.env') });
+// Always load .env from backend directory
+dotenv.config({ path: path.resolve(__dirname, '.env') });
 
 const app = express();
 const PORT = process.env.PORT || 5000;

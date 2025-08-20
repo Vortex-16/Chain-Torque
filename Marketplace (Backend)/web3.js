@@ -37,27 +37,15 @@ class Web3Manager {
     try {
       console.log('Initializing Web3 Manager...');
 
-      // Connect to local Hardhat network (try both hardhat and localhost)
-      try {
-        this.provider = new ethers.providers.JsonRpcProvider(
-          'http://127.0.0.1:8545'
-        );
-        await this.provider.getNetwork();
-        console.log('Connected to localhost Hardhat network');
-      } catch (error) {
-        // Fallback to embedded hardhat network for testing
-        console.log('Using embedded Hardhat network for testing...');
-        this.provider =
-          ethers.provider || new ethers.providers.JsonRpcProvider();
+      // Use RPC_URL and PRIVATE_KEY from environment variables
+      const rpcUrl = process.env.RPC_URL;
+      const privateKey = process.env.PRIVATE_KEY;
+      if (!rpcUrl || !privateKey) {
+        throw new Error('RPC_URL or PRIVATE_KEY not set in environment');
       }
-
-      // Get the first account as signer (for testing)
-      const accounts = await this.provider.listAccounts();
-      if (accounts.length === 0) {
-        throw new Error('No accounts available in Hardhat network');
-      }
-
-      this.signer = await this.provider.getSigner(0);
+      this.provider = new ethers.providers.JsonRpcProvider(rpcUrl);
+      this.signer = new ethers.Wallet(privateKey, this.provider);
+      console.log('Connected to network:', rpcUrl);
       console.log('Connected to account:', await this.signer.getAddress());
 
       // Load contract artifacts
