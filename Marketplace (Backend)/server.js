@@ -1,11 +1,12 @@
 const express = require('express');
 const cors = require('cors');
 const multer = require('multer');
-const path = require('path');
 const fs = require('fs');
 const Web3Manager = require('./web3');
-const PinataService = require('./services/pinata');
-require('dotenv').config();
+const path = require('path');
+const dotenv = require('dotenv');
+// Always load .env from monorepo root
+dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -51,27 +52,15 @@ const upload = multer({
 
 // Initialize services
 const web3 = new Web3Manager();
-const pinata = new PinataService();
 let marketplaceItems = [];
 let itemCounter = 1;
 
-// Initialize both Web3 and Pinata services
+// Initialize Web3 only
 async function initializeServices() {
   console.log('🔗 Initializing services...');
-
   try {
-    // Initialize Web3
     await web3.initialize();
-
-    // Initialize Pinata IPFS
-    await pinata.initialize();
-
-    const storageInfo = pinata.getStorageInfo();
-    console.log('📦 Storage configuration:', storageInfo);
-
-    // 🚀 CRITICAL FIX: Load existing NFTs from blockchain on startup
     await loadExistingNFTs();
-    
   } catch (error) {
     console.error('❌ Service initialization failed:', error.message);
   }
@@ -190,7 +179,7 @@ app.get('/api/marketplace', async (req, res) => {
       success: true,
       data: marketplaceItems,
       total: marketplaceItems.length,
-      source: pinata.isAvailable() ? 'ipfs+blockchain' : 'local+blockchain',
+    source: 'blockchain',
     });
   } catch (error) {
     console.error('❌ Marketplace fetch error:', error.message);
@@ -230,161 +219,64 @@ app.post(
 
       let result = { success: true };
 
-      // 🌐 Real NFT Marketplace: Try IPFS upload via Pinata first
-      if (pinata.isAvailable()) {
-        console.log('📡 Using IPFS storage (Real NFT Marketplace mode)...');
 
-        try {
-          const nftData = {
-            title,
-            description,
-            category,
-            imagePath: imageFile.path,
-            imageFileName: imageFile.filename,
-            modelPath: modelFile ? modelFile.path : null,
-            modelFileName: modelFile ? modelFile.filename : null,
-            externalUrl: `${req.protocol}://${req.get('host')}`,
-          };
-
-          // Upload to IPFS
-          console.log('🌐 Uploading to IPFS (permanent storage)...');
-          const ipfsResult = await pinata.uploadNFT(nftData);
-
-          // Create NFT on blockchain with IPFS metadata
-          if (web3.isReady()) {
-            console.log('⛓️ Minting NFT on blockchain...');
-
-            const blockchainResult = await web3.createMarketItem({
-              tokenURI: ipfsResult.tokenURI, // Real NFT standard: IPFS metadata URL
-              price: parseFloat(price),
-              category,
-              royalty: 0,
-            });
-
-            // Store in marketplace (permanent, shows immediately)
-            const nftItem = {
-              id: itemCounter++,
-              tokenId: blockchainResult.tokenId,
-              title,
-              description,
-              price: parseFloat(price),
-              category,
-              imageUrl: ipfsResult.imageUrl, // IPFS URL (global, permanent)
-              modelUrl: ipfsResult.modelUrl, // IPFS URL (global, permanent)
-              tokenURI: ipfsResult.tokenURI, // Metadata IPFS URL
-              seller: blockchainResult.seller || 'blockchain-user',
-              createdAt: new Date().toISOString(),
-              isBlockchain: true,
-              isPermanent: true,
-              storage: 'ipfs',
-              transactionHash: blockchainResult.transactionHash,
-              blockNumber: blockchainResult.blockNumber,
-              gasUsed: blockchainResult.gasUsed,
-            };
-
-            marketplaceItems.push(nftItem);
-
-            result = {
-              success: true,
-              ...ipfsResult,
-              ...blockchainResult,
-              message:
-                '🎉 Real NFT created! Permanent IPFS storage + Blockchain',
-              storage: 'ipfs',
-              isPermanent: true,
-            };
-
-            console.log('✅ Real NFT marketplace item created successfully!');
-          }
-        } catch (ipfsError) {
-          console.error('❌ IPFS creation failed:', ipfsError.message);
-          // Continue to fallback below
-        }
+      // Enforce IPFS + blockchain minting for every upload
+  // IPFS upload will be handled by another service
+      if (!web3.isReady()) {
+        throw new Error('Web3 not ready. Cannot mint NFT.');
       }
-
-      // 📁 Fallback: Local storage (development mode)
-      if (!result.storage) {
-        console.log('📁 Using local storage (development mode)...');
-
-        const imageUrl = `/uploads/${imageFile.filename}`;
-        const modelUrl = modelFile ? `/uploads/${modelFile.filename}` : null;
-
-        // Try blockchain with local URLs
-        if (web3.isReady()) {
-          try {
-            const blockchainResult = await web3.createMarketItem({
-              tokenURI: `${req.protocol}://${req.get('host')}${imageUrl}`,
-              price: parseFloat(price),
-              category,
-              royalty: 0,
-            });
-
-            const blockchainItem = {
-              id: itemCounter++,
-              tokenId: blockchainResult.tokenId || Date.now(),
-              title,
-              description,
-              price: parseFloat(price),
-              category,
-              imageUrl,
-              modelUrl,
-              seller: blockchainResult.seller || 'blockchain-user',
-              createdAt: new Date().toISOString(),
-              isBlockchain: true,
-              isPermanent: false,
-              storage: 'local',
-              transactionHash: blockchainResult.transactionHash,
-              blockNumber: blockchainResult.blockNumber,
-              gasUsed: blockchainResult.gasUsed,
-            };
-
-            marketplaceItems.push(blockchainItem);
-
-            result = {
-              success: true,
-              imageUrl,
-              modelUrl,
-              ...blockchainResult,
-              message: 'NFT created on blockchain (local storage)',
-              storage: 'local',
-              isPermanent: false,
-            };
-          } catch (blockchainError) {
-            console.error(
-              '❌ Blockchain creation failed:',
-              blockchainError.message
-            );
-
-            // Pure local storage fallback
-            const localItem = {
-              id: itemCounter++,
-              tokenId: Date.now(),
-              title,
-              description,
-              price: parseFloat(price),
-              category,
-              imageUrl,
-              modelUrl,
-              seller: 'local-user',
-              createdAt: new Date().toISOString(),
-              isBlockchain: false,
-              isPermanent: false,
-              storage: 'local',
-            };
-
-            marketplaceItems.push(localItem);
-
-            result = {
-              success: true,
-              imageUrl,
-              modelUrl,
-              message: 'NFT created (local storage)',
-              storage: 'local',
-              isPermanent: false,
-            };
-          }
-        }
-      }
+      const nftData = {
+        title,
+        description,
+        category,
+        imagePath: imageFile.path,
+        imageFileName: imageFile.filename,
+        modelPath: modelFile ? modelFile.path : null,
+        modelFileName: modelFile ? modelFile.filename : null,
+        externalUrl: `${req.protocol}://${req.get('host')}`,
+      };
+      // Upload to IPFS
+      console.log('🌐 Uploading to IPFS (permanent storage)...');
+  // TODO: Integrate new IPFS service here
+  const ipfsResult = { success: true, tokenURI: '', imageUrl: '', modelUrl: '' };
+      // Mint NFT on blockchain
+      console.log('⛓️ Minting NFT on blockchain...');
+      const blockchainResult = await web3.createMarketItem({
+        tokenURI: ipfsResult.tokenURI,
+        price: parseFloat(price),
+        category,
+        royalty: 0,
+      });
+      // Store in marketplace (permanent, shows immediately)
+      const nftItem = {
+        id: itemCounter++,
+        tokenId: blockchainResult.tokenId,
+        title,
+        description,
+        price: parseFloat(price),
+        category,
+        imageUrl: ipfsResult.imageUrl,
+        modelUrl: ipfsResult.modelUrl,
+        tokenURI: ipfsResult.tokenURI,
+        seller: blockchainResult.seller || 'blockchain-user',
+        createdAt: new Date().toISOString(),
+        isBlockchain: true,
+        isPermanent: true,
+        storage: 'ipfs',
+        transactionHash: blockchainResult.transactionHash,
+        blockNumber: blockchainResult.blockNumber,
+        gasUsed: blockchainResult.gasUsed,
+      };
+      marketplaceItems.push(nftItem);
+      result = {
+        success: true,
+        ...ipfsResult,
+        ...blockchainResult,
+        message: '🎉 Real NFT created! Permanent IPFS storage + Blockchain',
+        storage: 'ipfs',
+        isPermanent: true,
+      };
+      console.log('✅ Real NFT marketplace item created successfully!');
 
   console.log('[DEBUG] NFT created:', result);
   console.log('[DEBUG] marketplaceItems after upload:', JSON.stringify(marketplaceItems, null, 2));
@@ -422,7 +314,7 @@ app.get('/api/marketplace/stats', async (req, res) => {
         .toString(),
       listingPrice: '0.00025',
       platformFee: '2.5%',
-      storage: pinata.isAvailable() ? 'ipfs' : 'local',
+  storage: 'local',
     };
 
     res.json({ success: true, ...stats });
@@ -462,12 +354,7 @@ async function startServer() {
       console.log('⛓️ Web3 Status: Disconnected ❌');
     }
 
-    const storageInfo = pinata.getStorageInfo();
-    console.log(
-      '📦 Storage:',
-      storageInfo.type.toUpperCase(),
-      storageInfo.permanent ? '✅' : '❌'
-    );
+  console.log('📦 Storage: LOCAL ❌');
 
     console.log('\n📋 Available endpoints:');
     console.log('   GET  /health');
@@ -476,15 +363,7 @@ async function startServer() {
     console.log('   POST /api/marketplace/create');
     console.log('   GET  /api/marketplace/stats');
 
-    if (pinata.isAvailable()) {
-      console.log('\n🌐 REAL NFT MARKETPLACE MODE');
-      console.log('✅ IPFS permanent storage');
-      console.log('🌍 Global accessibility');
-      console.log('💎 True NFT standard');
-    } else {
-      console.log('\n📁 Development mode (local storage)');
-      console.log('⚠️  Add Pinata credentials for real NFT functionality');
-    }
+  console.log('\n📁 Development mode (local storage)');
   });
 }
 

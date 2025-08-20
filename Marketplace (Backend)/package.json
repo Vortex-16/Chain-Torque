@@ -15,8 +15,7 @@
     "cors": "*",
     "multer": "*",
     "dotenv": "*",
-    "ethers": "*",
-    "@pinata/sdk": "*"
+    "ethers": "*"
   },
   "devDependencies": {
     "nodemon": "*",
