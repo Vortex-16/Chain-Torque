@@ -15,6 +15,7 @@ import cadRobot from '@/assets/cad-robot.jpg';
 const featuredModels = [
   {
     id: 1,
+    tokenId: 1,
     title: 'Professional Gear Assembly System',
     image: cadGear,
     price: '$49.99',
@@ -26,6 +27,7 @@ const featuredModels = [
   },
   {
     id: 2,
+    tokenId: 2,
     title: 'Carbon Fiber Drone Frame V2',
     image: cadDrone,
     price: '$29.99',
@@ -37,6 +39,7 @@ const featuredModels = [
   },
   {
     id: 3,
+    tokenId: 3,
     title: 'Automotive Engine Cylinder Head',
     image: cadEngine,
     price: '$89.99',
@@ -48,6 +51,7 @@ const featuredModels = [
   },
   {
     id: 4,
+    tokenId: 4,
     title: 'Industrial Robotic Arm Joint',
     image: cadRobot,
     price: '$75.00',
@@ -240,8 +244,8 @@ export function MarketplaceSection() {
               <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'>
                 {displayItems.map(model => (
                   <CadCard
-                    key={model.id}
-                    id={model.id}
+                    key={model.tokenId ?? model.id}
+                    id={model.tokenId ?? model.id}
                     title={model.title}
                     image={model.image}
                     price={model.price}

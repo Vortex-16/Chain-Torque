@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
 
 interface CadCardProps {
-  id?: string | number;
+  id: string | number | { tokenId: string | number };
   title: string;
   image: string;
   price: string;
@@ -33,8 +33,15 @@ export function CadCard({
   const navigate = useNavigate();
 
   const handleCardClick = () => {
-    navigate(`/product/${id}`);
-  };
+    // Prefer tokenId if present, fallback to id
+    let detailId: string | number = '';
+    if (id && typeof id === 'object' && 'tokenId' in id && id.tokenId != null) {
+      detailId = id.tokenId;
+    } else if (id != null && (typeof id === 'string' || typeof id === 'number')) {
+      detailId = id;
+    }
+    navigate(`/product/${detailId}`);
+  }
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent card click when clicking the button

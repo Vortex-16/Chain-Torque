@@ -150,11 +150,15 @@ const ProductDetail = () => {
   const transformBackendData = (backendData: any): ProductModel => {
     const fallbackImages = [cadGear, cadDrone, cadEngine, cadRobot];
 
-    // Use actual uploaded image if available, otherwise fallback
-    const actualImages =
-      backendData.imageUrl && backendData.imageUrl !== '/placeholder.jpg'
-        ? [`http://localhost:5000${backendData.imageUrl}`]
-        : fallbackImages;
+    // Prefer backendData.images array if present and non-empty
+    let actualImages = [];
+    if (Array.isArray(backendData.images) && backendData.images.length > 0) {
+      actualImages = backendData.images.map(url => url.startsWith('http') ? url : `http://localhost:5000${url}`);
+    } else if (backendData.imageUrl && backendData.imageUrl !== '/placeholder.jpg') {
+      actualImages = [backendData.imageUrl.startsWith('http') ? backendData.imageUrl : `http://localhost:5000${backendData.imageUrl}`];
+    } else {
+      actualImages = fallbackImages;
+    }
 
     return {
       id: backendData.id,
@@ -162,15 +166,15 @@ const ProductDetail = () => {
       description: backendData.description,
       images: actualImages,
       modelUrl: backendData.modelUrl
-        ? `http://localhost:5000${backendData.modelUrl}`
+        ? (backendData.modelUrl.startsWith('http') ? backendData.modelUrl : `http://localhost:5000${backendData.modelUrl}`)
         : '/models/sample.obj',
-      price: `$${parseFloat(backendData.price) * 2000}`, // Convert ETH to USD estimate
+      price: `$${parseFloat(backendData.price) * 2000}`,
       priceETH: parseFloat(backendData.price),
       seller: {
         name:
           backendData.sellerName ||
           backendData.seller_name ||
-          'Unknown Creator', // Use actual username
+          'Unknown Creator',
         avatar:
           'https://api.dicebear.com/7.x/avataaars/svg?seed=' +
           (backendData.sellerName ||
@@ -197,11 +201,11 @@ const ProductDetail = () => {
       },
       category: backendData.category,
       tags: ['CAD', '3D Model', backendData.category, 'Professional'],
-      uploadDate: new Date().toISOString().split('T')[0], // Default to today
+      uploadDate: new Date().toISOString().split('T')[0],
       lastUpdate: new Date().toISOString().split('T')[0],
       license: 'Standard License',
       tokenId: parseInt(backendData.tokenId),
-      contractAddress: '0x742d35Cc4Bf5C6BA53550e2C7a4C0D7F5a56B8f1', // Placeholder
+      contractAddress: '0x742d35Cc4Bf5C6BA53550e2C7a4C0D7F5a56B8f1',
       blockchain: 'Ethereum',
     };
   };

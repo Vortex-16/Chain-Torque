@@ -9,18 +9,5 @@
     "compile": "hardhat compile",
     "deploy": "hardhat run scripts/deploy.js --network localhost",
     "node": "hardhat node"
-  },
-  "dependencies": {
-    "express": "*",
-    "cors": "*",
-    "multer": "*",
-    "dotenv": "*",
-    "ethers": "*"
-  },
-  "devDependencies": {
-    "nodemon": "*",
-    "hardhat": "*",
-    "@nomiclabs/hardhat-ethers": "*",
-    "@openzeppelin/contracts": "*"
   }
 }

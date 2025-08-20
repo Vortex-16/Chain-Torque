@@ -126,10 +126,6 @@ class Web3Manager {
       throw error;
     }
   }
-
-  /**
-   * Create a single marketplace item (optimized)
-   */
   async createMarketItem(itemData) {
     try {
       if (!this.isReady()) {
@@ -410,15 +406,40 @@ class Web3Manager {
         let description = '';
         let imageUrl = '';
         let modelUrl = '';
+        let images = [];
 
         try {
           tokenURI = await this.contract.tokenURI(tokenId);
 
-          // If tokenURI is a URL, try to fetch metadata
+          // If tokenURI is a URL (IPFS or HTTP), fetch metadata from IPFS
           if (tokenURI.startsWith('http') || tokenURI.startsWith('ipfs://')) {
-            // For now, extract from filename or use defaults
-            title = `CAD Model #${tokenId}`;
-            description = `Professional 3D model in ${this.getCategoryName(item.category)} category`;
+            let metadataUrl = tokenURI;
+            if (tokenURI.startsWith('ipfs://')) {
+              metadataUrl = tokenURI.replace('ipfs://', 'https://ipfs.io/ipfs/');
+            }
+            try {
+              const res = await fetch(metadataUrl);
+              if (res.ok) {
+                const metadata = await res.json();
+                title = metadata.name || title;
+                description = metadata.description || description;
+                imageUrl = metadata.image || '';
+                modelUrl = metadata.model || metadata.animation_url || '';
+                if (Array.isArray(metadata.images)) {
+                  images = metadata.images;
+                } else if (metadata.image) {
+                  images = [metadata.image];
+                }
+              } else {
+                // Fallback to defaults if fetch fails
+                title = `CAD Model #${tokenId}`;
+                description = `Professional 3D model in ${this.getCategoryName(item.category)} category`;
+              }
+            } catch (e) {
+              // Fallback to defaults if fetch fails
+              title = `CAD Model #${tokenId}`;
+              description = `Professional 3D model in ${this.getCategoryName(item.category)} category`;
+            }
           } else {
             // Assume it's JSON metadata
             try {
@@ -427,10 +448,16 @@ class Web3Manager {
               description = metadata.description || description;
               imageUrl = metadata.image || '';
               modelUrl = metadata.model || metadata.animation_url || '';
+              if (Array.isArray(metadata.images)) {
+                images = metadata.images;
+              } else if (metadata.image) {
+                images = [metadata.image];
+              }
             } catch (e) {
               // Use tokenURI directly
               if (tokenURI.includes('uploads/')) {
                 imageUrl = tokenURI;
+                images = [tokenURI];
               }
             }
           }
@@ -452,6 +479,7 @@ class Web3Manager {
           title: title,
           description: description,
           imageUrl: imageUrl,
+          images: images,
           modelUrl: modelUrl,
         });
       }

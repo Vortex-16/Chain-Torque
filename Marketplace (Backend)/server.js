@@ -52,6 +52,7 @@ const upload = multer({
 
 // Initialize services
 const web3 = new Web3Manager();
+const { uploadFile, uploadMetadata } = require('./services/lighthouseStorage');
 let marketplaceItems = [];
 let itemCounter = 1;
 
@@ -78,7 +79,7 @@ async function loadExistingNFTs() {
 
     // Get all market items from the smart contract
     const result = await web3.getMarketItems();
-    console.log('[DEBUG] web3.getMarketItems() result:', JSON.stringify(result, null, 2));
+    const { uploadFile, uploadMetadata } = require('./services/lighthouseStorage');
     if (result.success && result.items.length > 0) {
       console.log(`[DEBUG] Found ${result.items.length} existing NFTs on blockchain`);
       for (const blockchainItem of result.items) {
@@ -195,14 +196,14 @@ app.get('/api/marketplace', async (req, res) => {
 app.post(
   '/api/marketplace/create',
   upload.fields([
-    { name: 'image', maxCount: 1 },
+    { name: 'image', maxCount: 10 }, // Allow up to 10 images
     { name: 'model', maxCount: 1 },
   ]),
   async (req, res) => {
     try {
       const { title, description, price, category } = req.body;
-      const imageFile = req.files['image'] ? req.files['image'][0] : null;
-      const modelFile = req.files['model'] ? req.files['model'][0] : null;
+  const imageFiles = req.files['image'] || [];
+  const modelFile = req.files['model'] ? req.files['model'][0] : null;
 
       console.log('[DEBUG] Creating Real NFT:', {
         title,
@@ -211,34 +212,68 @@ app.post(
         category,
       });
 
-      if (!imageFile) {
+      if (!imageFiles.length) {
         return res
           .status(400)
-          .json({ success: false, message: 'Image file is required' });
+          .json({ success: false, message: 'At least one image file is required' });
       }
 
       let result = { success: true };
 
 
       // Enforce IPFS + blockchain minting for every upload
-  // IPFS upload will be handled by another service
+      // IPFS upload will be handled by another service
       if (!web3.isReady()) {
         throw new Error('Web3 not ready. Cannot mint NFT.');
       }
-      const nftData = {
-        title,
+      // No need for nftData or imageFile references anymore
+
+      // Upload all images to Lighthouse
+      console.log('🌐 Uploading images to Lighthouse...');
+      const imageUploads = [];
+      for (const img of imageFiles) {
+        const uploaded = await uploadFile(img.path);
+        imageUploads.push(uploaded.url);
+      }
+      let modelUpload = { cid: '', url: '' };
+      if (modelFile) {
+        console.log('🌐 Uploading model to Lighthouse...');
+        modelUpload = await uploadFile(modelFile.path);
+      }
+
+      // Create NFT metadata (OpenSea standard)
+      const metadata = {
+        name: title,
         description,
-        category,
-        imagePath: imageFile.path,
-        imageFileName: imageFile.filename,
-        modelPath: modelFile ? modelFile.path : null,
-        modelFileName: modelFile ? modelFile.filename : null,
-        externalUrl: `${req.protocol}://${req.get('host')}`,
+        image: imageUploads[0], // OpenSea expects a single image field
+        images: imageUploads, // Custom field for all images
+        animation_url: modelUpload.url,
+        external_url: `${req.protocol}://${req.get('host')}`,
+        attributes: [
+          { trait_type: 'Category', value: category },
+          { trait_type: 'File Type', value: modelFile ? path.extname(modelFile.filename).toUpperCase() : '' },
+          { trait_type: 'Created', value: new Date().toISOString().split('T')[0] },
+          { trait_type: 'Marketplace', value: 'ChainTorque' },
+        ],
+        properties: {
+          category,
+          files: [
+            ...imageUploads.map(url => ({ uri: url, type: 'image' })),
+            ...(modelFile ? [{ uri: modelUpload.url, type: 'model' }] : []),
+          ],
+        },
       };
-      // Upload to IPFS
-      console.log('🌐 Uploading to IPFS (permanent storage)...');
-  // TODO: Integrate new IPFS service here
-  const ipfsResult = { success: true, tokenURI: '', imageUrl: '', modelUrl: '' };
+      console.log('📋 Uploading metadata to Lighthouse...');
+      const metadataUpload = await uploadMetadata(metadata);
+
+      const ipfsResult = {
+        success: true,
+        tokenURI: metadataUpload.url,
+        imageUrl: imageUploads[0],
+        images: imageUploads,
+        modelUrl: modelUpload.url,
+        metadataUrl: metadataUpload.url,
+      };
       // Mint NFT on blockchain
       console.log('⛓️ Minting NFT on blockchain...');
       const blockchainResult = await web3.createMarketItem({
@@ -248,14 +283,24 @@ app.post(
         royalty: 0,
       });
       // Store in marketplace (permanent, shows immediately)
+      let tokenId = blockchainResult.tokenId;
+      // Fallback: try to get tokenId from last item if not set
+      if (!tokenId && marketplaceItems.length > 0) {
+        tokenId = marketplaceItems[marketplaceItems.length - 1].tokenId + 1;
+      }
+      // Fallback: use itemCounter if still not set
+      if (!tokenId) {
+        tokenId = itemCounter;
+      }
       const nftItem = {
         id: itemCounter++,
-        tokenId: blockchainResult.tokenId,
+        tokenId,
         title,
         description,
         price: parseFloat(price),
         category,
         imageUrl: ipfsResult.imageUrl,
+        images: ipfsResult.images,
         modelUrl: ipfsResult.modelUrl,
         tokenURI: ipfsResult.tokenURI,
         seller: blockchainResult.seller || 'blockchain-user',
@@ -275,22 +320,13 @@ app.post(
         message: '🎉 Real NFT created! Permanent IPFS storage + Blockchain',
         storage: 'ipfs',
         isPermanent: true,
+        tokenId,
       };
       console.log('✅ Real NFT marketplace item created successfully!');
 
-  console.log('[DEBUG] NFT created:', result);
-  console.log('[DEBUG] marketplaceItems after upload:', JSON.stringify(marketplaceItems, null, 2));
-        // Always include tokenId in the response for frontend
-        let tokenId = undefined;
-        if (result.tokenId) {
-          tokenId = result.tokenId;
-        } else if (result.transactionHash) {
-          // Try to find the last item added to marketplaceItems
-          if (marketplaceItems.length > 0) {
-            tokenId = marketplaceItems[marketplaceItems.length - 1].tokenId;
-          }
-        }
-        res.json({ ...result, tokenId });
+      console.log('[DEBUG] NFT created:', result);
+      console.log('[DEBUG] marketplaceItems after upload:', JSON.stringify(marketplaceItems, null, 2));
+      res.json(result);
     } catch (error) {
       console.error('❌ NFT creation error:', error);
       res.status(500).json({
@@ -314,7 +350,7 @@ app.get('/api/marketplace/stats', async (req, res) => {
         .toString(),
       listingPrice: '0.00025',
       platformFee: '2.5%',
-  storage: 'local',
+  storage: 'ipfs',
     };
 
     res.json({ success: true, ...stats });
@@ -354,7 +390,7 @@ async function startServer() {
       console.log('⛓️ Web3 Status: Disconnected ❌');
     }
 
-  console.log('📦 Storage: LOCAL ❌');
+  console.log('📦 Storage: IPFS (Lighthouse) ✅');
 
     console.log('\n📋 Available endpoints:');
     console.log('   GET  /health');
