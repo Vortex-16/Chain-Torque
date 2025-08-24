@@ -12,18 +12,13 @@
     }
   </style>
 </head>
-<body class="bg-gray-900 text-white">
+<body class="bg-background text-foreground">
 
-  <!-- Redesigned Hero Section -->
-  <section class="min-h-[60vh] flex flex-col items-center justify-center text-center bg-gradient-to-br from-blue-900 via-purple-800 to-indigo-900 relative px-4 py-12">
-    <h1 class="text-5xl md:text-6xl font-extrabold mb-4 tracking-tight text-white drop-shadow-lg animate-fade-in-up">Build. Share. Explore.</h1>
-    <p class="text-xl md:text-2xl text-blue-100 max-w-2xl mb-8 animate-fade-in-up delay-300">Welcome to the future of CAD modeling – a marketplace where creativity meets collaboration.</p>
+  <!-- Hero Section -->
+  <section class="min-h-[60vh] flex flex-col items-center justify-center text-center bg-gradient-to-br from-blue-900 via-purple-800 to-indigo-900 dark:from-background dark:via-background dark:to-background relative px-4 py-12">
+    <h1 class="text-5xl md:text-6xl font-extrabold mb-4 tracking-tight text-white dark:text-primary drop-shadow-lg animate-fade-in-up">Build. Share. Explore.</h1>
+    <p class="text-xl md:text-2xl text-blue-100 dark:text-muted-foreground max-w-2xl mb-8 animate-fade-in-up delay-300">Welcome to the future of CAD modeling – a marketplace where creativity meets collaboration.</p>
 
-    <!-- Search + Explore -->
-    <div class="flex flex-col md:flex-row items-center gap-4 w-full max-w-xl mb-8 animate-fade-in-up delay-500">
-      <input type="text" placeholder="Search CAD models..." class="w-full md:w-3/4 px-5 py-3 rounded-full text-gray-900 focus:outline-none shadow-lg border-2 border-blue-400 focus:border-purple-500 transition">
-      <a href="#library" class="bg-gradient-to-r from-purple-500 to-blue-600 text-white font-semibold px-8 py-3 rounded-full shadow-lg hover:scale-105 hover:from-purple-600 hover:to-blue-700 transition-all duration-200">Explore</a>
-    </div>
 
     <!-- Scroll Down Arrow -->
     <div class="absolute bottom-8 text-white text-3xl animate-bounce">
@@ -33,24 +28,24 @@
     </div>
   </section>
 
-  <!-- Redesigned Popular CAD Collections Section -->
-  <section class="py-16 px-6 bg-gradient-to-br from-blue-50 via-purple-50 to-white text-gray-900" id="library">
-    <h2 class="text-4xl font-extrabold text-center mb-14 text-blue-900 animate-fade-in-up">Popular CAD Collections</h2>
+  <!-- Popular CAD Collections Section -->
+  <section class="py-16 px-6 bg-gradient-to-br from-blue-50 via-purple-50 to-white dark:from-background dark:via-background dark:to-background text-gray-900 dark:text-foreground" id="library">
+  <h2 class="text-4xl font-extrabold text-center mb-14 text-blue-900 dark:text-primary animate-fade-in-up">Popular CAD Collections</h2>
     <div class="grid md:grid-cols-3 gap-10">
-      <div class="bg-white rounded-2xl shadow-xl p-8 flex flex-col items-center hover:scale-105 hover:shadow-2xl transition duration-300">
+      <div class="bg-card rounded-2xl shadow-xl p-8 flex flex-col items-center hover:scale-105 hover:shadow-2xl transition duration-300">
         <div class="bg-gradient-to-br from-blue-400 to-purple-500 text-white rounded-full w-16 h-16 flex items-center justify-center mb-4 text-3xl">⚙️</div>
-        <h3 class="text-2xl font-bold mb-2 text-blue-800">Mechanical Parts</h3>
-        <p class="text-base text-gray-600 text-center">Explore gears, joints, bolts, and more...</p>
+  <h3 class="text-2xl font-bold mb-2 text-blue-800 dark:text-primary">Mechanical Parts</h3>
+  <p class="text-base text-gray-600 text-center dark:text-muted-foreground">Explore gears, joints, bolts, and more...</p>
       </div>
-      <div class="bg-white rounded-2xl shadow-xl p-8 flex flex-col items-center hover:scale-105 hover:shadow-2xl transition duration-300">
+      <div class="bg-card rounded-2xl shadow-xl p-8 flex flex-col items-center hover:scale-105 hover:shadow-2xl transition duration-300">
         <div class="bg-gradient-to-br from-purple-400 to-blue-500 text-white rounded-full w-16 h-16 flex items-center justify-center mb-4 text-3xl">🏛️</div>
-        <h3 class="text-2xl font-bold mb-2 text-blue-800">Architectural Blocks</h3>
-        <p class="text-base text-gray-600 text-center">Find building CADs, elevations & blueprints.</p>
+  <h3 class="text-2xl font-bold mb-2 text-blue-800 dark:text-primary">Architectural Blocks</h3>
+  <p class="text-base text-gray-600 text-center dark:text-muted-foreground">Find building CADs, elevations & blueprints.</p>
       </div>
-      <div class="bg-white rounded-2xl shadow-xl p-8 flex flex-col items-center hover:scale-105 hover:shadow-2xl transition duration-300">
+      <div class="bg-card rounded-2xl shadow-xl p-8 flex flex-col items-center hover:scale-105 hover:shadow-2xl transition duration-300">
         <div class="bg-gradient-to-br from-pink-400 to-blue-500 text-white rounded-full w-16 h-16 flex items-center justify-center mb-4 text-3xl">🖨️</div>
-        <h3 class="text-2xl font-bold mb-2 text-blue-800">3D Print Ready</h3>
-        <p class="text-base text-gray-600 text-center">Perfectly optimized models for printing.</p>
+  <h3 class="text-2xl font-bold mb-2 text-blue-800 dark:text-primary">3D Print Ready</h3>
+  <p class="text-base text-gray-600 text-center dark:text-muted-foreground">Perfectly optimized models for printing.</p>
       </div>
     </div>
   </section>
@@ -191,28 +186,29 @@
   </div>
 </section>
 
-<section class="cad-gallery-section">
-  <h2 class="cad-gallery-title">Explore Stunning CAD Creations</h2>
-  <p class="cad-gallery-subtitle">Experience the power of design with featured models from our vibrant community.</p>
-  <div class="cad-gallery-container">
-    <div class="cad-card">
-      <img src="/images/cad1.jpeg" alt="CAD Model 1" class="cad-img">
+
+<section class="py-16 px-6 bg-white dark:bg-background">
+  <h2 class="text-4xl font-extrabold text-center mb-8 text-gray-900 dark:text-primary">Explore Stunning CAD Creations</h2>
+  <p class="text-lg text-center mb-8 text-gray-700 dark:text-muted-foreground">Experience the power of design with featured models from our vibrant community.</p>
+  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 justify-center items-center">
+    <div class="rounded-2xl shadow-xl bg-white dark:bg-card p-4 flex flex-col items-center">
+      <img src="/images/cad1.jpeg" alt="CAD Model 1" class="w-full h-48 object-cover rounded-xl">
     </div>
-    <div class="cad-card">
-      <img src="/images/cad2.jpeg" alt="CAD Model 2" class="cad-img">
+    <div class="rounded-2xl shadow-xl bg-white dark:bg-card p-4 flex flex-col items-center">
+      <img src="/images/cad2.jpeg" alt="CAD Model 2" class="w-full h-48 object-cover rounded-xl">
     </div>
-    <div class="cad-card">
-      <img src="/images/cad3.jpeg" alt="CAD Model 3" class="cad-img">
+    <div class="rounded-2xl shadow-xl bg-white dark:bg-card p-4 flex flex-col items-center">
+      <img src="/images/cad3.jpeg" alt="CAD Model 3" class="w-full h-48 object-cover rounded-xl">
     </div>
-    <div class="cad-card">
-      <img src="/images/cad4.jpeg" alt="CAD Model 4" class="cad-img">
+    <div class="rounded-2xl shadow-xl bg-white dark:bg-card p-4 flex flex-col items-center">
+      <img src="/images/cad4.jpeg" alt="CAD Model 4" class="w-full h-48 object-cover rounded-xl">
     </div>
   </div>
 </section>
 
-<section class="testimonials-section" id="testimonials">
-  <h2>What Our Users Say</h2>
-  <p class="subtitle">Real experiences from real designers and engineers using our CAD platform.</p>
+<section class="testimonials-section bg-white dark:bg-background py-16" id="testimonials">
+  <h2 class="text-gray-900 dark:text-primary">What Our Users Say</h2>
+  <p class="subtitle text-gray-700 dark:text-muted-foreground">Real experiences from real designers and engineers using our CAD platform.</p>
 
   <div class="testimonial-cards">
     
@@ -225,7 +221,7 @@
       </div>
     </div>
 
-    <div class="testimonial-card">
+  <div class="testimonial-card bg-white dark:bg-card rounded-2xl shadow-xl">
       <img src="/images/user2.jpg" alt="Rhea Das" class="user-img">
       <div class="testimonial-content">
         <p><i class="fas fa-quote-left"></i> Beautifully crafted. The features like real-time preview and easy model access are just mind-blowing.<i class="fas fa-quote-right"></i></p>
@@ -299,9 +295,9 @@
   </div>
 </section>
 
-<section class="bg-gradient-to-b from-[#eef2f3] to-[#d6e4f0] py-20 px-6 md:px-20 text-gray-800">
+<section class="bg-gradient-to-b from-[#eef2f3] to-[#d6e4f0] dark:from-background dark:to-background py-20 px-6 md:px-20 text-gray-800 dark:text-foreground">
   <!-- Main Heading -->
-  <h2 class="text-4xl font-bold text-center mb-16">Explore Our Features & Plans</h2>
+  <h2 class="text-4xl font-bold text-center mb-16 text-gray-900 dark:text-primary">Explore Our Features & Plans</h2>
 
   <!-- Row 1: Image + Why You'll Love Our Platform -->
   <div class="grid md:grid-cols-2 gap-10 items-center mb-20">
@@ -326,9 +322,9 @@
   <!-- Row 2: Pricing Plans -->
   <div class="grid md:grid-cols-3 gap-8 items-start">
     <!-- Pre-Planning Card -->
-    <div class="bg-white rounded-2xl shadow-lg p-8 hover:shadow-2xl transition">
-      <h4 class="text-xl font-bold mb-4">Pre-Planning</h4>
-      <ul class="space-y-3 text-sm text-gray-700">
+    <div class="bg-white dark:bg-card rounded-2xl shadow-lg p-8 hover:shadow-2xl transition">
+      <h4 class="text-xl font-bold mb-4 text-gray-900 dark:text-primary">Pre-Planning</h4>
+      <ul class="space-y-3 text-sm text-gray-700 dark:text-muted-foreground">
         <li class="flex items-center"><span class="text-green-500">&#10003;</span><span class="ml-2">Basic CAD uploads</span></li>
         <li class="flex items-center"><span class="text-green-500">&#10003;</span><span class="ml-2">Community feedback</span></li>
         <li class="flex items-center"><span class="text-green-500">&#10003;</span><span class="ml-2">Limited cloud storage</span></li>
@@ -338,9 +334,9 @@
     </div>
 
     <!-- Pro-Planning Card -->
-    <div class="bg-white rounded-2xl shadow-lg p-8 hover:shadow-2xl transition">
-      <h4 class="text-xl font-bold mb-4">Pro-Planning</h4>
-      <ul class="space-y-3 text-sm text-gray-700">
+    <div class="bg-white dark:bg-card rounded-2xl shadow-lg p-8 hover:shadow-2xl transition">
+      <h4 class="text-xl font-bold mb-4 text-gray-900 dark:text-primary">Pro-Planning</h4>
+      <ul class="space-y-3 text-sm text-gray-700 dark:text-muted-foreground">
         <li class="flex items-center"><span class="text-green-500">&#10003;</span><span class="ml-2">Unlimited uploads</span></li>
         <li class="flex items-center"><span class="text-green-500">&#10003;</span><span class="ml-2">Real-time CAD rendering</span></li>
         <li class="flex items-center"><span class="text-green-500">&#10003;</span><span class="ml-2">Priority support</span></li>
