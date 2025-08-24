@@ -9,19 +9,21 @@
     "Marketplace (Backend)"
   ],
   "scripts": {
-  "dev:all": "concurrently \"npm run dev:landing\" \"npm run dev:marketplace\" \"npm run dev:backend\"",
-  "dev": "npm run dev:marketplace && npm run dev:backend",
-  "build": "npm run build:marketplace && npm run build:backend",
-  "start": "npm run start:marketplace && npm run start:backend",
-  "test": "npm run test:contracts",
-  "lint": "npm run lint:frontend",
-  "clean:all": "rimraf node_modules \"*/node_modules\" \"*/*/node_modules\"",
-  "update:all": "npm update && npm update --workspaces",
-  "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,css,md}\"",
-  "install": "npm install",
-  "node:hardhat": "cd \"Marketplace (Backend)\" && npx hardhat node",
-  "deploy:local": "cd \"Marketplace (Backend)\" && npx hardhat run scripts/deploy.js --network hardhat",
-  "deploy:sepolia": "cd \"Marketplace (Backend)\" && npx hardhat run scripts/deploy.js --network sepolia"
+    "dev:all": "concurrently \"npm run dev:landing\" \"npm run dev:marketplace\" \"npm run dev:backend\"",
+    "dev": "npm run dev:marketplace && npm run dev:backend",
+    "build": "npm run build:marketplace && npm run build:backend",
+    "start": "npm run start:marketplace && npm run start:backend",
+    "test": "npm run test:contracts",
+    "lint": "npm run lint:frontend",
+    "clean:all": "rimraf node_modules \"*/node_modules\" \"*/*/node_modules\"",
+    "update:all": "npm update && npm update --workspaces",
+    "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,css,md}\"",
+    "node:hardhat": "cd \"Marketplace (Backend)\" && npx hardhat node",
+    "deploy:local": "cd \"Marketplace (Backend)\" && npx hardhat run scripts/deploy.js --network hardhat",
+    "deploy:sepolia": "cd \"Marketplace (Backend)\" && npx hardhat run scripts/deploy.js --network sepolia",
+    "dev:landing": "npm run dev --workspace \"Landing Page (Frontend)\"",
+    "dev:marketplace": "npm run dev --workspace \"Marketplace (Frontend)\"",
+    "dev:backend": "npm run dev --workspace \"Marketplace (Backend)\""
   },
   "keywords": [
     "web3",
@@ -38,8 +40,8 @@
     "@nomiclabs/hardhat-ethers": "^2.2.3",
     "@openzeppelin/contracts": "^4.9.3",
     "@types/node": "^20.5.0",
-    "@types/react": "^18.2.66",
-    "@types/react-dom": "^18.2.22",
+    "@types/react": "^18.3.24",
+    "@types/react-dom": "^18.3.7",
     "@typescript-eslint/eslint-plugin": "^7.2.0",
     "@typescript-eslint/parser": "^7.2.0",
     "@vitejs/plugin-react": "^4.2.1",
@@ -73,6 +75,8 @@
     "@radix-ui/react-toggle": "^1.1.10",
     "@radix-ui/react-toggle-group": "^1.1.11",
     "@radix-ui/react-tooltip": "^1.0.6",
+    "@react-three/drei": "^9.0.0",
+    "@react-three/fiber": "^8.0.0",
     "@tanstack/react-query": "^4.28.0",
     "autoprefixer": "^10.4.21",
     "axios": "^1.11.0",
@@ -105,6 +109,7 @@
     "tailwind-merge": "^1.14.0",
     "tailwindcss": "^3.4.11",
     "tailwindcss-animate": "^1.0.7",
+    "three": "^0.179.1",
     "web3": "^4.11.1"
   }
 }
