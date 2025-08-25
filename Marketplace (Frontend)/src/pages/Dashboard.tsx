@@ -72,12 +72,10 @@ const Dashboard = () => {
       const [marketplaceResponse, userNFTsResponse, balanceResponse] =
         await Promise.all(promises);
 
-      // Process user NFTs data - backend returns {success: true, data: {nfts: [...], count: 0, address: "..."}}
+      // Process user NFTs data - backend returns {success: true, nfts: [...]}
       const userNFTs =
-        userNFTsResponse.success &&
-        userNFTsResponse.data &&
-        userNFTsResponse.data.nfts
-          ? userNFTsResponse.data.nfts
+        userNFTsResponse.success && Array.isArray(userNFTsResponse.nfts)
+          ? userNFTsResponse.nfts
           : [];
 
       // Calculate user stats from NFTs

@@ -178,7 +178,7 @@ app.post(
   ]),
   async (req, res) => {
     try {
-      const { title, description, price, category, username } = req.body;
+  const { title, description, price, category, username, walletAddress } = req.body;
       console.log('DEBUG: Received username from req.body:', username);
       const imageFiles = req.files?.image || [];
       const modelFile = req.files?.model ? req.files.model[0] : null;
@@ -262,7 +262,7 @@ app.post(
         images: ipfsResult.images,
         modelUrl: ipfsResult.modelUrl,
         tokenURI: ipfsResult.tokenURI,
-        seller: blockchainResult.seller || 'blockchain-user',
+        seller: walletAddress || blockchainResult.seller || 'blockchain-user',
         username: username || 'Unknown Creator',
         createdAt: new Date().toISOString(),
         isBlockchain: true,
