@@ -116,10 +116,13 @@ const Upload: React.FC = () => {
       if (user?.unsafeMetadata?.walletAddress) {
         formData.append('walletAddress', String(user.unsafeMetadata.walletAddress));
       }
-      // Add username for display
-      if (user?.username) {
-        formData.append('username', String(user.username));
-      }
+        // Add username for display (prefer full name)
+        if (user?.firstName || user?.lastName) {
+          const displayName = `${user?.firstName || ''} ${user?.lastName || ''}`.trim();
+          formData.append('username', displayName);
+        } else if (user?.username) {
+          formData.append('username', String(user.username));
+        }
 
       // Add model file (first file from files array)
       if (uploadData.files.length > 0) {
