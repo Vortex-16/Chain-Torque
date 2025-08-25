@@ -8,15 +8,22 @@
 
 ## 🏗️ **Current Development Status**
 
-**Phase 1: Frontend Foundation** _(Completed)_
 
-- ✅ **Project Structure**: Clean frontend-focused architecture
+**Phase 1: Foundation** _(Mostly Completed)_
+
+- ✅ **Project Structure**: Clean frontend and backend architecture
 - ✅ **Landing Page**: Express.js + EJS templating engine
 - ✅ **Marketplace Frontend**: React + TypeScript + Vite setup
-- ✅ **Development Environment**: Concurrent development setup
-- 🔄 **Backend Integration**: Ready for API implementation
+- ✅ **Backend API**: Node.js + Express server, NFT minting, IPFS integration
+- ✅ **Smart Contract**: Solidity ERC721 contract, deployed and integrated
+- ✅ **Wallet-based onboarding**: Clerk + MetaMask integration
+- ✅ **Model upload, ownership, and display**
+- ✅ **Dashboard and user NFT tracking**
+- ✅ **Admin endpoints for model cleanup**
+- ✅ **Frontend/Backend integration**
+- 🔄 **AI/ML features**: Planned, not yet implemented
 
-**Next Steps**: Implement backend APIs and blockchain integration
+**Next Steps**: Implement advanced AI features, mobile app, and multi-chain support
 
 ---
 
@@ -128,37 +135,44 @@ ChainTorque transforms the marketplace experience through cutting-edge Web3 and 
 
 ## 🗺️ **Roadmap**
 
+
 ### **Phase 1: Foundation** (Q2 2025)
 
-- [ ] Core smart contract development
-- [ ] Basic 3D viewer implementation
-- [ ] User authentication system
-- [ ] IPFS integration
-- [ ] MVP marketplace launch
+- [x] Core smart contract development
+- [x] Basic 3D viewer implementation
+- [x] User authentication system (wallet-based)
+- [x] IPFS integration
+- [x] MVP marketplace launch
 
 ### **Phase 2: Intelligence** (Q3 2025)
 
-- [ ] AI model analysis engine
-- [ ] Advanced customization tools
-- [ ] Quality scoring system
-- [ ] Mobile app development
-- [ ] Creator analytics dashboard
+### **Phase 2: Intelligence** (Q3 2025)
+
+- [ ] AI model analysis engine (planned)
+- [ ] Advanced customization tools (planned)
+- [ ] Quality scoring system (planned)
+- [ ] Mobile app development (planned)
+- [ ] Creator analytics dashboard (planned)
 
 ### **Phase 3: Expansion** (Q4 2025)
 
-- [ ] Multi-chain support (Polygon, BSC)
-- [ ] Advanced licensing options
-- [ ] Collaborative design tools
-- [ ] Enterprise partnerships
-- [ ] Token governance launch
+### **Phase 3: Expansion** (Q4 2025)
+
+- [ ] Multi-chain support (Polygon, BSC) (planned)
+- [ ] Advanced licensing options (planned)
+- [ ] Collaborative design tools (planned)
+- [ ] Enterprise partnerships (planned)
+- [ ] Token governance launch (planned)
 
 ### **Phase 4: Revolution** (Q1 2026)
 
-- [ ] AR/VR integration
-- [ ] Cross-metaverse compatibility
-- [ ] AI-generated model variations
-- [ ] Global developer ecosystem
-- [ ] Industry standard adoption
+### **Phase 4: Revolution** (Q1 2026)
+
+- [ ] AR/VR integration (future)
+- [ ] Cross-metaverse compatibility (future)
+- [ ] AI-generated model variations (future)
+- [ ] Global developer ecosystem (future)
+- [ ] Industry standard adoption (future)
 
 ---
 
@@ -170,18 +184,30 @@ ChainTorque transforms the marketplace experience through cutting-edge Web3 and 
 - MetaMask or compatible Web3 wallet
 - Git for version control
 
+### **Prerequisites**
+
+- Node.js 18+ and npm/yarn
+- MetaMask or compatible Web3 wallet
+- Git for version control
+
 ### **Quick Setup**
 
 ```powershell
 # Clone the repository
-git clone https://github.com/your-username/ChainTorque.git
+
 cd ChainTorque
 
-# Install dependencies for both frontends
-npm run install:all
+# Install dependencies for frontend and backend
+cd "Marketplace (Frontend)"
+- 🔧 **Blockchain Developer**: Help improve our smart contracts
+cd "../Marketplace (Backend)"
+- 🎨 **Frontend Developer**: Enhance the user experience
 
 # Start development servers
-npm run dev  # Starts both Landing Page (port 3000) and Marketplace (port 8080)
+cd "../Marketplace (Frontend)"
+- 🤖 **AI/ML Engineer**: Advance our optimization algorithms
+cd "../Marketplace (Backend)"
+- 🎯 **3D Artist**: Create demo content and test models
 ```
 
 ### **Smart Contract Deployment**
@@ -194,19 +220,8 @@ npx hardhat compile
 npx hardhat run scripts/deploy.js --network localhost
 
 # Deploy to testnet
-npx hardhat run scripts/deploy.js --network goerli
+npx hardhat run scripts/deploy.js --network sepolia
 ```
-
----
-
-## 🤝 **Contributing**
-
-We welcome contributions from the community! Whether you're a:
-
-- 🔧 **Blockchain Developer**: Help improve our smart contracts
-- 🎨 **Frontend Developer**: Enhance the user experience
-- 🤖 **AI/ML Engineer**: Advance our optimization algorithms
-- 🎯 **3D Artist**: Create demo content and test models
 - 📝 **Technical Writer**: Improve documentation
 
 ### **How to Contribute**
