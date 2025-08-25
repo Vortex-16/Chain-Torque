@@ -31,6 +31,29 @@ const Upload: React.FC = () => {
   });
   const [isUploading, setIsUploading] = useState(false);
 
+  // Prevent upload if user has no wallet address
+  const hasWallet = !!user?.unsafeMetadata?.walletAddress;
+  if (!hasWallet) {
+    return (
+      <div className='min-h-screen bg-background text-foreground flex flex-col items-center justify-center'>
+        <Navigation />
+        <div className='max-w-md mx-auto mt-24 p-8 border rounded-lg bg-card text-center'>
+          <h2 className='text-2xl font-bold mb-4'>Wallet Required</h2>
+          <p className='text-muted-foreground mb-4'>
+            You must connect your wallet before uploading a model.
+          </p>
+          <a
+            href='/'
+            className='bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700'
+          >
+            Go to Marketplace & Connect Wallet
+          </a>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
   const handleInputChange = (field: keyof UploadData, value: any) => {
     setUploadData(prev => ({
       ...prev,
@@ -89,6 +112,14 @@ const Upload: React.FC = () => {
       formData.append('price', uploadData.price);
       formData.append('category', uploadData.category);
       formData.append('tags', JSON.stringify(uploadData.tags));
+      // Add wallet address for user association
+      if (user?.unsafeMetadata?.walletAddress) {
+        formData.append('walletAddress', String(user.unsafeMetadata.walletAddress));
+      }
+      // Add username for display
+      if (user?.username) {
+        formData.append('username', String(user.username));
+      }
 
       // Add model file (first file from files array)
       if (uploadData.files.length > 0) {

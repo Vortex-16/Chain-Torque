@@ -151,11 +151,17 @@ const ProductDetail = () => {
     const fallbackImages = [cadGear, cadDrone, cadEngine, cadRobot];
 
     // Prefer backendData.images array if present and non-empty
-    let actualImages = [];
+    let actualImages: string[] = [];
     if (Array.isArray(backendData.images) && backendData.images.length > 0) {
-      actualImages = backendData.images.map(url => url.startsWith('http') ? url : `http://localhost:5000${url}`);
+      actualImages = backendData.images.map((url: string) =>
+        url.startsWith('http') ? url : `http://localhost:5000${url}`
+      );
     } else if (backendData.imageUrl && backendData.imageUrl !== '/placeholder.jpg') {
-      actualImages = [backendData.imageUrl.startsWith('http') ? backendData.imageUrl : `http://localhost:5000${backendData.imageUrl}`];
+      actualImages = [
+        backendData.imageUrl.startsWith('http')
+          ? backendData.imageUrl
+          : `http://localhost:5000${backendData.imageUrl}`,
+      ];
     } else {
       actualImages = fallbackImages;
     }
@@ -172,14 +178,13 @@ const ProductDetail = () => {
       priceETH: parseFloat(backendData.price),
       seller: {
         name:
+          backendData.username ||
           backendData.sellerName ||
           backendData.seller_name ||
+          backendData.seller ||
           'Unknown Creator',
         avatar:
-          'https://api.dicebear.com/7.x/avataaars/svg?seed=' +
-          (backendData.sellerName ||
-            backendData.seller_name ||
-            backendData.seller),
+          `https://api.dicebear.com/7.x/avataaars/svg?seed=${backendData.username || backendData.sellerName || backendData.seller_name || backendData.seller || 'Unknown Creator'}`,
         verified: true,
         rating: 4.8,
         totalSales: Math.floor(Math.random() * 50) + 10,
@@ -204,7 +209,7 @@ const ProductDetail = () => {
       uploadDate: new Date().toISOString().split('T')[0],
       lastUpdate: new Date().toISOString().split('T')[0],
       license: 'Standard License',
-      tokenId: parseInt(backendData.tokenId),
+      tokenId: backendData.tokenId ? parseInt(backendData.tokenId, 10) : undefined,
       contractAddress: '0x742d35Cc4Bf5C6BA53550e2C7a4C0D7F5a56B8f1',
       blockchain: 'Ethereum',
     };
@@ -231,7 +236,7 @@ const ProductDetail = () => {
           const fallbackModel = {
             ...mockModel,
             id: id,
-            tokenId: parseInt(id) || 1,
+            tokenId: parseInt(String(id), 10) || 1,
           };
           setModel(fallbackModel);
         } catch (mockErr) {
@@ -253,10 +258,8 @@ const ProductDetail = () => {
 
       if (!isRealProduct) {
         // Handle mock data purchase
-        await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate processing
-        alert(
-          'Demo purchase successful! This was a mock transaction for demonstration purposes.'
-        );
+        await new Promise((resolve) => setTimeout(resolve, 1500)); // Simulate processing
+        alert('Demo purchase successful! This was a mock transaction for demonstration purposes.');
         return;
       }
 
@@ -273,10 +276,7 @@ const ProductDetail = () => {
         return;
       }
 
-      const response = await apiService.purchaseMarketplaceItem(
-        model.tokenId,
-        authToken
-      );
+      const response = await apiService.purchaseMarketplaceItem(model.tokenId, authToken);
 
       if (response.success) {
         alert('Purchase successful! Check your wallet for the NFT.');
@@ -316,14 +316,12 @@ const ProductDetail = () => {
 
   if (loading) {
     return (
-      <div className='min-h-screen bg-background text-foreground'>
+      <div className="min-h-screen bg-background text-foreground">
         <Navigation />
-        <div className='container mx-auto px-4 py-8'>
-          <div className='flex justify-center items-center min-h-96'>
-            <Loader2 className='h-8 w-8 animate-spin text-primary' />
-            <span className='ml-2 text-muted-foreground'>
-              Loading product details...
-            </span>
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex justify-center items-center min-h-96">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <span className="ml-2 text-muted-foreground">Loading product details...</span>
           </div>
         </div>
       </div>
@@ -332,17 +330,15 @@ const ProductDetail = () => {
 
   if (error || !model) {
     return (
-      <div className='min-h-screen bg-background text-foreground'>
+      <div className="min-h-screen bg-background text-foreground">
         <Navigation />
-        <div className='container mx-auto px-4 py-8'>
-          <div className='text-center py-12'>
-            <AlertCircle className='h-12 w-12 text-red-500 mx-auto mb-4' />
-            <h1 className='text-2xl font-bold mb-2'>Product Not Found</h1>
-            <p className='text-muted-foreground mb-4'>
-              {error || 'The requested product could not be found.'}
-            </p>
-            <Button onClick={() => navigate(-1)} variant='outline'>
-              <ArrowLeft className='h-4 w-4 mr-2' />
+        <div className="container mx-auto px-4 py-8">
+          <div className="text-center py-12">
+            <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+            <h1 className="text-2xl font-bold mb-2">Product Not Found</h1>
+            <p className="text-muted-foreground mb-4">{error || 'The requested product could not be found.'}</p>
+            <Button onClick={() => navigate(-1)} variant="outline">
+              <ArrowLeft className="h-4 w-4 mr-2" />
               Go Back
             </Button>
           </div>
@@ -352,73 +348,55 @@ const ProductDetail = () => {
   }
 
   return (
-    <div className='min-h-screen bg-background text-foreground'>
+    <div className="min-h-screen bg-background text-foreground">
       <Navigation />
 
-      <div className='container mx-auto px-4 py-8'>
+      <div className="container mx-auto px-4 py-8">
         {/* Breadcrumb */}
-        <div className='flex items-center gap-2 text-sm text-muted-foreground mb-6'>
+        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
           <button
             onClick={() => navigate(-1)}
-            className='flex items-center gap-1 hover:text-primary transition-colors'
+            className="flex items-center gap-1 hover:text-primary transition-colors"
           >
-            <ArrowLeft className='h-4 w-4' />
+            <ArrowLeft className="h-4 w-4" />
             Back to Marketplace
           </button>
           <span>/</span>
           <span>{model.category}</span>
           <span>/</span>
-          <span className='text-foreground'>{model.title}</span>
+          <span className="text-foreground">{model.title}</span>
         </div>
 
-        <div className='grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8'>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
           {/* Left Column - Images and 3D Viewer */}
-          <div className='space-y-4'>
+          <div className="space-y-4">
             {/* Main Image/3D Viewer */}
-            <div className='relative aspect-square bg-muted rounded-lg overflow-hidden'>
+            <div className="relative aspect-square bg-muted rounded-lg overflow-hidden">
               {show3D ? (
-                <Model3DViewer
-                  modelUrl={model.modelUrl}
-                  className='w-full h-full'
-                  onLoadStart={() => console.log('Loading 3D model...')}
-                  onLoadComplete={() => console.log('3D model loaded!')}
-                  onError={error => console.error('3D model error:', error)}
-                />
+                <Model3DViewer modelUrl={model.modelUrl} className="w-full h-full" />
               ) : (
-                <img
-                  src={model.images[selectedImage]}
-                  alt={model.title}
-                  className='w-full h-full object-cover'
-                />
+                <img src={model.images[selectedImage]} alt={model.title} className="w-full h-full object-cover" />
               )}
 
               {/* 3D Toggle Button - Only for supported formats */}
-              {model.modelUrl &&
-                !model.modelUrl.includes('.SLDPRT') &&
-                !model.modelUrl.includes('.SLDASM') && (
-                  <div className='absolute top-4 right-4'>
-                    <Button
-                      size='sm'
-                      variant='secondary'
-                      onClick={() => setShow3D(!show3D)}
-                      className='bg-black/50 backdrop-blur-sm hover:bg-black/70 text-white'
-                      title={show3D ? 'View Images' : 'View 3D Model'}
-                    >
-                      {show3D ? (
-                        <Eye className='h-4 w-4' />
-                      ) : (
-                        <Play className='h-4 w-4' />
-                      )}
-                      <span className='ml-1 text-xs hidden sm:inline'>
-                        {show3D ? 'Images' : '3D View'}
-                      </span>
-                    </Button>
-                  </div>
-                )}
+              {model.modelUrl && !model.modelUrl.includes('.SLDPRT') && !model.modelUrl.includes('.SLDASM') && (
+                <div className="absolute top-4 right-4">
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    onClick={() => setShow3D(!show3D)}
+                    className="bg-black/50 backdrop-blur-sm hover:bg-black/70 text-white"
+                    title={show3D ? 'View Images' : 'View 3D Model'}
+                  >
+                    {show3D ? <Eye className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+                    <span className="ml-1 text-xs hidden sm:inline">{show3D ? 'Images' : '3D View'}</span>
+                  </Button>
+                </div>
+              )}
             </div>
 
             {/* Thumbnail Images */}
-            <div className='flex gap-2 overflow-x-auto pb-2'>
+            <div className="flex gap-2 overflow-x-auto pb-2">
               {model.images.map((image, index) => (
                 <button
                   key={index}
@@ -427,119 +405,85 @@ const ProductDetail = () => {
                     setShow3D(false);
                   }}
                   className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-colors ${
-                    selectedImage === index && !show3D
-                      ? 'border-primary'
-                      : 'border-transparent'
+                    selectedImage === index && !show3D ? 'border-primary' : 'border-transparent'
                   }`}
                 >
-                  <img
-                    src={image}
-                    alt={`${model.title} view ${index + 1}`}
-                    className='w-full h-full object-cover'
-                  />
+                  <img src={image} alt={`${model.title} view ${index + 1}`} className="w-full h-full object-cover" />
                 </button>
               ))}
               {/* Only show 3D button for supported formats */}
-              {model.modelUrl &&
-                !model.modelUrl.includes('.SLDPRT') &&
-                !model.modelUrl.includes('.SLDASM') && (
-                  <button
-                    onClick={() => setShow3D(true)}
-                    className={`flex-shrink-0 w-20 h-20 rounded-lg border-2 transition-colors bg-muted flex items-center justify-center ${
-                      show3D ? 'border-primary' : 'border-transparent'
-                    }`}
-                  >
-                    <Play className='h-6 w-6 text-muted-foreground' />
-                  </button>
-                )}
+              {model.modelUrl && !model.modelUrl.includes('.SLDPRT') && !model.modelUrl.includes('.SLDASM') && (
+                <button
+                  onClick={() => setShow3D(true)}
+                  className={`flex-shrink-0 w-20 h-20 rounded-lg border-2 transition-colors bg-muted flex items-center justify-center ${
+                    show3D ? 'border-primary' : 'border-transparent'
+                  }`}
+                >
+                  <Play className="h-6 w-6 text-muted-foreground" />
+                </button>
+              )}
             </div>
           </div>
 
           {/* Right Column - Product Info */}
-          <div className='space-y-6'>
+          <div className="space-y-6">
             {/* Title and Price */}
             <div>
-              <h1 className='text-3xl font-bold text-foreground mb-2'>
-                {model.title}
-              </h1>
-              <div className='flex items-center gap-4 mb-4'>
-                <div className='flex items-center gap-2'>
-                  <Star className='h-5 w-5 fill-yellow-400 text-yellow-400' />
-                  <span className='font-medium'>{model.stats.rating}</span>
-                  <span className='text-muted-foreground'>
-                    ({model.stats.reviews} reviews)
-                  </span>
+              <h1 className="text-3xl font-bold text-foreground mb-2">{model.title}</h1>
+              <div className="flex items-center gap-4 mb-4">
+                <div className="flex items-center gap-2">
+                  <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+                  <span className="font-medium">{model.stats.rating}</span>
+                  <span className="text-muted-foreground">({model.stats.reviews} reviews)</span>
                 </div>
-                <Separator orientation='vertical' className='h-6' />
-                <div className='flex items-center gap-2 text-muted-foreground'>
-                  <Eye className='h-4 w-4' />
+                <Separator orientation="vertical" className="h-6" />
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Eye className="h-4 w-4" />
                   <span>{model.stats.views.toLocaleString()} views</span>
                 </div>
-                <div className='flex items-center gap-2 text-muted-foreground'>
-                  <Download className='h-4 w-4' />
-                  <span>
-                    {model.stats.downloads.toLocaleString()} downloads
-                  </span>
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Download className="h-4 w-4" />
+                  <span>{model.stats.downloads.toLocaleString()} downloads</span>
                 </div>
               </div>
 
-              <div className='flex items-center justify-between mb-6'>
-                <div className='flex flex-col'>
-                  <span className='text-3xl font-bold text-primary'>
-                    {model.price}
-                  </span>
-                  {model.priceETH && (
-                    <span className='text-muted-foreground'>
-                      ≈ {model.priceETH} ETH
-                    </span>
-                  )}
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex flex-col">
+                  <span className="text-3xl font-bold text-primary">{model.price}</span>
+                  {model.priceETH && <span className="text-muted-foreground">≈ {model.priceETH} ETH</span>}
                 </div>
-                <div className='flex gap-2'>
-                  <Button
-                    variant='outline'
-                    size='sm'
-                    onClick={toggleWishlist}
-                    className={
-                      isWishlisted ? 'text-red-500 border-red-500' : ''
-                    }
-                  >
-                    <Heart
-                      className={`h-4 w-4 ${isWishlisted ? 'fill-current' : ''}`}
-                    />
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm" onClick={toggleWishlist} className={isWishlisted ? 'text-red-500 border-red-500' : ''}>
+                    <Heart className={`h-4 w-4 ${isWishlisted ? 'fill-current' : ''}`} />
                   </Button>
-                  <Button variant='outline' size='sm' onClick={handleShare}>
-                    <Share2 className='h-4 w-4' />
+                  <Button variant="outline" size="sm" onClick={handleShare}>
+                    <Share2 className="h-4 w-4" />
                   </Button>
                 </div>
               </div>
             </div>
 
             {/* Purchase Buttons */}
-            <div className='space-y-3'>
-              <Button
-                size='lg'
-                className='w-full bg-gradient-primary hover:bg-primary-hover'
-                onClick={handlePurchase}
-                disabled={isPurchasing}
-              >
+            <div className="space-y-3">
+              <Button size="lg" className="w-full bg-gradient-primary hover:bg-primary-hover" onClick={handlePurchase} disabled={isPurchasing}>
                 {isPurchasing ? (
                   <>
-                    <Loader2 className='h-5 w-5 mr-2 animate-spin' />
+                    <Loader2 className="h-5 w-5 mr-2 animate-spin" />
                     Processing Purchase...
                   </>
                 ) : (
                   <>
-                    <ShoppingCart className='h-5 w-5 mr-2' />
+                    <ShoppingCart className="h-5 w-5 mr-2" />
                     Buy Now
                   </>
                 )}
               </Button>
 
               {model.tokenId && (
-                <div className='flex items-center gap-2 text-sm text-muted-foreground bg-muted p-3 rounded-lg'>
-                  <Shield className='h-4 w-4 text-green-500' />
+                <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted p-3 rounded-lg">
+                  <Shield className="h-4 w-4 text-green-500" />
                   <div>
-                    <p className='font-medium'>Blockchain Verified NFT</p>
+                    <p className="font-medium">Blockchain Verified NFT</p>
                     <p>
                       Token ID: #{model.tokenId} on {model.blockchain}
                     </p>
@@ -550,28 +494,26 @@ const ProductDetail = () => {
 
             {/* Seller Info */}
             <Card>
-              <CardContent className='p-4'>
-                <div className='flex items-center justify-between'>
-                  <div className='flex items-center gap-3'>
-                    <div className='w-12 h-12 bg-muted rounded-full flex items-center justify-center'>
-                      <User className='h-6 w-6 text-muted-foreground' />
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 bg-muted rounded-full flex items-center justify-center">
+                      <User className="h-6 w-6 text-muted-foreground" />
                     </div>
                     <div>
-                      <div className='flex items-center gap-2'>
-                        <h3 className='font-semibold'>{model.seller.name}</h3>
-                        {model.seller.verified && (
-                          <Shield className='h-4 w-4 text-blue-500' />
-                        )}
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-semibold">{model.seller.name}</h3>
+                        {model.seller.verified && <Shield className="h-4 w-4 text-blue-500" />}
                       </div>
-                      <div className='flex items-center gap-2 text-sm text-muted-foreground'>
-                        <Star className='h-3 w-3 fill-yellow-400 text-yellow-400' />
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
                         <span>{model.seller.rating}</span>
                         <span>•</span>
                         <span>{model.seller.totalSales} sales</span>
                       </div>
                     </div>
                   </div>
-                  <Button variant='outline' size='sm'>
+                  <Button variant="outline" size="sm">
                     View Profile
                   </Button>
                 </div>
@@ -581,39 +523,31 @@ const ProductDetail = () => {
             {/* Quick Specs */}
             <Card>
               <CardHeader>
-                <CardTitle className='text-lg'>Specifications</CardTitle>
+                <CardTitle className="text-lg">Specifications</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className='grid grid-cols-2 gap-4 text-sm'>
+                <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
-                    <p className='font-medium mb-1'>File Formats</p>
-                    <div className='flex flex-wrap gap-1'>
-                      {model.specs.fileTypes.map(type => (
-                        <Badge
-                          key={type}
-                          variant='secondary'
-                          className='text-xs'
-                        >
+                    <p className="font-medium mb-1">File Formats</p>
+                    <div className="flex flex-wrap gap-1">
+                      {model.specs.fileTypes.map((type) => (
+                        <Badge key={type} variant="secondary" className="text-xs">
                           {type}
                         </Badge>
                       ))}
                     </div>
                   </div>
                   <div>
-                    <p className='font-medium mb-1'>File Size</p>
-                    <p className='text-muted-foreground'>
-                      {model.specs.fileSize}
-                    </p>
+                    <p className="font-medium mb-1">File Size</p>
+                    <p className="text-muted-foreground">{model.specs.fileSize}</p>
                   </div>
                   <div>
-                    <p className='font-medium mb-1'>Polygons</p>
-                    <p className='text-muted-foreground'>
-                      {model.specs.polygons}
-                    </p>
+                    <p className="font-medium mb-1">Polygons</p>
+                    <p className="text-muted-foreground">{model.specs.polygons}</p>
                   </div>
                   <div>
-                    <p className='font-medium mb-1'>License</p>
-                    <p className='text-muted-foreground'>{model.license}</p>
+                    <p className="font-medium mb-1">License</p>
+                    <p className="text-muted-foreground">{model.license}</p>
                   </div>
                 </div>
               </CardContent>
@@ -622,29 +556,25 @@ const ProductDetail = () => {
         </div>
 
         {/* Detailed Tabs */}
-        <Tabs defaultValue='description' className='w-full'>
-          <TabsList className='grid w-full grid-cols-4'>
-            <TabsTrigger value='description'>Description</TabsTrigger>
-            <TabsTrigger value='specifications'>Specifications</TabsTrigger>
-            <TabsTrigger value='reviews'>
-              Reviews ({model.stats.reviews})
-            </TabsTrigger>
-            <TabsTrigger value='seller'>Seller Info</TabsTrigger>
+        <Tabs defaultValue="description" className="w-full">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="description">Description</TabsTrigger>
+            <TabsTrigger value="specifications">Specifications</TabsTrigger>
+            <TabsTrigger value="reviews">Reviews ({model.stats.reviews})</TabsTrigger>
+            <TabsTrigger value="seller">Seller Info</TabsTrigger>
           </TabsList>
 
-          <TabsContent value='description' className='mt-6'>
+          <TabsContent value="description" className="mt-6">
             <Card>
-              <CardContent className='p-6'>
-                <div className='prose prose-gray max-w-none'>
-                  <div className='whitespace-pre-line text-foreground leading-relaxed'>
-                    {model.description}
-                  </div>
+              <CardContent className="p-6">
+                <div className="prose prose-gray max-w-none">
+                  <div className="whitespace-pre-line text-foreground leading-relaxed">{model.description}</div>
 
-                  <div className='mt-6'>
-                    <h4 className='font-semibold mb-3'>Tags</h4>
-                    <div className='flex flex-wrap gap-2'>
-                      {model.tags.map(tag => (
-                        <Badge key={tag} variant='outline'>
+                  <div className="mt-6">
+                    <h4 className="font-semibold mb-3">Tags</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {model.tags.map((tag) => (
+                        <Badge key={tag} variant="outline">
                           #{tag}
                         </Badge>
                       ))}
@@ -655,56 +585,44 @@ const ProductDetail = () => {
             </Card>
           </TabsContent>
 
-          <TabsContent value='specifications' className='mt-6'>
+          <TabsContent value="specifications" className="mt-6">
             <Card>
-              <CardContent className='p-6'>
-                <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-                  <div className='space-y-4'>
+              <CardContent className="p-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-4">
                     <div>
-                      <h4 className='font-semibold mb-2'>File Information</h4>
-                      <div className='space-y-2 text-sm'>
-                        <div className='flex justify-between'>
-                          <span className='text-muted-foreground'>
-                            File Size:
-                          </span>
+                      <h4 className="font-semibold mb-2">File Information</h4>
+                      <div className="space-y-2 text-sm">
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">File Size:</span>
                           <span>{model.specs.fileSize}</span>
                         </div>
-                        <div className='flex justify-between'>
-                          <span className='text-muted-foreground'>
-                            Vertices:
-                          </span>
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Vertices:</span>
                           <span>{model.specs.vertices}</span>
                         </div>
-                        <div className='flex justify-between'>
-                          <span className='text-muted-foreground'>
-                            Polygons:
-                          </span>
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Polygons:</span>
                           <span>{model.specs.polygons}</span>
                         </div>
-                        <div className='flex justify-between'>
-                          <span className='text-muted-foreground'>
-                            Textures:
-                          </span>
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Textures:</span>
                           <span>{model.specs.textures ? 'Yes' : 'No'}</span>
                         </div>
-                        <div className='flex justify-between'>
-                          <span className='text-muted-foreground'>
-                            Animated:
-                          </span>
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Animated:</span>
                           <span>{model.specs.animated ? 'Yes' : 'No'}</span>
                         </div>
                       </div>
                     </div>
                   </div>
 
-                  <div className='space-y-4'>
+                  <div className="space-y-4">
                     <div>
-                      <h4 className='font-semibold mb-2'>
-                        Compatible Software
-                      </h4>
-                      <div className='flex flex-wrap gap-2'>
-                        {model.specs.software.map(software => (
-                          <Badge key={software} variant='outline'>
+                      <h4 className="font-semibold mb-2">Compatible Software</h4>
+                      <div className="flex flex-wrap gap-2">
+                        {model.specs.software.map((software) => (
+                          <Badge key={software} variant="outline">
                             {software}
                           </Badge>
                         ))}
@@ -712,28 +630,18 @@ const ProductDetail = () => {
                     </div>
 
                     <div>
-                      <h4 className='font-semibold mb-2'>Upload Information</h4>
-                      <div className='space-y-2 text-sm'>
-                        <div className='flex justify-between'>
-                          <span className='text-muted-foreground'>
-                            Upload Date:
-                          </span>
-                          <span>
-                            {new Date(model.uploadDate).toLocaleDateString()}
-                          </span>
+                      <h4 className="font-semibold mb-2">Upload Information</h4>
+                      <div className="space-y-2 text-sm">
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Upload Date:</span>
+                          <span>{new Date(model.uploadDate).toLocaleDateString()}</span>
                         </div>
-                        <div className='flex justify-between'>
-                          <span className='text-muted-foreground'>
-                            Last Update:
-                          </span>
-                          <span>
-                            {new Date(model.lastUpdate).toLocaleDateString()}
-                          </span>
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Last Update:</span>
+                          <span>{new Date(model.lastUpdate).toLocaleDateString()}</span>
                         </div>
-                        <div className='flex justify-between'>
-                          <span className='text-muted-foreground'>
-                            Category:
-                          </span>
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Category:</span>
                           <span>{model.category}</span>
                         </div>
                       </div>
@@ -744,30 +652,25 @@ const ProductDetail = () => {
             </Card>
           </TabsContent>
 
-          <TabsContent value='reviews' className='mt-6'>
+          <TabsContent value="reviews" className="mt-6">
             <Card>
-              <CardContent className='p-6'>
-                <div className='text-center text-muted-foreground'>
-                  <FileText className='h-12 w-12 mx-auto mb-4 opacity-50' />
+              <CardContent className="p-6">
+                <div className="text-center text-muted-foreground">
+                  <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
                   <p>Reviews feature coming soon!</p>
-                  <p className='text-sm'>
-                    Users will be able to leave reviews and ratings here.
-                  </p>
+                  <p className="text-sm">Users will be able to leave reviews and ratings here.</p>
                 </div>
               </CardContent>
             </Card>
           </TabsContent>
 
-          <TabsContent value='seller' className='mt-6'>
+          <TabsContent value="seller" className="mt-6">
             <Card>
-              <CardContent className='p-6'>
-                <div className='text-center text-muted-foreground'>
-                  <User className='h-12 w-12 mx-auto mb-4 opacity-50' />
+              <CardContent className="p-6">
+                <div className="text-center text-muted-foreground">
+                  <User className="h-12 w-12 mx-auto mb-4 opacity-50" />
                   <p>Seller profile coming soon!</p>
-                  <p className='text-sm'>
-                    Detailed seller information and portfolio will be displayed
-                    here.
-                  </p>
+                  <p className="text-sm">Detailed seller information and portfolio will be displayed here.</p>
                 </div>
               </CardContent>
             </Card>
@@ -779,5 +682,4 @@ const ProductDetail = () => {
     </div>
   );
 };
-
 export default ProductDetail;

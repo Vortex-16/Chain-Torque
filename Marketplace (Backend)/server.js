@@ -1,3 +1,5 @@
+// server.js (fixed)
+
 const express = require('express');
 const cors = require('cors');
 const multer = require('multer');
@@ -55,9 +57,9 @@ const upload = multer({
 const web3 = new Web3Manager();
 const { uploadFile, uploadMetadata } = require('./services/lighthouseStorage');
 
+// In-memory marketplace
 let marketplaceItems = [];
 let itemCounter = 1;
-
 // Initialize only Web3 and load existing NFTs from chain if available
 async function initializeServices() {
   try {
@@ -176,9 +178,10 @@ app.post(
   ]),
   async (req, res) => {
     try {
-      const { title, description, price, category } = req.body;
-      const imageFiles = req.files['image'] || [];
-      const modelFile = req.files['model'] ? req.files['model'][0] : null;
+      const { title, description, price, category, username } = req.body;
+      console.log('DEBUG: Received username from req.body:', username);
+      const imageFiles = req.files?.image || [];
+      const modelFile = req.files?.model ? req.files.model[0] : null;
 
       if (!imageFiles.length) {
         return res.status(400).json({ success: false, message: 'At least one image file is required' });
@@ -211,7 +214,7 @@ app.post(
         external_url: `${req.protocol}://${req.get('host')}`,
         attributes: [
           { trait_type: 'Category', value: category },
-          { trait_type: 'File Type', value: modelFile ? path.extname(modelFile.filename).toUpperCase() : '' },
+          { trait_type: 'File Type', value: modelFile ? path.extname(modelFile.originalname).toUpperCase() : '' },
           { trait_type: 'Created', value: new Date().toISOString().split('T')[0] },
           { trait_type: 'Marketplace', value: 'ChainTorque' },
         ],
@@ -260,6 +263,7 @@ app.post(
         modelUrl: ipfsResult.modelUrl,
         tokenURI: ipfsResult.tokenURI,
         seller: blockchainResult.seller || 'blockchain-user',
+        username: username || 'Unknown Creator',
         createdAt: new Date().toISOString(),
         isBlockchain: true,
         isPermanent: true,
@@ -311,7 +315,6 @@ app.get('/api/marketplace/stats', async (req, res) => {
   }
 });
 
-// Get single item by tokenId
 // Get NFTs owned by a user
 app.get('/api/user/:address/nfts', async (req, res) => {
   const userAddress = req.params.address;
@@ -323,8 +326,8 @@ app.get('/api/user/:address/nfts', async (req, res) => {
     // Find items in marketplaceItems matching user's tokenIds, seller, or owner
     const userNFTs = marketplaceItems.filter(item => {
       return result.tokenIds.includes(item.tokenId) ||
-        item.seller?.toLowerCase() === userAddress.toLowerCase() ||
-        item.owner?.toLowerCase() === userAddress.toLowerCase();
+        (item.seller && item.seller.toLowerCase() === userAddress.toLowerCase()) ||
+        (item.owner && item.owner.toLowerCase() === userAddress.toLowerCase());
     });
     res.json({ success: true, nfts: userNFTs });
   } catch (error) {
@@ -346,6 +349,8 @@ app.get('/api/web3/balance/:address', async (req, res) => {
     res.status(404).json({ success: false, error: error.message });
   }
 });
+
+// Get single item by tokenId
 app.get('/api/marketplace/:id', (req, res) => {
   const paramTokenId = req.params.id;
   const item = marketplaceItems.find(item => String(item.tokenId) === String(paramTokenId));

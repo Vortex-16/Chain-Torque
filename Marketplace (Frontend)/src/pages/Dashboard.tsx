@@ -51,7 +51,7 @@ const Dashboard = () => {
 
       // Get user's wallet address from metadata or use default for demo
       const walletAddress =
-        user.publicMetadata?.walletAddress ||
+        user.unsafeMetadata?.walletAddress ||
         '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266'; // Default wallet address for Archis
 
       const promises = [

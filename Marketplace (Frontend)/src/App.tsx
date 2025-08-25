@@ -22,6 +22,7 @@ import Dashboard from './pages/Dashboard';
 import Edit from './pages/Edit';
 import NotFound from './pages/NotFound';
 import BackendStatus from './components/BackendStatus';
+import SignUp from './pages/SignUp';
 
 const queryClient = new QueryClient();
 
@@ -47,6 +48,7 @@ const AppContent = () => {
         }}
       >
         <Routes>
+          <Route path='/signup' element={<SignUp />} />
           <Route
             path='/'
             element={

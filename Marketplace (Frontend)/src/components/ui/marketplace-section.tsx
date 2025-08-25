@@ -96,9 +96,7 @@ export function MarketplaceSection() {
         price: item.price
           ? `${parseFloat(item.price).toFixed(4)} ETH`
           : '0.001 ETH',
-        seller: item.seller
-          ? `${item.seller.slice(0, 6)}...${item.seller.slice(-4)}`
-          : 'Unknown',
+        seller: item.username || (item.seller ? `${item.seller.slice(0, 6)}...${item.seller.slice(-4)}` : 'Unknown Creator'),
         rating: 4.5 + Math.random() * 0.5, // Random rating for demo
         downloads: parseInt(item.downloads) || Math.floor(Math.random() * 1000),
         fileTypes:

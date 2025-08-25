@@ -62,6 +62,7 @@
     "@clerk/clerk-react": "^5.42.1",
     "@clerk/clerk-sdk-node": "^4.13.7",
     "@lighthouse-web3/sdk": "^0.4.1",
+    "@metamask/providers": "^22.1.0",
     "@nomicfoundation/hardhat-toolbox": "^2.0.2",
     "@openzeppelin/contracts": "^4.9.6",
     "@pinata/sdk": "^2.1.0",
