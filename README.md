@@ -27,6 +27,74 @@
 
 ---
 
+## 🧑‍💻 CAD Copilot & AI Assistant Implementation
+
+ChainTorque is building a next-generation CAD Copilot: an LLM-driven assistant that understands engineering prompts, generates safe CAD operations, and previews/executed edits in-browser or server-side. The architecture is modular and phased for rapid, beginner-friendly development.
+
+### CAD Copilot Architecture
+- Copilot Orchestrator (Node/TS microservice): Handles prompts, LLM calls, tool plan validation, and execution routing.
+- VectorDB / RAG: Stores examples, tool definitions, and domain docs for context retrieval.
+- LLM Provider: OpenAI GPT-4o/Gemini API for structured function-calling; self-hosted models later.
+- Tool API (JSON Schema): Strict schema for all CAD operations; validated with AJV.
+- Validator / Dry-Run: Simulates tool plans for safety and geometry checks.
+- Executor: WASM client for instant ops; server worker for heavy jobs (BullMQ + Redis).
+- UI: Chat panel, ghost preview overlay, accept/modify/cancel controls.
+
+### Phased Implementation (Beginner-Friendly)
+- Phase 0: Orchestrator skeleton, Tool API schema, VectorDB seeding, LLM adapter (1–2 weeks)
+- Phase 1: Prompt → Structured Plan, RAG-enhanced prompting, schema enforcement (2–3 weeks)
+- Phase 2: Validation & Ghost Preview, dry-run execution, risk scoring, UI preview (2–4 weeks)
+- Phase 3: Execution & Job System, WASM ops, server jobs, WebSocket progress (3–5 weeks)
+- Phase 4: Domain Intelligence, parametric gear/material modules, microservices (3–6 weeks)
+- Phase 5: Analysis & Simulation Hooks, CAE job creation, solver integration (optional, 4–8 weeks)
+- Phase 6: Fine-tuning, on-prem inference, privacy controls (ongoing)
+
+### CAD Editing Tool Phases
+- Phase 0: Ownership guard for model editing (1–2 days)
+- Phase 1: ModelViewer (react-three-fiber), region selection, highlighting (3–5 days)
+- Phase 2: Local edits, WASM preview, undo stack (5–8 days)
+- Phase 3: Mesh CSG (drill/cut), voxel-based ops, server fallback (4–6 days)
+- Phase 4: Server job system, worker, WebSocket notifications (4–7 days)
+- Phase 5: Save derivative, mint NFT, licensing checks (3–5 days)
+- Phase 6: Polish, performance tuning, autoscaling (ongoing)
+
+### Tech Stack
+- Frontend: React + TypeScript, react-three-fiber, three-mesh-bvh, drei
+- WASM: Rust + wasm-pack for mesh ops
+- Backend: Express + TypeScript, BullMQ + Redis
+- Storage: IPFS / Pinata, S3 fallback
+- DB: MongoDB/Postgres
+- Realtime: ws or socket.io
+
+---
+
+## 🗺️ CAD Copilot & AI Assistant Roadmap (Q3–Q4 2025)
+- [ ] Copilot Orchestrator service + LLM adapter + seeded VectorDB
+- [ ] Tool API schema + validator
+- [ ] Prompt → structured plan (function calling)
+- [ ] Dry-run + ghost preview generation (client-friendly mesh diff)
+- [ ] Execute small ops in WASM; enqueue heavy ops to worker
+- [ ] UI: Chat panel + preview + accept/cancel
+- [ ] Derivative metadata + provenance store
+- [ ] ModelViewer, region selection, local edits, undo stack
+- [ ] Mesh CSG, server job system, WebSocket notifications
+- [ ] Save derivative, mint NFT, licensing checks
+
+**Outcome:** Fast, incremental system for secure, responsive 3D model editing and AI-powered engineering assistance.
+
+---
+
+## 🎯 Key Features (Additional)
+- AI Copilot: Chat-driven CAD editing, ghost previews, risk scoring, and safe execution
+- Beginner-friendly phased development plan
+
+---
+
+## 🚀 Getting Started (Contributor Roles)
+- 🤖 AI/CAD Copilot Developer: Help build the Orchestrator, Tool API, and chat-driven CAD features
+
+---
+
 ## 🚀 **The Problem We're Solving**
 
 Traditional 3D model marketplaces suffer from critical flaws:
