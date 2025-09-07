@@ -160,7 +160,7 @@ const Upload: React.FC = () => {
       if (response.success) {
         console.log('✅ Upload successful!', response);
         alert(
-          `Model uploaded successfully! Token ID: ${response.tokenId || response.data?.tokenId}`
+          `Model uploaded successfully! Token ID: ${response.data?.tokenId || 'Unknown'}`
         );
         // Reset form
         setUploadData({
@@ -176,10 +176,11 @@ const Upload: React.FC = () => {
       } else {
         throw new Error(response.error || 'Upload failed');
       }
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('❌ Upload failed at step:', error);
       console.error('❌ Full error details:', error);
-      alert(`Upload failed: ${error.message}`);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      alert(`Upload failed: ${errorMessage}`);
     } finally {
       setIsUploading(false);
     }
@@ -328,7 +329,7 @@ const Upload: React.FC = () => {
           <input
             type='file'
             multiple
-            accept='.glb,.gltf,.obj,.fbx,.stl,.dae,.3ds,.blend,.max,.ma,.mb,.c4d,.ply,.x3d,.sldprt,.sldasm,.slddrw,.dwg,.dxf,.step,.stp,.iges,.igs,.catpart,.catproduct,.prt,.asm'
+            accept='.glb,.gltf,.obj,.stl'
             onChange={e => handleFileChange(e, 'files')}
             className='hidden'
             id='model-files'
@@ -353,9 +354,7 @@ const Upload: React.FC = () => {
               Click to upload 3D model files or drag and drop
             </p>
             <p className='text-xs text-muted-foreground mt-1'>
-              Supported formats: GLB, GLTF, OBJ, FBX, STL, DAE, 3DS, BLEND, MAX,
-              MA, MB, C4D, PLY, X3D, SolidWorks (SLDPRT/SLDASM/SLDDRW), AutoCAD
-              (DWG/DXF), STEP/IGES, CATIA, Creo
+              Supported formats: GLB, GLTF, OBJ, STL (WebGL-compatible formats for browser editing)
             </p>
           </label>
         </div>

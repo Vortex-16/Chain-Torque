@@ -1,7 +1,10 @@
-import React, { Suspense, useRef, useState } from 'react';
-import { Canvas } from '@react-three/fiber';
+import { Suspense, useRef, useState } from 'react';
+import { Canvas, useLoader } from '@react-three/fiber';
 import { OrbitControls, useGLTF } from '@react-three/drei';
+import { STLLoader } from 'three-stdlib';
+import { OBJLoader } from 'three-stdlib';
 import { Loader2 } from 'lucide-react';
+import * as THREE from 'three';
 
 import { Button } from '@/components/ui/button';
 
@@ -10,15 +13,76 @@ interface Model3DViewerProps {
   className?: string;
 }
 
+function getFileExtension(url: string): string {
+  return url.split('.').pop()?.toLowerCase() || '';
+}
+
 function Model({ url }: { url: string }) {
-  // useGLTF returns a loaded GLTF scene
-  const { scene } = useGLTF(url);
-  return <primitive object={scene} />;
+  const extension = getFileExtension(url);
+  
+  // Handle different file formats
+  try {
+    switch (extension) {
+      case 'glb':
+      case 'gltf':
+        // eslint-disable-next-line react-hooks/rules-of-hooks
+        const { scene: gltfScene } = useGLTF(url);
+        return <primitive object={gltfScene} />;
+        
+      case 'stl':
+        // eslint-disable-next-line react-hooks/rules-of-hooks
+        const stlGeometry = useLoader(STLLoader, url);
+        const stlMaterial = new THREE.MeshStandardMaterial({ 
+          color: '#60a5fa', 
+          metalness: 0.3, 
+          roughness: 0.4 
+        });
+        return <mesh geometry={stlGeometry} material={stlMaterial} />;
+        
+      case 'obj':
+        // eslint-disable-next-line react-hooks/rules-of-hooks
+        const objGroup = useLoader(OBJLoader, url);
+        // Apply default material to OBJ if it doesn't have one
+        objGroup.traverse((child: any) => {
+          if (child.isMesh && !child.material) {
+            child.material = new THREE.MeshStandardMaterial({ 
+              color: '#60a5fa', 
+              metalness: 0.3, 
+              roughness: 0.4 
+            });
+          }
+        });
+        return <primitive object={objGroup} />;
+        
+      default:
+        // Fallback for unsupported formats - show error message
+        console.warn(`Unsupported 3D file format: ${extension}. Supported formats: GLB, GLTF, STL, OBJ`);
+        return (
+          <mesh>
+            <boxGeometry args={[2, 0.5, 0.1]} />
+            <meshStandardMaterial color="#ff6b6b" />
+          </mesh>
+        );
+    }
+  } catch (error) {
+    console.error('Error loading 3D model:', error);
+    return (
+      <mesh>
+        <boxGeometry args={[2, 0.5, 0.1]} />
+        <meshStandardMaterial color="#ff6b6b" />
+      </mesh>
+    );
+  }
 }
 
 export function Model3DViewer({ modelUrl, className = '' }: Model3DViewerProps) {
   const controlsRef = useRef<any>(null);
   const [rotation, setRotation] = useState(0);
+  
+  // Validate file format
+  const extension = getFileExtension(modelUrl);
+  const supportedFormats = ['glb', 'gltf', 'stl', 'obj'];
+  const isSupported = supportedFormats.includes(extension);
 
   // Manual revolve
   const handleRevolve = () => {
@@ -40,6 +104,31 @@ export function Model3DViewer({ modelUrl, className = '' }: Model3DViewerProps) 
       controlsRef.current.update();
     }
   };
+
+  // Show error for unsupported formats
+  if (!isSupported) {
+    return (
+      <div
+        className={`relative bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center ${className}`}
+        style={{ height: 400 }}
+      >
+        <div className="text-center">
+          <div className="text-red-500 mb-4">
+            <svg className="w-16 h-16 mx-auto" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+            </svg>
+          </div>
+          <h3 className="text-lg font-semibold text-gray-800 mb-2">Unsupported File Format</h3>
+          <p className="text-sm text-gray-600 mb-2">
+            The file format <span className="font-mono bg-gray-200 px-1 rounded">.{extension}</span> is not supported for 3D viewing.
+          </p>
+          <p className="text-xs text-gray-500">
+            Supported formats: {supportedFormats.map(f => f.toUpperCase()).join(', ')}
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div

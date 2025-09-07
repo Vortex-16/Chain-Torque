@@ -17,11 +17,9 @@ import {
   Download,
   Star,
   User,
-  Calendar,
   FileText,
   Eye,
   Shield,
-  Wallet,
   Loader2,
   AlertCircle,
   Play,
@@ -111,8 +109,8 @@ Applications:
     totalSales: 1245,
   },
   specs: {
-    fileTypes: ['STEP', 'IGES', 'STL', 'SLDPRT', 'GLB'],
-    software: ['SolidWorks', 'AutoCAD', 'Fusion360', 'Inventor', 'CATIA'],
+    fileTypes: ['GLB', 'GLTF', 'OBJ', 'STL'],
+    software: ['Blender', 'Three.js', 'WebGL', 'Browser CAD'],
     fileSize: '25.4 MB',
     vertices: '247,592',
     polygons: '485,726',
@@ -217,6 +215,12 @@ const ProductDetail = () => {
 
   useEffect(() => {
     const fetchProduct = async () => {
+      if (!id) {
+        setError('Product ID is required');
+        setLoading(false);
+        return;
+      }
+      
       setLoading(true);
       try {
         const response = await apiService.getMarketplaceItem(id);
@@ -235,7 +239,7 @@ const ProductDetail = () => {
           // Update the mock data ID to match the requested ID
           const fallbackModel = {
             ...mockModel,
-            id: id,
+            id: id || '1',
             tokenId: parseInt(String(id), 10) || 1,
           };
           setModel(fallbackModel);

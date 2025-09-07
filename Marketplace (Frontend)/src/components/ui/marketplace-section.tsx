@@ -1,10 +1,10 @@
 import { CadCard } from '@/components/ui/cad-card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Filter, Grid, List, Loader2, AlertCircle } from 'lucide-react';
 import { useMarketplace, useWeb3Status } from '@/hooks/useWeb3';
 import { useEffect, useState } from 'react';
+import type { MarketplaceItem } from '@/hooks/useWeb3';
 
 // Import the generated images (fallback)
 import cadGear from '@/assets/cad-gear.jpg';
@@ -12,7 +12,24 @@ import cadDrone from '@/assets/cad-drone.jpg';
 import cadEngine from '@/assets/cad-engine.jpg';
 import cadRobot from '@/assets/cad-robot.jpg';
 
-const featuredModels = [
+interface DisplayItem {
+  id: string | number;
+  tokenId: number;
+  title: string;
+  image: string;
+  price: string;
+  seller: string;
+  rating: number;
+  downloads: number;
+  fileTypes: string[];
+  software: string[];
+  category?: string;
+  modelHash?: string;
+  modelUrl?: string | null;
+  isBlockchain?: boolean;
+}
+
+const featuredModels: DisplayItem[] = [
   {
     id: 1,
     tokenId: 1,
@@ -22,8 +39,8 @@ const featuredModels = [
     seller: 'MechDesign Pro',
     rating: 4.8,
     downloads: 1245,
-    fileTypes: ['STEP', 'IGES', 'STL'],
-    software: ['SolidWorks', 'AutoCAD', 'Fusion360'],
+    fileTypes: ['GLB', 'GLTF', 'STL'],
+    software: ['Blender', 'Three.js', 'WebGL'],
   },
   {
     id: 2,
@@ -34,8 +51,8 @@ const featuredModels = [
     seller: 'AeroTech Solutions',
     rating: 4.9,
     downloads: 856,
-    fileTypes: ['STEP', 'STL', 'DWG'],
-    software: ['CATIA', 'SolidWorks', 'Inventor'],
+    fileTypes: ['GLB', 'STL', 'OBJ'],
+    software: ['Blender', 'Three.js', 'WebGL'],
   },
   {
     id: 3,
@@ -46,8 +63,8 @@ const featuredModels = [
     seller: 'AutoCAD Masters',
     rating: 4.7,
     downloads: 2134,
-    fileTypes: ['STEP', 'IGES', 'SLDPRT'],
-    software: ['SolidWorks', 'NX', 'CATIA'],
+    fileTypes: ['GLTF', 'GLB', 'OBJ'],
+    software: ['Blender', 'Three.js', 'WebGL'],
   },
   {
     id: 4,
@@ -75,13 +92,13 @@ const categories = [
 
 export function MarketplaceSection() {
   const { items, stats, loading, error, refreshMarketplace } = useMarketplace();
-  const { initialized, network, contract } = useWeb3Status();
-  const [displayItems, setDisplayItems] = useState(featuredModels); // Fallback data
+  const { initialized, network } = useWeb3Status();
+  const [displayItems, setDisplayItems] = useState<DisplayItem[]>(featuredModels); // Fallback data
 
   useEffect(() => {
     // If we have real NFT items from the blockchain, use them
     if (items && items.length > 0) {
-      const nftItems = items.map((item, index) => ({
+      const nftItems: DisplayItem[] = items.map((item: MarketplaceItem, index: number) => ({
         id: item.tokenId || index,
         title: item.title || item.name || `NFT Model #${item.tokenId}`,
         image:
@@ -98,15 +115,9 @@ export function MarketplaceSection() {
           : '0.001 ETH',
         seller: item.username || (item.seller ? `${item.seller.slice(0, 6)}...${item.seller.slice(-4)}` : 'Unknown Creator'),
         rating: 4.5 + Math.random() * 0.5, // Random rating for demo
-        downloads: parseInt(item.downloads) || Math.floor(Math.random() * 1000),
-        fileTypes:
-          item.category === 'vehicles'
-            ? ['STEP', 'SLDPRT', 'STL']
-            : ['GLB', 'GLTF', 'STL'],
-        software:
-          item.category === 'vehicles'
-            ? ['SolidWorks', 'AutoCAD', 'CATIA']
-            : ['Blender', 'Three.js', 'Web3D'],
+        downloads: parseInt(String(item.downloads)) || Math.floor(Math.random() * 1000),
+        fileTypes: ['GLB', 'GLTF', 'STL'],
+        software: ['Blender', 'Three.js', 'WebGL'],
         category: item.category || '3D Model',
         tokenId: item.tokenId,
         modelHash: item.modelHash,
@@ -208,7 +219,7 @@ export function MarketplaceSection() {
         {/* Categories */}
         <Tabs defaultValue='all' className='mb-8'>
           <TabsList className='grid grid-cols-4 lg:grid-cols-7 w-full bg-muted'>
-            {categories.map((category, index) => (
+            {categories.map((category: string, index: number) => (
               <TabsTrigger
                 key={index}
                 value={category.toLowerCase().replace(' ', '-')}
