@@ -26,11 +26,21 @@ ChainTorque/
 
 ## 🛠️ **Technologies Used**
 
-- **Frontend**: Next.js, React, Three.js, React Three fiber, Tailwind CSS
-- **Backend**: Node.js + Express (Typescript), WASM + Rust, Socket.IO, MongoDB, IPFS
+- **Frontend**: Next.js, React, Three.js, Tailwind CSS
+- **Backend**: Node.js + Express, WASM + Rust, Socket.IO, MongoDB, IPFS
 - **Blockchain**: Solidity (ERC-721), Hardhat, Ethereum/Polygon, Web3.js, OpenZeppelin
 - **AI/ML**: Python (Scikit-learn, Pandas, PyTorch/TensorFlow, HuggingFaceTransformers), VectorDB
 - **DevOps**: Github Actions, Docker, AWS EC2/Azure
+
+## 🏗️ **Hybrid Storage Architecture**
+
+ChainTorque uses a dual-storage approach for optimal performance and decentralization:
+
+- **IPFS**: Stores 3D model files and images for permanent, censorship-resistant access
+- **MongoDB**: Handles user profiles, transaction history, and search for fast queries
+- **Blockchain**: Records ownership and ensures immutable transaction history
+
+This architecture provides instant user experiences while maintaining true Web3 decentralization for engineering assets.
 
 ## � **Quick Start**
 
