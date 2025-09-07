@@ -116,7 +116,7 @@ const App = () => {
             className="fit-to-screen-btn"
           />
           <FaRobot 
-            title="AI Copilot" 
+            title="Torquy" 
             className={`ai-copilot ${showAIPanel ? 'active' : ''}`}
             onClick={toggleAIPanel}
           />
@@ -239,14 +239,14 @@ const App = () => {
       <div className={`ai-panel-floating ${showAIPanel ? 'visible' : 'hidden'}`}>
         <div className="ai-header">
           <FaRobot />
-          <h3>AI Copilot</h3>
+          <h3>Torquy</h3>
           <button className="close-btn" onClick={toggleAIPanel}>×</button>
         </div>
         <div className="ai-chat">
           <div className="chat-messages">
             <div className="ai-message">
-              <strong>🤖 ChainTorque CAD AI:</strong><br/>
-              Hello! I'm your CAD copilot. I can help you with:
+              <strong>🤖 Torquy:</strong><br/>
+              Hello! I'm Torquy, your CAD assistant. I can help you with:
               <ul>
                 <li>"Create a 10mm hole here"</li>
                 <li>"Add 2mm fillet to all edges"</li>
