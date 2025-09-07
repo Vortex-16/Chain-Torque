@@ -5,6 +5,7 @@ import { User, LogOut, Activity } from 'lucide-react';
 import { useAuthContext } from '@/hooks/useAuth';
 import { useSystemStatus } from '@/hooks/useSystemStatus';
 import { useStatusPanel } from '@/contexts/StatusPanelContext';
+import { Link } from 'react-router-dom';
 
 export function Navigation() {
   const [showScrollButton, setShowScrollButton] = useState(false);
@@ -76,42 +77,42 @@ export function Navigation() {
   return (
     <>
       <nav className='bg-background border-b border-border shadow-sm p-4 flex justify-between items-center'>
-        <a href='/' className='text-xl font-bold text-primary'>
+        <Link to='/' className='text-xl font-bold text-primary'>
           ChainTorque
-        </a>
+        </Link>
         <div className='flex items-center gap-6'>
           <ul className='flex gap-6'>
             <li>
-              <a
-                href='/'
+              <Link
+                to='/'
                 className='text-foreground hover:text-primary transition-colors'
               >
                 Home
-              </a>
+              </Link>
             </li>
             <li>
-              <a
-                href='/dashboard'
+              <Link
+                to='/dashboard'
                 className='text-foreground hover:text-primary transition-colors'
               >
                 Dashboard
-              </a>
+              </Link>
             </li>
             <li>
-              <a
-                href='/edit'
+              <Link
+                to='/edit'
                 className='text-foreground hover:text-primary transition-colors'
               >
                 Edit
-              </a>
+              </Link>
             </li>
             <li>
-              <a
-                href='/upload'
+              <Link
+                to='/upload'
                 className='text-foreground hover:text-primary transition-colors'
               >
                 Upload
-              </a>
+              </Link>
             </li>
           </ul>
           <div className='flex items-center gap-3'>

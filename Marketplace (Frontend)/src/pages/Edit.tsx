@@ -1,34 +1,308 @@
+import { useState, useEffect } from 'react';
+import { useUser } from '@clerk/clerk-react';
 import { Navigation } from '@/components/ui/navigation';
 import { Footer } from '@/components/ui/footer';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Plus, Loader2, AlertCircle, Download, Star, Edit3 } from 'lucide-react';
+import apiService from '@/services/apiService';
+
+// Import fallback images
+import cadGear from '@/assets/cad-gear.jpg';
+import cadDrone from '@/assets/cad-drone.jpg';
+import cadEngine from '@/assets/cad-engine.jpg';
+import cadRobot from '@/assets/cad-robot.jpg';
+
+interface PurchasedItem {
+  id: string | number;
+  tokenId: number;
+  title: string;
+  image: string;
+  price: string;
+  seller: string;
+  rating: number;
+  downloads: number;
+  fileTypes: string[];
+  software: string[];
+  purchaseDate?: string;
+  modelUrl?: string;
+  isBlockchain?: boolean;
+}
 
 const Edit = () => {
+  const { user } = useUser();
+  const [purchasedItems, setPurchasedItems] = useState<PurchasedItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Get user's wallet address from Clerk metadata
+  const walletAddress = user?.unsafeMetadata?.walletAddress as string;
+
+  useEffect(() => {
+    loadPurchasedItems();
+  }, [walletAddress]);
+
+  const loadPurchasedItems = async () => {
+    if (!walletAddress) {
+      setError('Please connect your wallet to view purchased items');
+      setLoading(false);
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const response = await apiService.getUserPurchases(walletAddress);
+      
+      if (response.success && response.data) {
+        // Transform the API response to match our interface
+        const items: PurchasedItem[] = response.data.map((item: any, index: number) => ({
+          id: item.tokenId || item.id || index,
+          tokenId: item.tokenId || index,
+          title: item.title || `Model #${item.tokenId || index}`,
+          image: item.image || [cadGear, cadDrone, cadEngine, cadRobot][index % 4],
+          price: item.price || 'Purchased',
+          seller: item.seller || item.creator || 'Unknown Creator',
+          rating: item.rating || 4.5,
+          downloads: item.downloads || 0,
+          fileTypes: item.fileTypes || ['GLB', 'STL'],
+          software: item.software || ['CAD'],
+          purchaseDate: item.purchaseDate || new Date().toISOString(),
+          modelUrl: item.modelUrl,
+          isBlockchain: item.isBlockchain || true
+        }));
+        
+        setPurchasedItems(items);
+      } else {
+        // If no purchases or API fails, show empty state
+        setPurchasedItems([]);
+      }
+    } catch (err) {
+      console.error('Error loading purchased items:', err);
+      // Set empty array instead of error to show empty state
+      setPurchasedItems([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCreateNew = () => {
+    // Navigate to the CAD editor for creating a new model
+    window.open('http://localhost:3001', '_blank'); // CAD Frontend URL
+  };
+
+  const handleEditModel = (item: PurchasedItem) => {
+    // Navigate to the CAD editor with the model loaded
+    // For now, open the CAD editor in a new tab. In future, we could pass model data
+    const cadUrl = `http://localhost:3001?model=${encodeURIComponent(item.modelUrl || '')}&title=${encodeURIComponent(item.title)}`;
+    window.open(cadUrl, '_blank');
+  };
+
+  // Create New Card Component
+  const CreateNewCard = () => (
+    <Card 
+      className="group cursor-pointer bg-gradient-to-br from-primary/5 to-primary/10 border-dashed border-2 border-primary/30 hover:border-primary/50 transition-all duration-300 hover:shadow-lg"
+      onClick={handleCreateNew}
+    >
+      <CardContent className="p-6 flex flex-col items-center justify-center h-[300px]">
+        <div className="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center mb-4 group-hover:bg-primary/30 transition-colors">
+          <Plus className="h-8 w-8 text-primary" />
+        </div>
+        <h3 className="text-lg font-semibold text-foreground mb-2">Create New</h3>
+        <p className="text-sm text-muted-foreground text-center">
+          Start a new sketch with our CAD editor
+        </p>
+        <Button 
+          variant="outline" 
+          size="sm" 
+          className="mt-4 border-primary text-primary hover:bg-primary hover:text-primary-foreground"
+        >
+          Open Editor
+        </Button>
+      </CardContent>
+    </Card>
+  );
+
+  // Purchased Item Card Component
+  const PurchasedItemCard = ({ item }: { item: PurchasedItem }) => (
+    <Card
+      className="group cursor-pointer bg-gradient-card border-border/50 hover:animate-card-hover transition-all duration-300 hover:shadow-glow hover:border-primary/20"
+      onClick={() => handleEditModel(item)}
+    >
+      <CardContent className="p-0">
+        {/* Image */}
+        <div className="relative overflow-hidden rounded-t-lg">
+          <img
+            src={item.image}
+            alt={item.title}
+            className="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105"
+          />
+          <div className="absolute top-3 right-3">
+            <Badge variant="secondary" className="bg-green-500/90 text-white">
+              Owned
+            </Badge>
+          </div>
+          {/* File type badges */}
+          <div className="absolute bottom-3 left-3 flex gap-1 flex-wrap">
+            {item.fileTypes.map((type) => (
+              <Badge
+                key={type}
+                variant="secondary"
+                className="text-xs bg-background/80 backdrop-blur-sm"
+              >
+                {type}
+              </Badge>
+            ))}
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="p-4">
+          <h3 className="font-semibold text-foreground mb-2 line-clamp-2 group-hover:text-primary transition-colors">
+            {item.title}
+          </h3>
+
+          <div className="flex items-center justify-between text-sm text-muted-foreground mb-3">
+            <span>by {item.seller}</span>
+            <div className="flex items-center gap-1">
+              <Star className="h-3 w-3 fill-warning text-warning" />
+              <span>{item.rating}</span>
+            </div>
+          </div>
+
+          {/* Software compatibility */}
+          <div className="flex gap-1 mb-3 flex-wrap">
+            {item.software.map(sw => (
+              <Badge key={sw} variant="outline" className="text-xs">
+                {sw}
+              </Badge>
+            ))}
+          </div>
+
+          {/* Actions */}
+          <div className="flex items-center justify-between">
+            <div className="flex flex-col">
+              <span className="text-sm font-medium text-green-600">Purchased</span>
+              <span className="text-xs text-muted-foreground flex items-center gap-1">
+                <Download className="h-3 w-3" />
+                {item.downloads} downloads
+              </span>
+            </div>
+            <Button
+              size="sm"
+              className="bg-gradient-primary hover:bg-primary-hover transition-all hover:scale-105"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleEditModel(item);
+              }}
+            >
+              <Edit3 className="h-4 w-4 mr-1" />
+              Edit
+            </Button>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+
   return (
-    <div className='min-h-screen bg-background'>
+    <div className="min-h-screen bg-background">
       <Navigation />
 
-      <div className='container mx-auto px-4 py-8'>
-        <div className='max-w-4xl mx-auto'>
-          <div className='mb-8'>
-            <h1 className='text-3xl font-bold mb-2'>Edit</h1>
-            <p className='text-muted-foreground'>
-              Edit and manage your existing models (Coming Soon)
+      <div className="container mx-auto px-4 py-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold mb-2">My CAD Workshop</h1>
+            <p className="text-muted-foreground">
+              Edit your purchased models or create new designs with our professional CAD tools
             </p>
           </div>
 
-          <div className='text-center py-16'>
-            <div className='mb-4'>
-              <div className='w-24 h-24 bg-muted rounded-full flex items-center justify-center mx-auto mb-4'>
-                <span className='text-4xl'>🔧</span>
-              </div>
-              <h2 className='text-2xl font-semibold mb-2'>
-                Edit Features Coming Soon
-              </h2>
-              <p className='text-muted-foreground max-w-md mx-auto'>
-                This section will allow you to edit your existing models, update
-                descriptions, pricing, and manage your marketplace listings.
-              </p>
+          {/* Loading State */}
+          {loading && (
+            <div className="flex justify-center items-center py-16">
+              <Loader2 className="h-8 w-8 animate-spin text-primary mr-3" />
+              <span className="text-muted-foreground">Loading your models...</span>
             </div>
-          </div>
+          )}
+
+          {/* Error State */}
+          {error && (
+            <div className="text-center py-16">
+              <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-foreground mb-2">
+                Unable to Load Models
+              </h3>
+              <p className="text-muted-foreground mb-4">{error}</p>
+              <Button onClick={loadPurchasedItems} variant="outline">
+                Try Again
+              </Button>
+            </div>
+          )}
+
+          {/* Content */}
+          {!loading && !error && (
+            <>
+              {/* Stats */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <Card>
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-muted-foreground">Purchased Models</p>
+                        <p className="text-2xl font-bold text-foreground">{purchasedItems.length}</p>
+                      </div>
+                      <Download className="h-8 w-8 text-primary" />
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-muted-foreground">Editor Ready</p>
+                        <p className="text-2xl font-bold text-green-600">Active</p>
+                      </div>
+                      <Edit3 className="h-8 w-8 text-green-600" />
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-muted-foreground">Total Downloads</p>
+                        <p className="text-2xl font-bold text-foreground">
+                          {purchasedItems.reduce((sum, item) => sum + item.downloads, 0)}
+                        </p>
+                      </div>
+                      <Star className="h-8 w-8 text-warning" />
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Models Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {/* Create New Card - Always first */}
+                <CreateNewCard />
+                
+                {/* Purchased Items */}
+                {purchasedItems.map(item => (
+                  <PurchasedItemCard 
+                    key={`${item.tokenId}-${item.id}`} 
+                    item={item} 
+                  />
+                ))}
+              </div>
+
+              {/* Empty State for No Purchases - Removed as requested */}
+            </>
+          )}
         </div>
       </div>
 

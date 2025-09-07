@@ -171,6 +171,36 @@ class ApiService {
     return this.request(`/user/${userAddress}/nfts`, { method: 'GET' });
   }
 
+  // Get user's purchase history
+  async getUserPurchases(userAddress: string): Promise<ApiResponse<any[]>> {
+    return this.request(`/user/${userAddress}/purchases`, { method: 'GET' });
+  }
+
+  // Get user's sales history
+  async getUserSales(userAddress: string): Promise<ApiResponse<any[]>> {
+    return this.request(`/user/${userAddress}/sales`, { method: 'GET' });
+  }
+
+  // Get user profile with stats
+  async getUserProfileByAddress(userAddress: string): Promise<ApiResponse<any>> {
+    return this.request(`/user/${userAddress}/profile`, { method: 'GET' });
+  }
+
+  // Purchase an NFT (updated method)
+  async purchaseNFT(tokenId: number | string, buyerAddress: string, price: number): Promise<ApiResponse<any>> {
+    return this.request('/marketplace/purchase', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        tokenId: Number(tokenId),
+        buyerAddress,
+        price
+      }),
+    });
+  }
+
   async getUserProfile(authToken: string): Promise<ApiResponse<any>> {
     return this.request('/user/profile', {
       method: 'GET',
@@ -196,7 +226,7 @@ class ApiService {
   }
 
   // Legacy method aliases for backward compatibility
-  async getMyNFTs(authToken: string): Promise<ApiResponse<any[]>> {
+  async getMyNFTs(_authToken: string): Promise<ApiResponse<any[]>> {
     // This would need a user address - for now return empty
     return {
       success: true,
@@ -207,10 +237,6 @@ class ApiService {
 
   async createNFT(formData: FormData, authToken: string): Promise<ApiResponse<{ tokenId: number }>> {
     return this.createMarketplaceItem(formData, authToken);
-  }
-
-  async purchaseNFT(tokenId: number | string, _price: string, authToken: string): Promise<ApiResponse<{ transactionHash: string }>> {
-    return this.purchaseMarketplaceItem(tokenId, authToken);
   }
 
   // Direct fetch for health check
@@ -239,14 +265,17 @@ export const {
   getMarketplaceItems,
   getMarketplaceItem,
   getUserNFTs,
+  getUserPurchases,
+  getUserSales,
+  getUserProfileByAddress,
   getMarketplaceStats,
   createMarketplaceItem,
   purchaseMarketplaceItem,
+  purchaseNFT,
   getUserProfile,
   uploadFile,
   isBackendConnected,
   // Legacy aliases
   getMyNFTs,
   createNFT,
-  purchaseNFT,
 } = apiService;
