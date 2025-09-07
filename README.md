@@ -1,4 +1,4 @@
-# 🔗⚙️ ChainTorque
+# ChainTorque
 
 ### _The Web3 Engineering Marketplace Reinvented_
 
@@ -14,6 +14,7 @@
 - ✅ **Project Structure**: Clean frontend and backend architecture
 - ✅ **Landing Page**: Express.js + EJS templating engine
 - ✅ **Marketplace Frontend**: React + TypeScript + Vite setup
+- ✅ **CAD Frontend**: Browser-based CAD editor UI with professional tools
 - ✅ **Backend API**: Node.js + Express server, NFT minting, IPFS integration
 - ✅ **Smart Contract**: Solidity ERC721 contract, deployed and integrated
 - ✅ **Wallet-based onboarding**: Clerk + MetaMask integration
@@ -170,6 +171,39 @@ ChainTorque transforms the marketplace experience through cutting-edge Web3 and 
 - **AWS/Vercel**: Scalable cloud hosting
 - **GitHub Actions**: CI/CD automation
 - **Pinata**: IPFS pinning service
+
+---
+
+## 📁 **Project Structure**
+
+```
+ChainTorque/
+├── Landing Page (Frontend)/     # Express.js + EJS landing page
+├── Marketplace (Frontend)/      # React + Vite marketplace interface
+├── Marketplace (Backend)/       # Node.js + Express API & smart contracts
+├── CAD (Frontend)/              # Browser-based CAD editor interface
+├── AI Implementaion.md          # AI Copilot architecture & implementation plan
+├── Cad Implementaion.md         # CAD editor phased development plan
+└── README.md                    # This file
+```
+
+### **Quick Start Commands**
+
+```bash
+# Run all services
+npm run dev:all
+
+# Run individual services
+npm run dev:landing          # Landing page (Express)
+npm run dev:marketplace      # Marketplace frontend (Vite)
+npm run dev:backend         # Backend API (Node.js)
+npm run dev:cad             # CAD editor (React)
+
+# Smart contract operations
+npm run node:hardhat        # Start local blockchain
+npm run deploy:local        # Deploy contracts locally
+npm run deploy:sepolia      # Deploy to Sepolia testnet
+```
 
 ---
 

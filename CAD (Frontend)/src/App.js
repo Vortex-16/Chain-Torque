@@ -33,7 +33,7 @@ const App = () => {
       {/* Top Bar */}
       <div className="topbar">
         <div className="topbar-left">
-          <h1>🔗⚙️ ChainTorque CAD</h1>
+          <h1>ChainTorque CAD</h1>
           <span className="filename">untitled_model.cad</span>
         </div>
         <div className="topbar-icons">
