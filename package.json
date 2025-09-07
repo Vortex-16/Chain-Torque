@@ -5,11 +5,12 @@
   "private": true,
   "workspaces": [
     "Landing Page (Frontend)",
-    "Marketplace (Frontend)",
-    "Marketplace (Backend)"
+    "Marketplace (Frontend)", 
+    "Marketplace (Backend)",
+    "CAD (Frontend)"
   ],
   "scripts": {
-    "dev:all": "concurrently \"npm run dev:landing\" \"npm run dev:marketplace\" \"npm run dev:backend\"",
+    "dev:all": "concurrently \"npm run dev:landing\" \"npm run dev:marketplace\" \"npm run dev:backend\" \"npm run dev:cad\"",
     "dev": "npm run dev:marketplace && npm run dev:backend",
     "build": "npm run build:marketplace && npm run build:backend",
     "start": "npm run start:marketplace && npm run start:backend",
@@ -23,7 +24,8 @@
     "deploy:sepolia": "cd \"Marketplace (Backend)\" && npx hardhat run scripts/deploy.js --network sepolia",
     "dev:landing": "npm run dev --workspace \"Landing Page (Frontend)\"",
     "dev:marketplace": "npm run dev --workspace \"Marketplace (Frontend)\"",
-    "dev:backend": "npm run dev --workspace \"Marketplace (Backend)\""
+    "dev:backend": "npm run dev --workspace \"Marketplace (Backend)\"",
+    "dev:cad": "npm run start --workspace \"CAD (Frontend)\""
   },
   "keywords": [
     "web3",
