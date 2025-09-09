@@ -5,6 +5,7 @@ import { Filter, Grid, List, Loader2, AlertCircle } from 'lucide-react';
 import { useMarketplace, useWeb3Status } from '@/hooks/useWeb3';
 import { useEffect, useState } from 'react';
 import type { MarketplaceItem } from '@/hooks/useWeb3';
+import { WalletConnectionDialog } from '@/components/ui/wallet-connection-dialog';
 
 // Import the generated images (fallback)
 import cadGear from '@/assets/cad-gear.jpg';
@@ -94,6 +95,7 @@ export function MarketplaceSection() {
   const { items, stats, loading, error, refreshMarketplace } = useMarketplace();
   const { initialized, network } = useWeb3Status();
   const [displayItems, setDisplayItems] = useState<DisplayItem[]>(featuredModels); // Fallback data
+  const [showWalletDialog, setShowWalletDialog] = useState(false);
 
   useEffect(() => {
     // If we have real NFT items from the blockchain, use them
@@ -140,6 +142,15 @@ export function MarketplaceSection() {
 
   const handleRefresh = () => {
     refreshMarketplace();
+  };
+
+  const handleWalletRequired = () => {
+    setShowWalletDialog(true);
+  };
+
+  const handleWalletConnected = () => {
+    // Refresh the page or update state as needed
+    window.location.reload();
   };
 
   return (
@@ -263,6 +274,7 @@ export function MarketplaceSection() {
                     downloads={model.downloads}
                     fileTypes={model.fileTypes}
                     software={model.software}
+                    onWalletRequired={handleWalletRequired}
                   />
                 ))}
               </div>
@@ -281,6 +293,13 @@ export function MarketplaceSection() {
           </Button>
         </div>
       </div>
+
+      {/* Wallet Connection Dialog */}
+      <WalletConnectionDialog
+        isOpen={showWalletDialog}
+        onClose={() => setShowWalletDialog(false)}
+        onConnect={handleWalletConnected}
+      />
     </section>
   );
 }

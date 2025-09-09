@@ -8,7 +8,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { Model3DViewer } from '@/components/ui/model-3d-viewer';
+import { WalletConnectionDialog } from '@/components/ui/wallet-connection-dialog';
 import apiService from '@/services/apiService';
+import { useUser } from '@clerk/clerk-react';
 import {
   ArrowLeft,
   ShoppingCart,
@@ -23,6 +25,7 @@ import {
   Loader2,
   AlertCircle,
   Play,
+  Wallet,
 } from 'lucide-react';
 
 // Import fallback images
@@ -136,6 +139,7 @@ Applications:
 const ProductDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useUser();
   const [model, setModel] = useState<ProductModel | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -143,6 +147,10 @@ const ProductDetail = () => {
   const [isPurchasing, setIsPurchasing] = useState(false);
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [show3D, setShow3D] = useState(false);
+  const [showWalletDialog, setShowWalletDialog] = useState(false);
+
+  // Check if user has wallet connected
+  const hasWallet = !!user?.unsafeMetadata?.walletAddress;
 
   // Transform backend data to frontend ProductModel structure
   const transformBackendData = (backendData: any): ProductModel => {
@@ -255,6 +263,11 @@ const ProductDetail = () => {
   }, [id]);
 
   const handlePurchase = async () => {
+    if (!hasWallet) {
+      setShowWalletDialog(true);
+      return;
+    }
+
     setIsPurchasing(true);
     try {
       // Check if this is mock data (no real tokenId from backend)
@@ -316,6 +329,11 @@ const ProductDetail = () => {
       navigator.clipboard.writeText(window.location.href);
       alert('Link copied to clipboard!');
     }
+  };
+
+  const handleWalletConnected = () => {
+    // Refresh the page to update wallet state
+    window.location.reload();
   };
 
   if (loading) {
@@ -469,19 +487,39 @@ const ProductDetail = () => {
 
             {/* Purchase Buttons */}
             <div className="space-y-3">
-              <Button size="lg" className="w-full bg-gradient-primary hover:bg-primary-hover" onClick={handlePurchase} disabled={isPurchasing}>
+              <Button 
+                size="lg" 
+                className={hasWallet 
+                  ? "w-full bg-gradient-primary hover:bg-primary-hover" 
+                  : "w-full bg-muted text-muted-foreground cursor-not-allowed opacity-60"
+                } 
+                onClick={handlePurchase} 
+                disabled={isPurchasing || !hasWallet}
+              >
                 {isPurchasing ? (
                   <>
                     <Loader2 className="h-5 w-5 mr-2 animate-spin" />
                     Processing Purchase...
                   </>
-                ) : (
+                ) : hasWallet ? (
                   <>
                     <ShoppingCart className="h-5 w-5 mr-2" />
                     Buy Now
                   </>
+                ) : (
+                  <>
+                    <Wallet className="h-5 w-5 mr-2" />
+                    Connect Wallet to Purchase
+                  </>
                 )}
               </Button>
+
+              {!hasWallet && (
+                <div className="flex items-center gap-2 text-sm text-amber-600 bg-amber-50 p-3 rounded-lg border border-amber-200">
+                  <AlertCircle className="h-4 w-4" />
+                  <p>Connect your wallet to purchase and own this NFT</p>
+                </div>
+              )}
 
               {model.tokenId && (
                 <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted p-3 rounded-lg">
@@ -683,6 +721,13 @@ const ProductDetail = () => {
       </div>
 
       <Footer />
+
+      {/* Wallet Connection Dialog */}
+      <WalletConnectionDialog
+        isOpen={showWalletDialog}
+        onClose={() => setShowWalletDialog(false)}
+        onConnect={handleWalletConnected}
+      />
     </div>
   );
 };

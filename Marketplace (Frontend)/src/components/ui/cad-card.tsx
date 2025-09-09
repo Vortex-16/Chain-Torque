@@ -1,9 +1,10 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Heart, Download, Star, ShoppingCart } from 'lucide-react';
+import { Heart, Download, Star, ShoppingCart, Wallet } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
+import { useUser } from '@clerk/clerk-react';
 
 interface CadCardProps {
   id: string | number | { tokenId: string | number };
@@ -16,6 +17,7 @@ interface CadCardProps {
   fileTypes: string[];
   software: string[];
   className?: string;
+  onWalletRequired?: () => void;
 }
 
 export function CadCard({
@@ -29,8 +31,13 @@ export function CadCard({
   fileTypes,
   software,
   className,
+  onWalletRequired,
 }: CadCardProps) {
   const navigate = useNavigate();
+  const { user } = useUser();
+
+  // Check if user has wallet connected
+  const hasWallet = !!user?.unsafeMetadata?.walletAddress;
 
   const handleCardClick = () => {
     // Prefer tokenId if present, fallback to id
@@ -45,7 +52,18 @@ export function CadCard({
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent card click when clicking the button
-    // Add to cart logic here
+    
+    if (!hasWallet) {
+      // If no wallet connected, trigger wallet connection popup
+      if (onWalletRequired) {
+        onWalletRequired();
+      } else {
+        alert('Please connect your wallet to purchase items');
+      }
+      return;
+    }
+    
+    // Add to cart logic here (only if wallet is connected)
     console.log(`Added ${title} to cart`);
   };
 
@@ -130,12 +148,27 @@ export function CadCard({
             </div>
             <Button
               size='sm'
-              className='bg-gradient-primary hover:bg-primary-hover transition-all hover:scale-105 animate-glow-pulse'
+              className={cn(
+                'transition-all hover:scale-105',
+                hasWallet 
+                  ? 'bg-gradient-primary hover:bg-primary-hover animate-glow-pulse' 
+                  : 'bg-muted text-muted-foreground cursor-not-allowed opacity-60'
+              )}
               onClick={handleAddToCart}
-              aria-label='Add to cart'
+              aria-label={hasWallet ? 'Add to cart' : 'Connect wallet to purchase'}
+              disabled={!hasWallet}
             >
-              <ShoppingCart className='h-4 w-4 mr-1' />
-              Add
+              {hasWallet ? (
+                <>
+                  <ShoppingCart className='h-4 w-4 mr-1' />
+                  Add
+                </>
+              ) : (
+                <>
+                  <Wallet className='h-4 w-4 mr-1' />
+                  Connect
+                </>
+              )}
             </Button>
           </div>
         </div>

@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 import { Navigation } from '../components/ui/navigation';
 import { Footer } from '../components/ui/footer';
 import { Button } from '../components/ui/button';
+import { WalletConnectionDialog } from '@/components/ui/wallet-connection-dialog';
 import { useAuthContext } from '@/hooks/useAuth';
 import { useAuth } from '@clerk/clerk-react';
 import apiService from '@/services/apiService';
+import { Wallet } from 'lucide-react';
 
 interface UploadData {
   modelName: string;
@@ -20,6 +22,7 @@ const Upload: React.FC = () => {
   const { user } = useAuthContext();
   const { getToken } = useAuth();
   const [step, setStep] = useState(1);
+  const [showWalletDialog, setShowWalletDialog] = useState(false);
   const [uploadData, setUploadData] = useState<UploadData>({
     modelName: '',
     description: '',
@@ -31,28 +34,8 @@ const Upload: React.FC = () => {
   });
   const [isUploading, setIsUploading] = useState(false);
 
-  // Prevent upload if user has no wallet address
+  // Check if user has wallet connected
   const hasWallet = !!user?.unsafeMetadata?.walletAddress;
-  if (!hasWallet) {
-    return (
-      <div className='min-h-screen bg-background text-foreground flex flex-col items-center justify-center'>
-        <Navigation />
-        <div className='max-w-md mx-auto mt-24 p-8 border rounded-lg bg-card text-center'>
-          <h2 className='text-2xl font-bold mb-4'>Wallet Required</h2>
-          <p className='text-muted-foreground mb-4'>
-            You must connect your wallet before uploading a model.
-          </p>
-          <a
-            href='/'
-            className='bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700'
-          >
-            Go to Marketplace & Connect Wallet
-          </a>
-        </div>
-        <Footer />
-      </div>
-    );
-  }
 
   const handleInputChange = (field: keyof UploadData, value: any) => {
     setUploadData(prev => ({
@@ -500,6 +483,11 @@ const Upload: React.FC = () => {
     </div>
   );
 
+  const handleWalletConnected = () => {
+    // Refresh the page to reload user data
+    window.location.reload();
+  };
+
   return (
     <div className='min-h-screen bg-background text-foreground'>
       <Navigation />
@@ -515,43 +503,73 @@ const Upload: React.FC = () => {
             </p>
           </div>
 
-          {renderStepIndicator()}
-
-          <div className='bg-card rounded-lg shadow-lg border border-border p-8'>
-            {step === 1 && renderStep1()}
-            {step === 2 && renderStep2()}
-            {step === 3 && renderStep3()}
-            {step === 4 && renderStep4()}
-
-            <div className='flex justify-between pt-6 mt-6 border-t border-border'>
-              <Button
-                onClick={() => setStep(step - 1)}
-                disabled={step === 1}
-                className={step === 1 ? 'opacity-50 cursor-not-allowed' : ''}
+          {!hasWallet ? (
+            // Show wallet connection requirement
+            <div className='bg-card rounded-lg shadow-lg border border-border p-8 text-center'>
+              <div className='w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-4'>
+                <Wallet className='h-8 w-8 text-primary' />
+              </div>
+              <h2 className='text-2xl font-bold mb-4'>Wallet Required</h2>
+              <p className='text-muted-foreground mb-6'>
+                You must connect your wallet before uploading a model to the blockchain marketplace.
+              </p>
+              <Button 
+                onClick={() => setShowWalletDialog(true)}
+                className='bg-gradient-primary hover:bg-primary-hover'
               >
-                Previous
+                <Wallet className='h-4 w-4 mr-2' />
+                Connect Wallet
               </Button>
-
-              {step < 4 ? (
-                <Button
-                  onClick={() => setStep(step + 1)}
-                  disabled={!validateStep(step)}
-                >
-                  Next
-                </Button>
-              ) : (
-                <Button
-                  onClick={handleSubmit}
-                  disabled={isUploading}
-                  className='bg-green-600 hover:bg-green-700 text-white'
-                >
-                  {isUploading ? 'Uploading...' : 'Submit Model'}
-                </Button>
-              )}
             </div>
-          </div>
+          ) : (
+            // Show upload form
+            <>
+              {renderStepIndicator()}
+
+              <div className='bg-card rounded-lg shadow-lg border border-border p-8'>
+                {step === 1 && renderStep1()}
+                {step === 2 && renderStep2()}
+                {step === 3 && renderStep3()}
+                {step === 4 && renderStep4()}
+
+                <div className='flex justify-between pt-6 mt-6 border-t border-border'>
+                  <Button
+                    onClick={() => setStep(step - 1)}
+                    disabled={step === 1}
+                    className={step === 1 ? 'opacity-50 cursor-not-allowed' : ''}
+                  >
+                    Previous
+                  </Button>
+
+                  {step < 4 ? (
+                    <Button
+                      onClick={() => setStep(step + 1)}
+                      disabled={!validateStep(step)}
+                    >
+                      Next
+                    </Button>
+                  ) : (
+                    <Button
+                      onClick={handleSubmit}
+                      disabled={isUploading}
+                      className='bg-green-600 hover:bg-green-700 text-white'
+                    >
+                      {isUploading ? 'Uploading...' : 'Submit Model'}
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </div>
+
+      {/* Wallet Connection Dialog */}
+      <WalletConnectionDialog
+        isOpen={showWalletDialog}
+        onClose={() => setShowWalletDialog(false)}
+        onConnect={handleWalletConnected}
+      />
 
       <Footer />
     </div>

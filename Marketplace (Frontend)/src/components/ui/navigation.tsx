@@ -76,7 +76,7 @@ export function Navigation() {
 
   return (
     <>
-      <nav className='bg-background border-b border-border shadow-sm p-4 flex justify-between items-center'>
+      <nav className='bg-background border-b border-border shadow-sm p-4 flex justify-between items-center relative z-10'>
         <Link to='/' className='text-xl font-bold text-primary'>
           ChainTorque
         </Link>
