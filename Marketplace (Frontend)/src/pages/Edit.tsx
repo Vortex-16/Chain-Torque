@@ -5,7 +5,8 @@ import { Footer } from '@/components/ui/footer';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Loader2, AlertCircle, Download, Star, Edit3 } from 'lucide-react';
+import { WalletConnectionDialog } from '@/components/ui/wallet-connection-dialog';
+import { Plus, Loader2, AlertCircle, Download, Star, Edit3, Wallet } from 'lucide-react';
 import apiService from '@/services/apiService';
 
 // Import fallback images
@@ -35,6 +36,7 @@ const Edit = () => {
   const [purchasedItems, setPurchasedItems] = useState<PurchasedItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showWalletDialog, setShowWalletDialog] = useState(false);
 
   // Get user's wallet address from Clerk metadata
   const walletAddress = user?.unsafeMetadata?.walletAddress as string;
@@ -45,7 +47,8 @@ const Edit = () => {
 
   const loadPurchasedItems = async () => {
     if (!walletAddress) {
-      setError('Please connect your wallet to view purchased items');
+      // No wallet connected - just show empty state, don't treat as error
+      setPurchasedItems([]);
       setLoading(false);
       return;
     }
@@ -91,6 +94,11 @@ const Edit = () => {
   const handleCreateNew = () => {
     // Navigate to the CAD editor for creating a new model
     window.open('http://localhost:3001', '_blank'); // CAD Frontend URL
+  };
+
+  const handleWalletConnected = () => {
+    // Refresh the page to reload user data and purchased items
+    window.location.reload();
   };
 
   const handleEditModel = (item: PurchasedItem) => {
@@ -220,6 +228,33 @@ const Edit = () => {
             </p>
           </div>
 
+          {/* Wallet Connection Warning */}
+          {!walletAddress && (
+            <div className="mb-8 p-4 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+              <div className="flex items-start gap-3">
+                <div className="w-6 h-6 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <Wallet className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" />
+                </div>
+                <div>
+                  <h3 className="font-medium text-blue-900 dark:text-blue-100 mb-1">
+                    Connect Wallet to Access Purchased Models
+                  </h3>
+                  <p className="text-sm text-blue-700 dark:text-blue-300 mb-3">
+                    You can use the CAD editor to create new sketches without a wallet. To view and edit models you've purchased from the marketplace, please connect your wallet.
+                  </p>
+                  <Button 
+                    onClick={() => setShowWalletDialog(true)}
+                    size="sm"
+                    className="bg-blue-600 hover:bg-blue-700 text-white"
+                  >
+                    <Wallet className="h-4 w-4 mr-2" />
+                    Connect Wallet
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Loading State */}
           {loading && (
             <div className="flex justify-center items-center py-16">
@@ -305,6 +340,13 @@ const Edit = () => {
           )}
         </div>
       </div>
+
+      {/* Wallet Connection Dialog */}
+      <WalletConnectionDialog
+        isOpen={showWalletDialog}
+        onClose={() => setShowWalletDialog(false)}
+        onConnect={handleWalletConnected}
+      />
 
       <Footer />
     </div>
