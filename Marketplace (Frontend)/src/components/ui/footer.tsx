@@ -5,7 +5,7 @@ export function Footer() {
         {/* Brand */}
         <div>
           <h3 className='text-foreground text-xl font-semibold mb-4'>
-            CAD Marketplace
+            ChainTorque
           </h3>
           <p className='text-sm text-muted-foreground'>
             A platform to upload, explore, and download 3D CAD models easily.
@@ -132,7 +132,7 @@ export function Footer() {
       </div>
 
       <div className='border-t border-border mt-10 pt-4 text-center text-sm text-muted-foreground'>
-        &copy; 2025 CAD Marketplace. All rights reserved.
+        &copy; 2025 ChainTorque. All rights reserved.
       </div>
     </footer>
   );

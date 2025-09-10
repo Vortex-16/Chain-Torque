@@ -1,12 +1,12 @@
 # ChainTorque
 
-### _Web3 Engineering Marketplace with AI-Powered CAD Editor_
+### _Web3 Engineering Platform with AI-Powered CAD Editor_
 
-> **ChainTorque** revolutionizes 3D model marketplaces by combining blockchain technology, AI-driven optimization, and real-time 3D interaction to create a secure, transparent, and intelligent platform for engineering assets.
+> **ChainTorque** revolutionizes 3D model platforms by combining blockchain technology, AI-driven optimization, and real-time 3D interaction to create a secure, transparent, and intelligent platform for engineering assets.
 
 ## 🚀 **What is ChainTorque?**
 
-ChainTorque is a comprehensive Web3 platform that solves critical problems in the 3D engineering marketplace:
+ChainTorque is a comprehensive Web3 platform that solves critical problems in the 3D engineering space:
 
 - **🛡️ NFT-Based Licensing**: Blockchain-verified ownership and licensing
 - **🎮 Interactive 3D Previews**: Inspect models before purchasing
@@ -92,7 +92,7 @@ npm run dev:cad             # CAD editor with Torquy
 **🔄 In Progress**
 - AI-powered CAD operations
 - Advanced geometry optimization
-- Mobile responsiveness
+- Native Mobile Marketplace App
 
 **📋 Planned**
 - Multi-chain support

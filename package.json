@@ -1,7 +1,7 @@
 {
   "name": "chaintorque-monorepo",
   "version": "1.0.0",
-  "description": "ChainTorque Web3 Engineering Marketplace - Monorepo",
+  "description": "ChainTorque Web3 Engineering Platform - Monorepo",
   "private": true,
   "workspaces": [
     "Landing Page (Frontend)",
