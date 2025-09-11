@@ -1,0 +1,25 @@
+{
+  "name": "chaintorque-landing",
+  "version": "1.0.0",
+  "description": "ChainTorque Landing Page",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js"
+  },
+  "keywords": [
+    "web3",
+    "landing",
+    "express"
+  ],
+  "author": "ChainTorque Team",
+  "license": "ISC",
+  "dependencies": {
+    "express": "*",
+    "dotenv": "*",
+    "ejs": "*"
+  },
+  "devDependencies": {
+    "nodemon": "*"
+  }
+}

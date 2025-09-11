@@ -1,0 +1,32 @@
+<%- include('partials/header')  %>
+
+<section class="bg-gray-100 py-10">
+    <div class="container mx-auto">
+        <h2 class="text-4xl font-bold mb-8 text-center">All CAD Models</h2>
+        <div class="mb-8 text-center">
+            <input type="text" class="form-control w-1/2 mx-auto" placeholder="Search CAD Models...">
+        </div>
+        
+        
+        <div class="row">
+            <% models.forEach(model => {%>
+                <div class="col-md-4 mb-4">
+                    <div class="card shadow-md tansition-transform duration-300 hover:scale-105 hover:shadow-2xl" style="border-radius: 16px;">
+                        <img src="<%= model.imageURL %>" class="card-img-top" alt="<%= model.title %>">
+                        <div class="card-body">
+                            <h5 class="card-title"><%= model.title %></h5>
+                            <p class="card-text"><%= model.description.substring(0,100) %>...</p>
+                            <a href="/model/<%= model._id %>" class="btn btn-success">View</a>
+                            <a href="/download/<%= model._id %>" class="btn btn-outline-secondary">Download</a>
+                        </div>
+                    </div>
+                </div>
+           <% }) %>
+        </div>
+    </div>
+</section>
+
+
+
+
+<%- include('partials/footer')  %>

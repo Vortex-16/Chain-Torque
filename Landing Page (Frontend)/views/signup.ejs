@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ChainTorque Sign Up</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-background min-h-screen flex items-center justify-center text-foreground">
+
+  <div class="bg-card shadow-2xl rounded-xl w-full max-w-lg p-8">
+    <div class="text-center mb-6">
+      <div class="w-20 h-20 mx-auto rounded-full mb-4 bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center">
+        <span class="text-white text-2xl font-bold">CT</span>
+      </div>
+      <h1 class="text-2xl font-bold">Join ChainTorque</h1>
+      <p class="text-gray-500">Create your account</p>
+    </div>
+
+    <div id="sign-up"></div>
+
+    <div class="text-center mt-4">
+      <a href="/login" class="text-blue-600 hover:underline">Already have an account? Sign in</a>
+    </div>
+  </div>
+
+  <script
+    async
+    crossorigin="anonymous"
+    data-clerk-publishable-key="<%= process.env.CLERK_PUBLISHABLE_KEY %>"
+    src="https://cdn.jsdelivr.net/npm/@clerk/clerk-js@latest/dist/clerk.browser.js"
+  ></script>
+
+  <script>
+    window.addEventListener("load", async function () {
+      await Clerk.load();
+      
+      // Check if user is already signed in
+      if (Clerk.user) {
+        window.location.href = "http://localhost:8080";
+        return;
+      }
+      
+      Clerk.mountSignUp(document.getElementById("sign-up"), {
+        appearance: {
+          theme: {
+            primaryColor: "#4f46e5"
+          }
+        }
+      });
+
+      // Listen for authentication state changes
+      setInterval(() => {
+        if (Clerk.user) {
+          window.location.href = "http://localhost:8080";
+        }
+      }, 1000);
+    });
+  </script>
+</body>
+</html>

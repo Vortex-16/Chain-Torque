@@ -1,0 +1,184 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* CAD Market Design System - Professional engineering aesthetic
+All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    /* Light Mode Variables */
+    --background: 0 0% 100%;
+    --foreground: 224 71.4% 4.1%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 224 71.4% 4.1%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 224 71.4% 4.1%;
+
+    /* Blue primary matching Landing Page */
+    --primary: 217 91% 60%;
+    --primary-foreground: 0 0% 100%;
+    --primary-hover: 217 91% 55%;
+
+    /* Purple/Indigo accent for gradients */
+    --secondary: 259 94% 51%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 220 14.3% 95.9%;
+    --muted-foreground: 220 8.9% 46.1%;
+
+    --accent: 259 94% 51%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 217 91% 60%;
+
+    /* CAD Market specific colors - Light Mode */
+    --engineering-blue: 217 91% 60%;
+    --technical-gray: 220 8.9% 46.1%;
+    --success-green: 142 76% 36%;
+    --warning-orange: 25 95% 53%;
+
+    /* Light mode gradients */
+    --gradient-primary: linear-gradient(
+      135deg,
+      hsl(217 91% 60%),
+      hsl(259 94% 51%)
+    );
+    --gradient-hero: linear-gradient(
+      135deg,
+      hsl(259 94% 51%),
+      hsl(217 91% 60%),
+      hsl(172 76% 41%)
+    );
+    --gradient-card: linear-gradient(
+      145deg,
+      hsl(0 0% 100%),
+      hsl(220 14.3% 95.9%)
+    );
+
+    /* Light shadows */
+    --shadow-card:
+      0 1px 3px 0 hsl(0 0% 0% / 0.1), 0 1px 2px -1px hsl(0 0% 0% / 0.1);
+    --shadow-card-hover:
+      0 4px 6px -1px hsl(0 0% 0% / 0.1), 0 2px 4px -2px hsl(0 0% 0% / 0.1);
+    --shadow-professional:
+      0 10px 15px -3px hsl(0 0% 0% / 0.1), 0 4px 6px -4px hsl(0 0% 0% / 0.1);
+
+    --radius: 0.5rem;
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 217 91% 60%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 14.3% 95.9%;
+    --sidebar-accent-foreground: 240 5.3% 26.1%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217 91% 60%;
+  }
+
+  .dark {
+    /* Dark Mode Variables */
+    --background: 224 71.4% 4.1%;
+    --foreground: 210 20% 98%;
+
+    --card: 224 71.4% 4.1%;
+    --card-foreground: 210 20% 98%;
+
+    --popover: 224 71.4% 4.1%;
+    --popover-foreground: 210 20% 98%;
+
+    /* Bright primary for dark mode */
+    --primary: 217 91% 65%;
+    --primary-foreground: 224 71.4% 4.1%;
+    --primary-hover: 217 91% 70%;
+
+    /* Purple secondary */
+    --secondary: 259 94% 65%;
+    --secondary-foreground: 224 71.4% 4.1%;
+
+    --muted: 215 27.9% 16.9%;
+    --muted-foreground: 217.9 10.6% 64.9%;
+
+    --accent: 259 94% 65%;
+    --accent-foreground: 224 71.4% 4.1%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 20% 98%;
+
+    --border: 215 27.9% 16.9%;
+    --input: 215 27.9% 16.9%;
+    --ring: 217 91% 65%;
+
+    /* CAD Market specific colors - Dark Mode */
+    --engineering-blue: 217 91% 65%;
+    --technical-gray: 217.9 10.6% 64.9%;
+    --success-green: 142 76% 46%;
+    --warning-orange: 25 95% 63%;
+
+    /* Dark mode gradients */
+    --gradient-primary: linear-gradient(
+      135deg,
+      hsl(217 91% 65%),
+      hsl(259 94% 65%)
+    );
+    --gradient-hero: linear-gradient(
+      135deg,
+      hsl(259 94% 65%),
+      hsl(217 91% 65%),
+      hsl(172 76% 51%)
+    );
+    --gradient-card: linear-gradient(
+      145deg,
+      hsl(224 71.4% 4.1%),
+      hsl(215 27.9% 16.9%)
+    );
+
+    /* Dark shadows with glow */
+    --shadow-card:
+      0 4px 6px -1px hsl(0 0% 0% / 0.3), 0 2px 4px -2px hsl(0 0% 0% / 0.3);
+    --shadow-card-hover:
+      0 10px 15px -3px hsl(217 91% 65% / 0.2), 0 4px 6px -4px hsl(0 0% 0% / 0.3);
+    --shadow-professional: 0 25px 50px -12px hsl(0 0% 0% / 0.5);
+
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 217 91% 65%;
+    --sidebar-primary-foreground: 224 71.4% 4.1%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217 91% 65%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Custom animations for 3D viewer */
+@keyframes spin-y {
+  from {
+    transform: rotateY(0deg);
+  }
+  to {
+    transform: rotateY(360deg);
+  }
+}
+
+.animate-spin-y {
+  animation: spin-y 4s linear infinite;
+}
