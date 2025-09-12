@@ -101,7 +101,7 @@ Applications:
 • Precision equipment
 • Custom mechanical systems`,
   images: [cadGear, cadDrone, cadEngine, cadRobot],
-  modelUrl: '/models/gear-assembly.glb',
+  modelUrl: 'https://threejs.org/examples/models/gltf/DamagedHelmet/glTF/DamagedHelmet.gltf',
   price: '$49.99',
   priceETH: 0.025,
   seller: {
@@ -196,7 +196,7 @@ const ProductDetail = () => {
         totalSales: Math.floor(Math.random() * 50) + 10,
       },
       specs: {
-        fileTypes: ['CAD', 'OBJ', 'STL'],
+        fileTypes: ['GLB', 'OBJ', 'STL'],
         software: ['SolidWorks', 'AutoCAD', 'Fusion 360'],
         fileSize: '15.2 MB',
         vertices: '127,543',
@@ -395,7 +395,11 @@ const ProductDetail = () => {
             {/* Main Image/3D Viewer */}
             <div className="relative aspect-square bg-muted rounded-lg overflow-hidden">
               {show3D ? (
-                <Model3DViewer modelUrl={model.modelUrl} className="w-full h-full" />
+                <Model3DViewer 
+                  modelUrl={model.modelUrl} 
+                  className="w-full h-full"
+                  fileType={model.specs.fileTypes[0]} 
+                />
               ) : (
                 <img src={model.images[selectedImage]} alt={model.title} className="w-full h-full object-cover" />
               )}

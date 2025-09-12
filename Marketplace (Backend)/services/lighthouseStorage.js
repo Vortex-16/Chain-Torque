@@ -15,12 +15,26 @@ async function uploadFile(filePath) {
   if (!apiKey || typeof apiKey !== 'string' || apiKey.length < 10) {
     throw new Error('Lighthouse API key is missing or malformed! Value: ' + JSON.stringify(apiKey));
   }
-  const response = await lighthouse.upload(filePath, apiKey);
-  // Response contains data.Hash (CID)
-  return {
-    cid: response.data.Hash,
-    url: `https://gateway.lighthouse.storage/ipfs/${response.data.Hash}`,
-  };
+  
+  try {
+    console.log('[Lighthouse] Attempting to upload file:', filePath);
+    const response = await lighthouse.upload(filePath, apiKey);
+    console.log('[Lighthouse] Upload successful:', response);
+    // Response contains data.Hash (CID)
+    return {
+      cid: response.data.Hash,
+      url: `https://gateway.lighthouse.storage/ipfs/${response.data.Hash}`,
+    };
+  } catch (error) {
+    console.error('[Lighthouse] Upload failed:', error);
+    console.error('[Lighthouse] Error details:', {
+      message: error.message,
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      data: error.response?.data
+    });
+    throw new Error(`Lighthouse upload failed: ${error.message}`);
+  }
 }
 
 /**
@@ -35,13 +49,34 @@ async function uploadMetadata(metadata) {
   if (!apiKey || typeof apiKey !== 'string' || apiKey.length < 10) {
     throw new Error('Lighthouse API key is missing or malformed! Value: ' + JSON.stringify(apiKey));
   }
-  const response = await lighthouse.upload(tempPath, apiKey);
-  // Clean up temp file
-  await fs.promises.unlink(tempPath);
-  return {
-    cid: response.data.Hash,
-    url: `https://gateway.lighthouse.storage/ipfs/${response.data.Hash}`,
-  };
+  
+  try {
+    console.log('[Lighthouse] Attempting to upload metadata:', tempPath);
+    const response = await lighthouse.upload(tempPath, apiKey);
+    console.log('[Lighthouse] Metadata upload successful:', response);
+    // Clean up temp file
+    await fs.promises.unlink(tempPath);
+    return {
+      cid: response.data.Hash,
+      url: `https://gateway.lighthouse.storage/ipfs/${response.data.Hash}`,
+    };
+  } catch (error) {
+    // Clean up temp file even on error
+    try {
+      await fs.promises.unlink(tempPath);
+    } catch (unlinkError) {
+      console.error('[Lighthouse] Failed to clean up temp file:', unlinkError);
+    }
+    
+    console.error('[Lighthouse] Metadata upload failed:', error);
+    console.error('[Lighthouse] Error details:', {
+      message: error.message,
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      data: error.response?.data
+    });
+    throw new Error(`Lighthouse metadata upload failed: ${error.message}`);
+  }
 }
 
 module.exports = { uploadFile, uploadMetadata };
