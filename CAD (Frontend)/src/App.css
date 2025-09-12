@@ -1,5 +1,3 @@
-/* src/App.css */
-
 /* General Layout */
 .app {
   height: 100vh;
@@ -445,5 +443,513 @@
   
   .sidebar {
     width: 60px;
+  }
+}
+
+/* Legacy Right Sidebar - Now using collapsible sidebar */
+/* .right-sidebar {
+  width: 300px;
+  background: #ecf0f1;
+  border-left: 1px solid #bdc3c7;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+} */
+
+/* Feature Tree Styles */
+.feature-tree {
+  flex: 1;
+  padding: 15px;
+  border-bottom: 1px solid #bdc3c7;
+  overflow-y: auto;
+  min-height: 200px;
+}
+
+.feature-tree-header h3 {
+  margin: 0 0 15px 0;
+  color: #2c3e50;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.no-features {
+  text-align: center;
+  color: #7f8c8d;
+  padding: 20px;
+}
+
+.no-features .hint {
+  font-size: 12px;
+  font-style: italic;
+  margin-top: 5px;
+}
+
+.feature-item {
+  display: flex;
+  align-items: center;
+  padding: 8px;
+  margin: 5px 0;
+  background: white;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.feature-item:hover {
+  background: #f8f9fa;
+  border-color: #16a085;
+  transform: translateX(2px);
+}
+
+.feature-item.hidden {
+  opacity: 0.5;
+}
+
+.feature-icon {
+  margin-right: 10px;
+  color: #16a085;
+  font-size: 14px;
+}
+
+.feature-info {
+  flex: 1;
+}
+
+.feature-name {
+  font-weight: bold;
+  color: #2c3e50;
+  font-size: 13px;
+}
+
+.feature-details {
+  font-size: 11px;
+  color: #7f8c8d;
+  margin-top: 2px;
+}
+
+.feature-controls {
+  display: flex;
+  gap: 5px;
+}
+
+.feature-controls button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 3px;
+  color: #7f8c8d;
+  font-size: 12px;
+  transition: all 0.2s ease;
+}
+
+.feature-controls button:hover {
+  background: #e74c3c;
+  color: white;
+}
+
+.feature-controls .toggle-visibility:hover {
+  background: #3498db;
+}
+
+/* CAD Operations Styles */
+.cad-operations {
+  flex: 1;
+  padding: 15px;
+  overflow-y: auto;
+  background: #f8f9fa;
+}
+
+.operations-header h3 {
+  margin: 0 0 15px 0;
+  color: #2c3e50;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.no-selection {
+  text-align: center;
+  color: #7f8c8d;
+  padding: 20px;
+  font-style: italic;
+}
+
+.operation-panel {
+  background: white;
+  padding: 15px;
+  margin: 10px 0;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.operation-panel h4 {
+  margin: 0 0 12px 0;
+  color: #2c3e50;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.parameter-group {
+  margin: 8px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.parameter-group label {
+  font-size: 12px;
+  color: #34495e;
+  min-width: 50px;
+}
+
+.parameter-group input {
+  flex: 1;
+  padding: 4px 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.parameter-group .unit {
+  font-size: 11px;
+  color: #7f8c8d;
+  min-width: 40px;
+}
+
+.operation-btn {
+  width: 100%;
+  padding: 8px;
+  background: linear-gradient(135deg, #16a085 0%, #27ae60 100%);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: bold;
+  margin-top: 8px;
+  transition: all 0.2s ease;
+}
+
+.operation-btn:hover {
+  background: linear-gradient(135deg, #149174 0%, #229954 100%);
+  transform: translateY(-1px);
+}
+
+.boolean-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.boolean-buttons .operation-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.operation-btn.union {
+  background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+}
+
+.operation-btn.subtract {
+  background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+}
+
+.operation-btn.intersect {
+  background: linear-gradient(135deg, #f39c12 0%, #d68910 100%);
+}
+
+.material-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Viewport Manager Styles */
+.viewport-manager {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: #f5f5f5;
+}
+
+.viewport-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+  border-bottom: 2px solid #16a085;
+  color: white;
+}
+
+.view-mode-indicator {
+  display: flex;
+  gap: 8px;
+}
+
+.mode-badge {
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  background: rgba(255,255,255,0.1);
+  transition: all 0.3s ease;
+}
+
+.mode-badge.active {
+  background: #16a085;
+  color: white;
+}
+
+.viewport-controls {
+  display: flex;
+  gap: 4px;
+}
+
+.view-toggle {
+  padding: 6px 12px;
+  border: 1px solid #16a085;
+  background: transparent;
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.view-toggle:hover {
+  background: rgba(22, 160, 133, 0.2);
+}
+
+.view-toggle.active {
+  background: #16a085;
+  color: white;
+}
+
+.viewport-info {
+  font-size: 11px;
+  color: #bdc3c7;
+}
+
+.shortcut-hint {
+  font-style: italic;
+}
+
+.viewport-content {
+  flex: 1;
+  display: flex;
+  position: relative;
+}
+
+.viewport-status {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 16px;
+  background: #ecf0f1;
+  border-top: 1px solid #bdc3c7;
+  font-size: 12px;
+  color: #2c3e50;
+}
+
+.status-left {
+  font-weight: 500;
+}
+
+.status-right {
+  color: #7f8c8d;
+}
+
+/* Canvas 2D Styles */
+.canvas-2d-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: #fafafa;
+}
+
+.canvas-2d-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 16px;
+  background: #ecf0f1;
+  border-bottom: 1px solid #bdc3c7;
+  font-size: 12px;
+}
+
+.toolbar-section {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.toolbar-section label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+}
+
+.status-text {
+  font-weight: 500;
+  color: #2c3e50;
+}
+
+.help-text {
+  color: #7f8c8d;
+  font-style: italic;
+}
+
+.sketch-canvas {
+  flex: 1;
+  background: #fafafa;
+}
+
+.sketch-canvas:hover {
+  box-shadow: inset 0 0 4px rgba(22, 160, 133, 0.3);
+}
+
+/* Update main viewport container */
+.viewport-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: #f5f5f5;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* Collapsible Sidebar Styles */
+.sidebar-toggle-btn {
+  position: fixed;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: linear-gradient(135deg, #16a085 0%, #1abc9c 100%);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(22, 160, 133, 0.4);
+  transition: all 0.3s ease;
+  z-index: 1000;
+  font-size: 20px;
+}
+
+.sidebar-toggle-btn:hover {
+  transform: translateY(-50%) scale(1.1);
+  box-shadow: 0 6px 20px rgba(22, 160, 133, 0.6);
+}
+
+.collapsible-sidebar {
+  position: fixed;
+  right: 0;
+  top: 60px;
+  bottom: 0;
+  width: 350px;
+  background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+  border-left: 3px solid #16a085;
+  box-shadow: -4px 0 20px rgba(0,0,0,0.3);
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 999;
+  display: flex;
+  flex-direction: column;
+}
+
+.collapsible-sidebar.closed {
+  transform: translateX(100%);
+}
+
+.collapsible-sidebar.open {
+  transform: translateX(0);
+}
+
+.sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: rgba(22, 160, 133, 0.1);
+  border-bottom: 2px solid #16a085;
+  color: white;
+}
+
+.sidebar-header h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #16a085;
+}
+
+.sidebar-close-btn {
+  background: transparent;
+  color: #ecf0f1;
+  border: 1px solid #7f8c8d;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 18px;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.sidebar-close-btn:hover {
+  background: #e74c3c;
+  border-color: #e74c3c;
+  color: white;
+  transform: rotate(90deg);
+}
+
+.sidebar-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0;
+}
+
+/* Update existing sidebar styles for the new collapsible version */
+.sidebar-content .feature-tree {
+  margin: 0;
+  border-radius: 0;
+  border: none;
+  border-bottom: 2px solid #16a085;
+}
+
+.sidebar-content .cad-operations {
+  margin: 0;
+  border-radius: 0;
+  border: none;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .collapsible-sidebar {
+    width: 100%;
+    right: 0;
+  }
+  
+  .sidebar-toggle-btn {
+    right: 10px;
+    width: 50px;
+    height: 50px;
+    font-size: 16px;
   }
 }

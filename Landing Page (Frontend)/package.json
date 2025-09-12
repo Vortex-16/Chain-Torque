@@ -5,7 +5,8 @@
   "main": "app.js",
   "scripts": {
     "start": "node app.js",
-    "dev": "nodemon app.js"
+    "dev": "nodemon app.js",
+    "build": "echo 'Landing page build complete'"
   },
   "keywords": [
     "web3",
@@ -13,13 +14,5 @@
     "express"
   ],
   "author": "ChainTorque Team",
-  "license": "ISC",
-  "dependencies": {
-    "express": "*",
-    "dotenv": "*",
-    "ejs": "*"
-  },
-  "devDependencies": {
-    "nodemon": "*"
-  }
+  "license": "ISC"
 }

@@ -1,7 +1,7 @@
 // src/components/ThreeViewer.js
 import React, { Suspense, useRef, useState, useImperativeHandle, forwardRef } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { OrbitControls, Grid, Box, Sphere, Cylinder, Cone, Text, Html } from '@react-three/drei';
+import { OrbitControls, Grid, Box, Sphere, Cylinder, Cone, Html } from '@react-three/drei';
 import * as THREE from 'three';
 
 // Sample 3D objects for demonstration
@@ -168,7 +168,7 @@ const CameraController = forwardRef((props, ref) => {
   );
 });
 
-const Scene = ({ cameraRef }) => {
+const Scene = ({ cameraRef, activeTool, onGeometryCreated }) => {
   return (
     <>
       {/* Lighting */}
@@ -188,10 +188,14 @@ const Scene = ({ cameraRef }) => {
       {/* Work plane and grid */}
       <WorkPlane />
       
-      {/* Sample CAD objects */}
-      <SampleCube />
-      <SampleSphere />
-      <SampleCylinder />
+      {/* Sample CAD objects - will be hidden when drawing */}
+      {activeTool === 'select' && (
+        <>
+          <SampleCube />
+          <SampleSphere />
+          <SampleCylinder />
+        </>
+      )}
       
       {/* Coordinate system indicator */}
       <group position={[-8, 0, 8]}>
@@ -258,6 +262,8 @@ const LoadingSpinner = () => (
 
 const ThreeViewer = forwardRef((props, ref) => {
   const cameraRef = useRef();
+  const [geometries, setGeometries] = useState([]);
+  const { activeTool } = props;
 
   useImperativeHandle(ref, () => ({
     fitToScreen: () => cameraRef.current?.fitToScreen(),
@@ -265,7 +271,14 @@ const ThreeViewer = forwardRef((props, ref) => {
     setTopView: () => cameraRef.current?.setTopView(),
     setRightView: () => cameraRef.current?.setRightView(),
     setIsoView: () => cameraRef.current?.setIsoView(),
+    getGeometries: () => geometries,
+    clearGeometries: () => setGeometries([]),
   }));
+
+  const handleGeometryCreated = (newGeometry) => {
+    setGeometries(prev => [...prev, newGeometry]);
+    console.log(`Created ${newGeometry.type}:`, newGeometry);
+  };
 
   return (
     <div style={{ width: '100%', height: '100%', position: 'relative' }}>
@@ -280,7 +293,11 @@ const ThreeViewer = forwardRef((props, ref) => {
         style={{ background: 'linear-gradient(to bottom, #87CEEB 0%, #f8f9fa 100%)' }}
       >
         <Suspense fallback={<LoadingSpinner />}>
-          <Scene cameraRef={cameraRef} />
+          <Scene 
+            cameraRef={cameraRef} 
+            activeTool={activeTool}
+            onGeometryCreated={handleGeometryCreated}
+          />
         </Suspense>
       </Canvas>
       
@@ -299,7 +316,32 @@ const ThreeViewer = forwardRef((props, ref) => {
         <div>• Left click + drag: Rotate</div>
         <div>• Right click + drag: Pan</div>
         <div>• Scroll: Zoom</div>
+        {activeTool !== 'select' && (
+          <>
+            <div style={{ marginTop: '10px', fontWeight: 'bold', color: '#ff6600' }}>
+              Drawing Mode: {activeTool}
+            </div>
+            <div>• Click to draw</div>
+            <div>• ESC to cancel</div>
+          </>
+        )}
       </div>
+      
+      {/* Geometry counter */}
+      {geometries.length > 0 && (
+        <div style={{
+          position: 'absolute',
+          bottom: '10px',
+          left: '10px',
+          background: 'rgba(0, 0, 0, 0.7)',
+          color: 'white',
+          padding: '8px 12px',
+          borderRadius: '6px',
+          fontSize: '12px'
+        }}>
+          Objects: {geometries.length}
+        </div>
+      )}
       
       <style jsx>{`
         @keyframes spin {
