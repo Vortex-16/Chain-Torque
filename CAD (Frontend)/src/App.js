@@ -10,12 +10,7 @@ import {
   FaVectorSquare,
   FaCircle,
   FaSlash,
-  FaArrowsAlt,
   FaMousePointer,
-  FaDrawPolygon,
-  FaFont,
-  FaRuler,
-  FaTrash,
   FaSearchPlus,
   FaSearchMinus,
   FaExpandArrowsAlt,
@@ -25,13 +20,17 @@ import {
   FaRobot,
 } from "react-icons/fa";
 
-import ThreeViewer from "./components/ThreeViewer";
+import ViewportManager from "./components/ViewportManager";
+import FeatureTree from "./components/FeatureTree";
+import CADOperations from "./components/CADOperations";
 import "./App.css";
 
 const App = () => {
   const [showAIPanel, setShowAIPanel] = useState(false);
   const [activeTool, setActiveTool] = useState('select');
   const [activeView, setActiveView] = useState('iso');
+  const [features, setFeatures] = useState([]);
+  const [selectedFeature, setSelectedFeature] = useState(null);
   const threeViewerRef = useRef();
 
   const toggleAIPanel = () => {
@@ -40,6 +39,62 @@ const App = () => {
 
   const handleToolSelect = (tool) => {
     setActiveTool(tool);
+  };
+
+  // Handle new features created from sketches
+  const handleFeatureCreated = (newFeature) => {
+    setFeatures(prev => [...prev, { ...newFeature, visible: true }]);
+    console.log(`Created feature:`, newFeature);
+  };
+
+  // Toggle feature visibility
+  const handleFeatureToggle = (featureId) => {
+    setFeatures(prev => prev.map(feature => {
+      if (feature.id === featureId) {
+        const updated = { ...feature, visible: !feature.visible };
+        if (updated.geometry) {
+          updated.geometry.visible = updated.visible;
+        }
+        return updated;
+      }
+      return feature;
+    }));
+  };
+
+  // Delete feature
+  const handleFeatureDelete = (featureId) => {
+    setFeatures(prev => {
+      const feature = prev.find(f => f.id === featureId);
+      if (feature && feature.geometry && feature.geometry.parent) {
+        feature.geometry.parent.remove(feature.geometry);
+      }
+      return prev.filter(f => f.id !== featureId);
+    });
+    
+    // Clear selection if deleted feature was selected
+    if (selectedFeature && selectedFeature.id === featureId) {
+      setSelectedFeature(null);
+    }
+  };
+
+  // Update feature
+  const handleFeatureUpdate = (featureId, updates) => {
+    setFeatures(prev => prev.map(feature => 
+      feature.id === featureId 
+        ? { ...feature, ...updates }
+        : feature
+    ));
+  };
+
+  // Select feature
+  const handleFeatureSelect = (feature) => {
+    setSelectedFeature(feature);
+  };
+
+  // Handle CAD operations
+  const handleCADOperation = (operation) => {
+    console.log('CAD Operation:', operation);
+    // This would be implemented with actual geometry operations
   };
 
   // View control functions
@@ -125,10 +180,10 @@ const App = () => {
       </div>
 
       <div className="main">
-        {/* Sidebar */}
+        {/* Left Sidebar - Tools */}
         <div className="sidebar">
           <div className="tool-section">
-            <h3>Select</h3>
+            <h3>Sketch</h3>
             <FaMousePointer 
               title="Select" 
               className={activeTool === 'select' ? 'active' : ''} 
@@ -152,54 +207,13 @@ const App = () => {
               className={activeTool === 'rectangle' ? 'active' : ''} 
               onClick={() => handleToolSelect('rectangle')}
             />
-            <FaDrawPolygon 
-              title="Polygon Tool" 
-              className={activeTool === 'polygon' ? 'active' : ''} 
-              onClick={() => handleToolSelect('polygon')}
-            />
-          </div>
-          <div className="tool-section">
-            <h3>Modify</h3>
-            <FaArrowsAlt 
-              title="Move Tool" 
-              className={activeTool === 'move' ? 'active' : ''} 
-              onClick={() => handleToolSelect('move')}
-            />
-            <FaExpandArrowsAlt 
-              title="Scale Tool" 
-              className={activeTool === 'scale' ? 'active' : ''} 
-              onClick={() => handleToolSelect('scale')}
-            />
-            <FaRedo 
-              title="Rotate Tool" 
-              className={activeTool === 'rotate' ? 'active' : ''} 
-              onClick={() => handleToolSelect('rotate')}
-            />
-            <FaTrash 
-              title="Delete" 
-              className={activeTool === 'delete' ? 'active' : ''} 
-              onClick={() => handleToolSelect('delete')}
-            />
-          </div>
-          <div className="tool-section">
-            <h3>Annotate</h3>
-            <FaFont 
-              title="Text Tool" 
-              className={activeTool === 'text' ? 'active' : ''} 
-              onClick={() => handleToolSelect('text')}
-            />
-            <FaRuler 
-              title="Dimension Tool" 
-              className={activeTool === 'dimension' ? 'active' : ''} 
-              onClick={() => handleToolSelect('dimension')}
-            />
           </div>
         </div>
 
-        {/* Canvas Area with 3D Viewer - Full Width */}
+        {/* Main Canvas Area */}
         <div className="canvas-area" data-tool={activeTool}>
           <div className="canvas-header">
-            <span>3D Viewport</span>
+            <span>3D CAD Viewport</span>
             <div className="view-controls">
               <button 
                 className={activeView === 'front' ? 'active' : ''}
@@ -228,10 +242,31 @@ const App = () => {
             </div>
           </div>
           
-          {/* 3D Viewer Integration */}
-          <div className="three-viewer-container">
-            <ThreeViewer ref={threeViewerRef} />
+          {/* Viewport Manager - 2D/3D Switching */}
+          <div className="viewport-container">
+            <ViewportManager 
+              features={features}
+              onFeatureAdd={handleFeatureCreated}
+              onFeatureDelete={handleFeatureDelete}
+              onFeatureUpdate={handleFeatureUpdate}
+              selectedFeature={selectedFeature}
+              onFeatureSelect={handleFeatureSelect}
+            />
           </div>
+        </div>
+
+        {/* Right Sidebar - Feature Tree & Operations */}
+        <div className="right-sidebar">
+          <FeatureTree 
+            features={features}
+            onFeatureToggle={handleFeatureToggle}
+            onFeatureDelete={handleFeatureDelete}
+            onFeatureSelect={handleFeatureSelect}
+          />
+          <CADOperations 
+            selectedFeature={selectedFeature}
+            onOperation={handleCADOperation}
+          />
         </div>
       </div>
 
@@ -275,8 +310,8 @@ const App = () => {
 
       {/* Status Bar */}
       <div className="statusbar">
-        <span>Ready | Tool: {activeTool} | Objects: 3 | FPS: 60</span>
-        <span>ChainTorque CAD v0.1.0 - 3D Enabled</span>
+        <span>Ready | Tool: {activeTool} | Features: {features.length} | FPS: 60</span>
+        <span>ChainTorque CAD v0.1.0 - Sketch-to-Solid CAD System</span>
       </div>
     </div>
   );
