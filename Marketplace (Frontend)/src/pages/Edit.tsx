@@ -93,7 +93,7 @@ const Edit = () => {
 
   const handleCreateNew = () => {
     // Navigate to the CAD editor for creating a new model
-    window.open('http://localhost:3001', '_blank'); // CAD Frontend URL
+    window.open('http://localhost:3000', '_blank'); // CAD Frontend URL
   };
 
   const handleWalletConnected = () => {
@@ -104,7 +104,7 @@ const Edit = () => {
   const handleEditModel = (item: PurchasedItem) => {
     // Navigate to the CAD editor with the model loaded
     // For now, open the CAD editor in a new tab. In future, we could pass model data
-    const cadUrl = `http://localhost:3001?model=${encodeURIComponent(item.modelUrl || '')}&title=${encodeURIComponent(item.title)}`;
+    const cadUrl = `http://localhost:3000?model=${encodeURIComponent(item.modelUrl || '')}&title=${encodeURIComponent(item.title)}`;
     window.open(cadUrl, '_blank');
   };
 

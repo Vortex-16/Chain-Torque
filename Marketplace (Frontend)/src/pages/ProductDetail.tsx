@@ -160,13 +160,13 @@ const ProductDetail = () => {
     let actualImages: string[] = [];
     if (Array.isArray(backendData.images) && backendData.images.length > 0) {
       actualImages = backendData.images.map((url: string) =>
-        url.startsWith('http') ? url : `http://localhost:5000${url}`
+        url.startsWith('http') ? url : `http://localhost:5001${url}`
       );
     } else if (backendData.imageUrl && backendData.imageUrl !== '/placeholder.jpg') {
       actualImages = [
         backendData.imageUrl.startsWith('http')
           ? backendData.imageUrl
-          : `http://localhost:5000${backendData.imageUrl}`,
+          : `http://localhost:5001${backendData.imageUrl}`,
       ];
     } else {
       actualImages = fallbackImages;
@@ -178,7 +178,7 @@ const ProductDetail = () => {
       description: backendData.description,
       images: actualImages,
       modelUrl: backendData.modelUrl
-        ? (backendData.modelUrl.startsWith('http') ? backendData.modelUrl : `http://localhost:5000${backendData.modelUrl}`)
+        ? (backendData.modelUrl.startsWith('http') ? backendData.modelUrl : `http://localhost:5001${backendData.modelUrl}`)
         : '/models/sample.obj',
       price: `$${parseFloat(backendData.price) * 2000}`,
       priceETH: parseFloat(backendData.price),

@@ -108,7 +108,7 @@ export function MarketplaceSection() {
             ? item.imageUrl.startsWith('http') ||
               item.imageUrl.startsWith('ipfs://')
               ? item.imageUrl
-              : `http://localhost:5000${item.imageUrl}`
+              : `http://localhost:5001${item.imageUrl}`
             : item.previewHash
               ? `https://gateway.pinata.cloud/ipfs/${item.previewHash}`
               : featuredModels[index % featuredModels.length].image,
@@ -127,12 +127,12 @@ export function MarketplaceSection() {
           ? item.modelUrl.startsWith('http') ||
             item.modelUrl.startsWith('ipfs://')
             ? item.modelUrl
-            : `http://localhost:5000${item.modelUrl}`
+            : `http://localhost:5001${item.modelUrl}`
           : item.tokenURI
             ? item.tokenURI.startsWith('http') ||
               item.tokenURI.startsWith('ipfs://')
               ? item.tokenURI
-              : `http://localhost:5000${item.tokenURI}`
+              : `http://localhost:5001${item.tokenURI}`
             : null,
         isBlockchain: true,
       }));

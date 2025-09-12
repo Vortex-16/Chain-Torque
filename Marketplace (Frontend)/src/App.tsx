@@ -99,7 +99,7 @@ const AppContent = () => {
                 Please sign in to access the marketplace
               </p>
               <a
-                href='http://localhost:3000/login'
+                href='http://localhost:5000/login'
                 className='bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700'
               >
                 Sign In
@@ -115,9 +115,9 @@ const AppContent = () => {
 const App = () => (
   <ClerkProvider
     publishableKey={clerkPubKey}
-    afterSignOutUrl='http://localhost:3000'
-    signInUrl='http://localhost:3000/login'
-    signUpUrl='http://localhost:3000/signup'
+    afterSignOutUrl='http://localhost:5000'
+    signInUrl='http://localhost:5000/login'
+    signUpUrl='http://localhost:5000/signup'
   >
     <QueryClientProvider client={queryClient}>
       <ThemeProvider

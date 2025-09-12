@@ -22,7 +22,7 @@
     "deploy:sepolia": "cd \"Marketplace (Backend)\" && npx hardhat run scripts/deploy.js --network sepolia",
     "dev:landing": "dotenv -e .env -- cross-env NODE_NO_WARNINGS=1 PORT=5000 npm run dev --workspace \"Landing Page (Frontend)\"",
     "dev:marketplace": "dotenv -e .env -- cross-env NODE_NO_WARNINGS=1 npm run dev --workspace \"Marketplace (Frontend)\"",
-    "dev:backend": "dotenv -e .env -- cross-env NODE_NO_WARNINGS=1 npm run dev --workspace \"Marketplace (Backend)\"",
+    "dev:backend": "dotenv -e .env -- cross-env NODE_NO_WARNINGS=1 PORT=5001 npm run dev --workspace \"Marketplace (Backend)\"",
     "dev:cad": "dotenv -e .env -- cross-env NODE_NO_WARNINGS=1 PORT=3000 GENERATE_SOURCEMAP=false npm run start --workspace \"CAD (Frontend)\"",
     "build:landing": "npm run build --workspace \"Landing Page (Frontend)\"",
     "build:marketplace": "npm run build --workspace \"Marketplace (Frontend)\"",

@@ -23,7 +23,7 @@ export const useSystemStatus = () => {
     setIsLoading(true);
     try {
       // Check basic health
-      const healthResponse = await fetch('http://localhost:5000/health');
+      const healthResponse = await fetch('http://localhost:5001/health');
       const backendStatus = healthResponse.ok ? 'connected' : 'error';
 
       // Check web3 status
@@ -31,7 +31,7 @@ export const useSystemStatus = () => {
       let contractStatus = 'not deployed';
       try {
         const web3Response = await fetch(
-          'http://localhost:5000/api/web3/status'
+          'http://localhost:5001/api/web3/status'
         );
         if (web3Response.ok) {
           const web3Data = await web3Response.json();
@@ -49,7 +49,7 @@ export const useSystemStatus = () => {
       let itemCount = 0;
       try {
         const marketplaceResponse = await fetch(
-          'http://localhost:5000/api/marketplace'
+          'http://localhost:5001/api/marketplace'
         );
         if (marketplaceResponse.ok) {
           const marketplaceData = await marketplaceResponse.json();

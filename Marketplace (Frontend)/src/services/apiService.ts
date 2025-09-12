@@ -38,7 +38,7 @@ export interface MarketplaceItem {
   format?: string;
 }
 
-const API_BASE_URL = 'http://localhost:5000/api';
+const API_BASE_URL = 'http://localhost:5001/api';
 
 class ApiService {
   public baseUrl: string;
@@ -101,7 +101,7 @@ class ApiService {
 
   // Health check
   async healthCheck(): Promise<{ status: string; timestamp: string }> {
-    const response = await fetch('http://localhost:5000/health');
+    const response = await fetch('http://localhost:5001/health');
     return response.json();
   }
 
@@ -242,7 +242,7 @@ class ApiService {
   // Direct fetch for health check
   async isBackendConnected(): Promise<boolean> {
     try {
-      const response = await fetch('http://localhost:5000/health');
+      const response = await fetch('http://localhost:5001/health');
       return response.ok;
     } catch (error) {
       return false;
