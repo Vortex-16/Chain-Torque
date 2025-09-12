@@ -1,0 +1,8 @@
+{
+  "timestampFormat": "HH:mm:ss",
+  "prefixColors": ["cyan", "magenta", "yellow", "green"],
+  "names": ["Landing", "Marketplace", "Backend", "CAD"],
+  "killOthers": ["failure", "success"],
+  "restartTries": 3,
+  "raw": false
+}

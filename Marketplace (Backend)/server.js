@@ -1,5 +1,11 @@
 // server.js (fixed)
 
+// Suppress Node.js warnings in development
+if (process.env.NODE_ENV !== 'production') {
+  process.removeAllListeners('warning');
+  process.on('warning', () => {}); // Suppress warnings
+}
+
 const express = require('express');
 const cors = require('cors');
 const multer = require('multer');
