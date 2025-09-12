@@ -1,5 +1,3 @@
-/* src/App.css */
-
 /* General Layout */
 .app {
   height: 100vh;
@@ -448,15 +446,15 @@
   }
 }
 
-/* Right Sidebar - Feature Tree & Operations */
-.right-sidebar {
+/* Legacy Right Sidebar - Now using collapsible sidebar */
+/* .right-sidebar {
   width: 300px;
   background: #ecf0f1;
   border-left: 1px solid #bdc3c7;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-}
+} */
 
 /* Feature Tree Styles */
 .feature-tree {
@@ -829,4 +827,129 @@
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* Collapsible Sidebar Styles */
+.sidebar-toggle-btn {
+  position: fixed;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: linear-gradient(135deg, #16a085 0%, #1abc9c 100%);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(22, 160, 133, 0.4);
+  transition: all 0.3s ease;
+  z-index: 1000;
+  font-size: 20px;
+}
+
+.sidebar-toggle-btn:hover {
+  transform: translateY(-50%) scale(1.1);
+  box-shadow: 0 6px 20px rgba(22, 160, 133, 0.6);
+}
+
+.collapsible-sidebar {
+  position: fixed;
+  right: 0;
+  top: 60px;
+  bottom: 0;
+  width: 350px;
+  background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+  border-left: 3px solid #16a085;
+  box-shadow: -4px 0 20px rgba(0,0,0,0.3);
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 999;
+  display: flex;
+  flex-direction: column;
+}
+
+.collapsible-sidebar.closed {
+  transform: translateX(100%);
+}
+
+.collapsible-sidebar.open {
+  transform: translateX(0);
+}
+
+.sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: rgba(22, 160, 133, 0.1);
+  border-bottom: 2px solid #16a085;
+  color: white;
+}
+
+.sidebar-header h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #16a085;
+}
+
+.sidebar-close-btn {
+  background: transparent;
+  color: #ecf0f1;
+  border: 1px solid #7f8c8d;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 18px;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.sidebar-close-btn:hover {
+  background: #e74c3c;
+  border-color: #e74c3c;
+  color: white;
+  transform: rotate(90deg);
+}
+
+.sidebar-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0;
+}
+
+/* Update existing sidebar styles for the new collapsible version */
+.sidebar-content .feature-tree {
+  margin: 0;
+  border-radius: 0;
+  border: none;
+  border-bottom: 2px solid #16a085;
+}
+
+.sidebar-content .cad-operations {
+  margin: 0;
+  border-radius: 0;
+  border: none;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .collapsible-sidebar {
+    width: 100%;
+    right: 0;
+  }
+  
+  .sidebar-toggle-btn {
+    right: 10px;
+    width: 50px;
+    height: 50px;
+    font-size: 16px;
+  }
 }

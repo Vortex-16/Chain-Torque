@@ -27,14 +27,23 @@ import "./App.css";
 
 const App = () => {
   const [showAIPanel, setShowAIPanel] = useState(false);
+  const [showSidebar, setShowSidebar] = useState(false);
   const [activeTool, setActiveTool] = useState('select');
   const [activeView, setActiveView] = useState('iso');
   const [features, setFeatures] = useState([]);
   const [selectedFeature, setSelectedFeature] = useState(null);
-  const threeViewerRef = useRef();
+  const viewportRef = useRef();
 
   const toggleAIPanel = () => {
     setShowAIPanel(!showAIPanel);
+  };
+
+  const toggleSidebar = () => {
+    setShowSidebar(!showSidebar);
+  };
+
+  const closeSidebar = () => {
+    setShowSidebar(false);
   };
 
   const handleToolSelect = (tool) => {
@@ -100,19 +109,19 @@ const App = () => {
   // View control functions
   const handleViewChange = (view) => {
     setActiveView(view);
-    if (threeViewerRef.current) {
+    if (viewportRef.current) {
       switch(view) {
         case 'front':
-          threeViewerRef.current.setFrontView();
+          viewportRef.current.setFrontView();
           break;
         case 'top':
-          threeViewerRef.current.setTopView();
+          viewportRef.current.setTopView();
           break;
         case 'right':
-          threeViewerRef.current.setRightView();
+          viewportRef.current.setRightView();
           break;
         case 'iso':
-          threeViewerRef.current.setIsoView();
+          viewportRef.current.setIsoView();
           break;
         default:
           break;
@@ -132,8 +141,8 @@ const App = () => {
   };
 
   const handleFitToScreen = () => {
-    if (threeViewerRef.current) {
-      threeViewerRef.current.fitToScreen();
+    if (viewportRef.current) {
+      viewportRef.current.fitToScreen();
     }
   };
 
@@ -245,6 +254,7 @@ const App = () => {
           {/* Viewport Manager - 2D/3D Switching */}
           <div className="viewport-container">
             <ViewportManager 
+              ref={viewportRef}
               features={features}
               onFeatureAdd={handleFeatureCreated}
               onFeatureDelete={handleFeatureDelete}
@@ -255,18 +265,42 @@ const App = () => {
           </div>
         </div>
 
-        {/* Right Sidebar - Feature Tree & Operations */}
-        <div className="right-sidebar">
-          <FeatureTree 
-            features={features}
-            onFeatureToggle={handleFeatureToggle}
-            onFeatureDelete={handleFeatureDelete}
-            onFeatureSelect={handleFeatureSelect}
-          />
-          <CADOperations 
-            selectedFeature={selectedFeature}
-            onOperation={handleCADOperation}
-          />
+        {/* Sidebar Toggle Button */}
+        {!showSidebar && (
+          <button 
+            className="sidebar-toggle-btn"
+            onClick={toggleSidebar}
+            title="Open Feature Tree & Operations"
+          >
+            <FaVectorSquare />
+          </button>
+        )}
+
+        {/* Collapsible Sidebar - Feature Tree & Operations */}
+        <div className={`collapsible-sidebar ${showSidebar ? 'open' : 'closed'}`}>
+          <div className="sidebar-header">
+            <h3>Features & Operations</h3>
+            <button 
+              className="sidebar-close-btn"
+              onClick={closeSidebar}
+              title="Close Sidebar"
+            >
+              ×
+            </button>
+          </div>
+          
+          <div className="sidebar-content">
+            <FeatureTree 
+              features={features}
+              onFeatureToggle={handleFeatureToggle}
+              onFeatureDelete={handleFeatureDelete}
+              onFeatureSelect={handleFeatureSelect}
+            />
+            <CADOperations 
+              selectedFeature={selectedFeature}
+              onOperation={handleCADOperation}
+            />
+          </div>
         </div>
       </div>
 

@@ -1,9 +1,8 @@
 // src/components/ThreeViewer.js
 import React, { Suspense, useRef, useState, useImperativeHandle, forwardRef } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { OrbitControls, Grid, Box, Sphere, Cylinder, Cone, Text, Html } from '@react-three/drei';
+import { OrbitControls, Grid, Box, Sphere, Cylinder, Cone, Html } from '@react-three/drei';
 import * as THREE from 'three';
-import SketchManager from './SketchManager';
 
 // Sample 3D objects for demonstration
 const SampleCube = ({ position = [0, 1, 0] }) => {
@@ -185,12 +184,6 @@ const Scene = ({ cameraRef, activeTool, onGeometryCreated }) => {
       
       {/* Camera Controller */}
       <CameraController ref={cameraRef} />
-      
-      {/* Sketch Manager - handles CAD sketching and solid creation */}
-      <SketchManager 
-        activeTool={activeTool} 
-        onSketchComplete={onGeometryCreated}
-      />
       
       {/* Work plane and grid */}
       <WorkPlane />
