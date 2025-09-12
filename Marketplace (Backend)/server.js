@@ -19,8 +19,8 @@ const dotenv = require('dotenv');
 const User = require('./models/User');
 const Transaction = require('./models/Transaction');
 
-// Load environment variables
-dotenv.config({ path: path.resolve(__dirname, '../.env') });
+// Environment variables are loaded by the root script via dotenv -e .env
+// No need to load again here
 
 const app = express();
 const PORT = process.env.PORT || 5000;

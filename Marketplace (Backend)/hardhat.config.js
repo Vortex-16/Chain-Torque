@@ -1,5 +1,5 @@
 require('@nomiclabs/hardhat-ethers');
-require('dotenv').config();
+require('dotenv').config({ path: '../.env' });
 
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {

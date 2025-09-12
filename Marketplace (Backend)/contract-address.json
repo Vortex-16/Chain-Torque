@@ -1,8 +1,8 @@
 {
-  "ChainTorqueMarketplace": "0xa2555458aC4E6EBb763e145E387cD4605a6a7ab9",
-  "deploymentTransaction": "0x0edfaf3ed84f0d2344db53d8bf72bc24fb0a53d6a52693c4e9b51ee15214762b",
+  "ChainTorqueMarketplace": "0x5698a5b0ec362390872e634351Fdd5aDD3a1cB08",
+  "deploymentTransaction": "0x93e84df1fece19e7d3de51929a4bc3d08676bc955e736d1620e5dd9a67c2e69b",
   "network": "hardhat",
   "chainId": 31337,
   "listingPrice": "0.00025",
-  "deployedAt": "2025-08-25T07:51:29.490Z"
+  "deployedAt": "2025-09-12T18:22:27.062Z"
 }

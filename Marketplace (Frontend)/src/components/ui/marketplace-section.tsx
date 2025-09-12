@@ -232,7 +232,7 @@ export function MarketplaceSection() {
           <TabsList className='grid grid-cols-4 lg:grid-cols-7 w-full bg-muted'>
             {categories.map((category: string, index: number) => (
               <TabsTrigger
-                key={index}
+                key={`category-${category}-${index}`}
                 value={category.toLowerCase().replace(' ', '-')}
                 className='text-xs text-muted-foreground data-[state=active]:bg-background data-[state=active]:text-primary'
               >
@@ -262,9 +262,9 @@ export function MarketplaceSection() {
               </div>
             ) : (
               <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'>
-                {displayItems.map(model => (
+                {displayItems.map((model, index) => (
                   <CadCard
-                    key={model.tokenId ?? model.id}
+                    key={`${model.tokenId ?? model.id}-${index}`}
                     id={model.tokenId ?? model.id}
                     title={model.title}
                     image={model.image}
