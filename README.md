@@ -51,8 +51,8 @@ git clone https://github.com/Dealer-09/ChainTorque.git
 cd ChainTorque
 pnpm install
 
-# Start all services (if configured)
-pnpm run dev:all
+# Start all services
+pnpm dev
 
 # Or run individual services
 pnpm --filter "Landing Page (Frontend)" dev      # Landing page
