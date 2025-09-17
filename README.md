@@ -42,22 +42,26 @@ ChainTorque uses a dual-storage approach for optimal performance and decentraliz
 
 This architecture provides instant user experiences while maintaining true Web3 decentralization for engineering assets.
 
-## � **Quick Start**
 
-```bash
+## 🚀 **Quick Start (PNPM)**
+
+```sh
 # Clone and install
 git clone https://github.com/Dealer-09/ChainTorque.git
 cd ChainTorque
+pnpm install
 
-# Start all services
-npm run dev:all
+# Start all services (if configured)
+pnpm run dev:all
 
 # Or run individual services
-npm run dev:landing          # Landing page
-npm run dev:marketplace      # Marketplace frontend  
-npm run dev:backend         # Backend API
-npm run dev:cad             # CAD editor with Torquy
+pnpm --filter "Landing Page (Frontend)" dev      # Landing page
+pnpm --filter "Marketplace (Frontend)" dev       # Marketplace frontend
+pnpm --filter "Marketplace (Backend)" dev        # Backend API
+pnpm --filter "CAD (Frontend)" dev               # CAD editor with Torquy
 ```
+
+> **Note:** This monorepo uses [PNPM](https://pnpm.io/) for package management. Do not use npm or yarn. See `pnpm-workspace.yaml` for workspace configuration.
 
 ## 🎯 **Key Features**
 

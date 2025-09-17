@@ -39,7 +39,7 @@
     "engineering",
     "monorepo"
   ],
-  "author": "ChainTorque Team",
+  "author": "Archisman Pal",
   "license": "ISC",
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^2.0.0",
