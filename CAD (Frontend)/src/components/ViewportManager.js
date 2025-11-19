@@ -3,12 +3,72 @@ import React, { useState, useEffect, useRef, useImperativeHandle, forwardRef } f
 import ThreeViewer from './ThreeViewer';
 
 // Integrated 2D Canvas Component
-const Canvas2D = ({ onSketchComplete, sketches, activeSketch, onPointAdd }) => {
+const Canvas2D = ({ onSketchComplete, sketches, activeSketch, onPointAdd, activeTool, onToolAction }) => {
   const canvasRef = useRef(null);
-  const [isDrawing, setIsDrawing] = useState(false);
-  const [currentPoints, setCurrentPoints] = useState([]);
+  const [drawMode, setDrawMode] = useState('line'); // 'line', 'polygon', or 'circle'
+  const [lines, setLines] = useState([]); // Array of completed line segments
+  const [currentLine, setCurrentLine] = useState([]); // Current line being drawn
+  const [polygonPoints, setPolygonPoints] = useState([]); // Points for polygon mode
+  const [circleCenter, setCircleCenter] = useState(null); // Center point for circle
+  const [circleRadius, setCircleRadius] = useState(0); // Radius for circle being drawn
+  const [circles, setCircles] = useState([]); // Completed circles
   const [snapToGrid, setSnapToGrid] = useState(true);
   const [gridSize] = useState(20);
+
+  // Update draw mode when activeTool changes
+  useEffect(() => {
+    if (activeTool === 'line') {
+      // Only switch mode and clear in-progress drawing, don't save
+      setDrawMode('line');
+      setPolygonPoints([]);
+      setCurrentLine([]);
+      setCircleCenter(null);
+      setCircleRadius(0);
+    } else if (activeTool === 'polygon') {
+      // Only switch mode and clear in-progress drawing, don't save
+      setDrawMode('polygon');
+      setLines([]);
+      setCurrentLine([]);
+      setCircleCenter(null);
+      setCircleRadius(0);
+    } else if (activeTool === 'circle') {
+      // Switch to circle mode
+      setDrawMode('circle');
+      setLines([]);
+      setPolygonPoints([]);
+      setCurrentLine([]);
+      setCircleCenter(null);
+      setCircleRadius(0);
+    } else if (activeTool === 'eraser') {
+      // Handle erase action
+      if (drawMode === 'line') {
+        if (currentLine.length > 0) {
+          setCurrentLine([]);
+        } else if (lines.length > 0) {
+          setLines(prev => prev.slice(0, -1));
+        }
+      } else if (drawMode === 'polygon') {
+        if (polygonPoints.length > 0) {
+          setPolygonPoints(prev => prev.slice(0, -1));
+        }
+      } else if (drawMode === 'circle') {
+        if (circleCenter) {
+          setCircleCenter(null);
+          setCircleRadius(0);
+        } else if (circles.length > 0) {
+          setCircles(prev => prev.slice(0, -1));
+        }
+      }
+    } else if (activeTool === 'delete') {
+      // Clear all
+      setCurrentLine([]);
+      setPolygonPoints([]);
+      setLines([]);
+      setCircleCenter(null);
+      setCircleRadius(0);
+      setCircles([]);
+    }
+  }, [activeTool]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -59,7 +119,31 @@ const Canvas2D = ({ onSketchComplete, sketches, activeSketch, onPointAdd }) => {
       ctx.fill();
     };
 
-    const drawSketch = (ctx, points, color, showPoints) => {
+    const drawLine = (ctx, p1, p2, color, lineWidth = 2) => {
+      ctx.strokeStyle = color;
+      ctx.lineWidth = lineWidth;
+      ctx.beginPath();
+      ctx.moveTo(p1.x, p1.y);
+      ctx.lineTo(p2.x, p2.y);
+      ctx.stroke();
+    };
+
+    const drawPoint = (ctx, point, color, size = 4) => {
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.arc(point.x, point.y, size, 0, 2 * Math.PI);
+      ctx.fill();
+    };
+
+    const drawCircle = (ctx, center, radius, color, lineWidth = 2) => {
+      ctx.strokeStyle = color;
+      ctx.lineWidth = lineWidth;
+      ctx.beginPath();
+      ctx.arc(center.x, center.y, radius, 0, 2 * Math.PI);
+      ctx.stroke();
+    };
+
+    const drawPolygon = (ctx, points, color, showPoints = false) => {
       if (points.length < 2) return;
       
       ctx.strokeStyle = color;
@@ -71,7 +155,7 @@ const Canvas2D = ({ onSketchComplete, sketches, activeSketch, onPointAdd }) => {
         ctx.lineTo(points[i].x, points[i].y);
       }
       
-      // Close the sketch if it has more than 2 points
+      // Close the polygon if it has more than 2 points
       if (points.length > 2) {
         ctx.closePath();
       }
@@ -80,12 +164,7 @@ const Canvas2D = ({ onSketchComplete, sketches, activeSketch, onPointAdd }) => {
       
       // Draw points
       if (showPoints) {
-        ctx.fillStyle = color;
-        points.forEach(point => {
-          ctx.beginPath();
-          ctx.arc(point.x, point.y, 4, 0, 2 * Math.PI);
-          ctx.fill();
-        });
+        points.forEach(point => drawPoint(ctx, point, color));
       }
     };
     
@@ -97,21 +176,67 @@ const Canvas2D = ({ onSketchComplete, sketches, activeSketch, onPointAdd }) => {
       drawGrid(ctx, canvas.width, canvas.height);
     }
     
-    // Draw existing sketches
+    // Draw existing sketches (saved drawings)
     sketches.forEach(sketch => {
-      drawSketch(ctx, sketch.original2DPoints || sketch.points, '#666', false);
+      if (sketch.type === 'lines' && sketch.originalLines) {
+        // Draw saved lines using original canvas coordinates
+        sketch.originalLines.forEach(line => {
+          drawLine(ctx, line[0], line[1], 'hsl(142 76% 36%)', 2);
+          drawPoint(ctx, line[0], 'hsl(142 76% 36%)', 4);
+          drawPoint(ctx, line[1], 'hsl(142 76% 36%)', 4);
+        });
+      } else if (sketch.type === 'polygon' && sketch.original2DPoints) {
+        // Draw saved polygon using original canvas coordinates
+        drawPolygon(ctx, sketch.original2DPoints, 'hsl(142 76% 36%)', false);
+      } else if (sketch.type === 'circles' && sketch.originalCircles) {
+        // Draw saved circles using original canvas coordinates
+        sketch.originalCircles.forEach(circle => {
+          drawCircle(ctx, circle.center, circle.radius, 'hsl(142 76% 36%)', 2);
+          drawPoint(ctx, circle.center, 'hsl(142 76% 36%)', 4);
+        });
+      }
     });
     
     // Draw active sketch
     if (activeSketch) {
-      drawSketch(ctx, activeSketch.original2DPoints || activeSketch.points, '#0066ff', true);
+      drawPolygon(ctx, activeSketch.original2DPoints || activeSketch.points, '#0066ff', true);
     }
     
-    // Draw current sketch being drawn
-    if (currentPoints.length > 0) {
-      drawSketch(ctx, currentPoints, '#ff6600', true);
+    // Draw completed lines in line mode
+    lines.forEach(line => {
+      drawLine(ctx, line[0], line[1], 'hsl(217 91% 65%)', 2);
+      drawPoint(ctx, line[0], 'hsl(217 91% 65%)', 5);
+      drawPoint(ctx, line[1], 'hsl(217 91% 65%)', 5);
+    });
+    
+    // Draw current line being drawn
+    if (drawMode === 'line' && currentLine.length === 1) {
+      drawPoint(ctx, currentLine[0], 'hsl(25 95% 63%)', 6);
+    } else if (drawMode === 'line' && currentLine.length === 2) {
+      drawLine(ctx, currentLine[0], currentLine[1], 'hsl(25 95% 63%)', 3);
+      drawPoint(ctx, currentLine[0], 'hsl(25 95% 63%)', 6);
+      drawPoint(ctx, currentLine[1], 'hsl(25 95% 63%)', 6);
     }
-  }, [sketches, activeSketch, currentPoints, snapToGrid, gridSize]);
+    
+    // Draw polygon being drawn
+    if (drawMode === 'polygon' && polygonPoints.length > 0) {
+      drawPolygon(ctx, polygonPoints, 'hsl(25 95% 63%)', true);
+    }
+    
+    // Draw completed circles
+    circles.forEach(circle => {
+      drawCircle(ctx, circle.center, circle.radius, 'hsl(217 91% 65%)', 2);
+      drawPoint(ctx, circle.center, 'hsl(217 91% 65%)', 4);
+    });
+    
+    // Draw circle being drawn
+    if (drawMode === 'circle' && circleCenter) {
+      if (circleRadius > 0) {
+        drawCircle(ctx, circleCenter, circleRadius, 'hsl(25 95% 63%)', 3);
+      }
+      drawPoint(ctx, circleCenter, 'hsl(25 95% 63%)', 6);
+    }
+  }, [sketches, activeSketch, lines, currentLine, polygonPoints, circles, circleCenter, circleRadius, drawMode, snapToGrid, gridSize]);
 
   const snapToGridPoint = (x, y) => {
     if (!snapToGrid) return { x, y };
@@ -123,40 +248,196 @@ const Canvas2D = ({ onSketchComplete, sketches, activeSketch, onPointAdd }) => {
   const handleMouseDown = (e) => {
     const canvas = canvasRef.current;
     const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+    
+    // Calculate proper canvas coordinates accounting for scaling
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    const x = (e.clientX - rect.left) * scaleX;
+    const y = (e.clientY - rect.top) * scaleY;
     
     const snappedPoint = snapToGridPoint(x, y);
     
-    if (!isDrawing) {
-      setCurrentPoints([snappedPoint]);
-      setIsDrawing(true);
-    } else {
-      const newPoints = [...currentPoints, snappedPoint];
-      setCurrentPoints(newPoints);
+    if (drawMode === 'line') {
+      // Line mode: each click adds a point, every 2 points creates a line
+      if (currentLine.length === 0) {
+        setCurrentLine([snappedPoint]);
+      } else if (currentLine.length === 1) {
+        // Complete the line
+        const newLine = [currentLine[0], snappedPoint];
+        setLines(prev => [...prev, newLine]);
+        setCurrentLine([]); // Reset for next line
+        if (onPointAdd) onPointAdd(snappedPoint);
+      }
+    } else if (drawMode === 'polygon') {
+      // Polygon mode: continuous points
+      setPolygonPoints(prev => [...prev, snappedPoint]);
       if (onPointAdd) onPointAdd(snappedPoint);
+    } else if (drawMode === 'circle') {
+      // Circle mode: first click sets center, second click sets radius
+      if (!circleCenter) {
+        setCircleCenter(snappedPoint);
+      } else {
+        // Calculate radius and complete circle
+        const dx = snappedPoint.x - circleCenter.x;
+        const dy = snappedPoint.y - circleCenter.y;
+        const radius = Math.sqrt(dx * dx + dy * dy);
+        if (radius > 0) {
+          setCircles(prev => [...prev, { center: circleCenter, radius }]);
+        }
+        setCircleCenter(null);
+        setCircleRadius(0);
+      }
+    }
+  };
+
+  const handleMouseMove = (e) => {
+    if (drawMode === 'circle' && circleCenter) {
+      const canvas = canvasRef.current;
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      const x = (e.clientX - rect.left) * scaleX;
+      const y = (e.clientY - rect.top) * scaleY;
+      
+      const dx = x - circleCenter.x;
+      const dy = y - circleCenter.y;
+      const radius = Math.sqrt(dx * dx + dy * dy);
+      setCircleRadius(radius);
     }
   };
 
   const handleDoubleClick = () => {
-    if (currentPoints.length > 2) {
-      if (onSketchComplete) onSketchComplete(currentPoints);
-      setCurrentPoints([]);
-      setIsDrawing(false);
+    if (drawMode === 'polygon' && polygonPoints.length > 2) {
+      // Complete the polygon
+      if (onSketchComplete) {
+        onSketchComplete({ points: polygonPoints, type: 'polygon' });
+      }
+      setPolygonPoints([]);
+    }
+  };
+
+  const checkIfClosed = (points) => {
+    if (points.length < 3) return false;
+    const first = points[0];
+    const last = points[points.length - 1];
+    const distance = Math.sqrt(Math.pow(last.x - first.x, 2) + Math.pow(last.y - first.y, 2));
+    return distance < gridSize; // Close if within grid snap distance
+  };
+
+  const completeSketch = () => {
+    if (drawMode === 'line' && lines.length > 0) {
+      // Check if lines form a closed loop
+      const isClosed = checkIfClosed([lines[0][0], ...lines.map(l => l[1])]);
+      if (onSketchComplete) {
+        onSketchComplete({ 
+          lines: lines, 
+          type: 'lines',
+          closed: isClosed 
+        });
+      }
+      // Clear to start new drawing
+      setLines([]);
+      setCurrentLine([]);
+    } else if (drawMode === 'polygon' && polygonPoints.length > 2) {
+      if (onSketchComplete) {
+        onSketchComplete({ 
+          points: polygonPoints, 
+          type: 'polygon',
+          closed: true
+        });
+      }
+      // Clear to start new drawing
+      setPolygonPoints([]);
+    } else if (drawMode === 'circle' && circles.length > 0) {
+      if (onSketchComplete) {
+        onSketchComplete({ 
+          circles: circles, 
+          type: 'circles',
+          closed: true
+        });
+      }
+      // Clear to start new drawing
+      setCircles([]);
+      setCircleCenter(null);
+      setCircleRadius(0);
     }
   };
 
   const handleKeyPress = (e) => {
+    // Escape - Cancel only current in-progress drawing (not saved sketches)
     if (e.key === 'Escape') {
-      setCurrentPoints([]);
-      setIsDrawing(false);
+      setCurrentLine([]);
+      setPolygonPoints([]);
+      setCircleCenter(null);
+      setCircleRadius(0);
+      // Only clear unsaved lines in line mode
+      if (drawMode === 'line') {
+        setLines([]);
+      }
+    }
+    
+    // Backspace or Delete - Remove last element
+    if (e.key === 'Backspace' || e.key === 'Delete') {
+      e.preventDefault(); // Prevent browser back navigation
+      
+      if (drawMode === 'line') {
+        if (currentLine.length > 0) {
+          setCurrentLine([]);
+        } else if (lines.length > 0) {
+          setLines(prev => prev.slice(0, -1));
+        }
+      } else if (drawMode === 'polygon') {
+        if (polygonPoints.length > 0) {
+          setPolygonPoints(prev => prev.slice(0, -1));
+        }
+      } else if (drawMode === 'circle') {
+        if (circleCenter) {
+          setCircleCenter(null);
+          setCircleRadius(0);
+        } else if (circles.length > 0) {
+          setCircles(prev => prev.slice(0, -1));
+        }
+      }
+    }
+    
+    // Enter - Complete sketch
+    if (e.key === 'Enter') {
+      completeSketch();
+    }
+    
+    // L key - Switch to line mode
+    if (e.key === 'l' && !e.ctrlKey) {
+      setDrawMode('line');
+      setPolygonPoints([]);
+      setCurrentLine([]);
+      setCircleCenter(null);
+      setCircleRadius(0);
+    }
+    
+    // P key - Switch to polygon mode
+    if (e.key === 'p' && !e.ctrlKey) {
+      setDrawMode('polygon');
+      setLines([]);
+      setCurrentLine([]);
+      setCircleCenter(null);
+      setCircleRadius(0);
+    }
+    
+    // C key - Switch to circle mode
+    if (e.key === 'c' && !e.ctrlKey) {
+      setDrawMode('circle');
+      setLines([]);
+      setPolygonPoints([]);
+      setCurrentLine([]);
+      setCircleCenter(null);
+      setCircleRadius(0);
     }
   };
 
   useEffect(() => {
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, []);
+  }, [drawMode, currentLine, polygonPoints, lines, circles, circleCenter]);
 
   return (
     <div className="canvas-2d-container">
@@ -173,14 +454,18 @@ const Canvas2D = ({ onSketchComplete, sketches, activeSketch, onPointAdd }) => {
         </div>
         <div className="toolbar-section">
           <span className="status-text">
-            {isDrawing 
-              ? `Drawing sketch - ${currentPoints.length} points (Double-click to complete)`
-              : 'Click to start sketching'
+            {drawMode === 'line' 
+              ? `Line Mode: ${lines.length} lines${currentLine.length > 0 ? ' (click to place 2nd point)' : ' (click to start)'}`
+              : drawMode === 'polygon'
+              ? `Polygon Mode: ${polygonPoints.length} points${polygonPoints.length > 0 ? ' (double-click or Enter to complete)' : ' (click to start)'}`
+              : `Circle Mode: ${circles.length} circles${circleCenter ? ' (click to set radius)' : ' (click to set center)'}`
             }
           </span>
         </div>
         <div className="toolbar-section">
-          <span className="help-text">ESC to cancel • ISO key for 3D view</span>
+          <span className="help-text">
+            L: line • P: polygon • C: circle • Backspace: undo • ESC: cancel • Enter: save • I: 3D view
+          </span>
         </div>
       </div>
       
@@ -190,11 +475,14 @@ const Canvas2D = ({ onSketchComplete, sketches, activeSketch, onPointAdd }) => {
         height={600}
         className="sketch-canvas"
         onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
         onDoubleClick={handleDoubleClick}
         style={{ 
           border: '1px solid #ccc', 
-          cursor: isDrawing ? 'crosshair' : 'pointer',
-          backgroundColor: '#fafafa'
+          cursor: 'crosshair',
+          backgroundColor: '#fafafa',
+          width: '100%',
+          height: '100%'
         }}
       />
     </div>
@@ -207,7 +495,8 @@ const ViewportManager = forwardRef(({
   onFeatureDelete, 
   onFeatureUpdate,
   selectedFeature,
-  onFeatureSelect 
+  onFeatureSelect,
+  activeTool
 }, ref) => {
   const [viewMode, setViewMode] = useState('2d'); // '2d' or '3d'
   const [sketches, setSketches] = useState([]);
@@ -264,34 +553,94 @@ const ViewportManager = forwardRef(({
     setViewMode(prev => prev === '2d' ? '3d' : '2d');
   };
 
-  const handleSketchComplete = (points) => {
-    if (points.length < 3) return;
+  const handleSketchComplete = (sketchData) => {
+    // Get canvas dimensions for proper normalization
+    const canvas = document.querySelector('.sketch-canvas');
+    const canvasWidth = canvas ? canvas.width : 800;
+    const canvasHeight = canvas ? canvas.height : 600;
+    const centerX = canvasWidth / 2;
+    const centerY = canvasHeight / 2;
 
-    // Convert 2D points to normalized coordinates for 3D extrusion
-    const normalizedPoints = points.map(point => ({
-      x: (point.x - 400) / 400, // Normalize to -1 to 1 range
-      y: -(point.y - 300) / 300  // Flip Y and normalize
-    }));
+    let newSketch;
 
-    // Create a new sketch feature
-    const newSketch = {
-      id: `sketch_${Date.now()}`,
-      type: 'sketch',
-      name: `Sketch ${sketches.length + 1}`,
-      points: normalizedPoints,
-      original2DPoints: points,
-      visible: true,
-      created: new Date().toISOString()
-    };
+    if (sketchData.type === 'lines') {
+      // Handle independent lines
+      if (!sketchData.lines || sketchData.lines.length === 0) return;
 
-    setSketches(prev => [...prev, newSketch]);
-    
-    // Automatically switch to 3D when sketch is completed
-    setViewMode('3d');
-    
-    // Add to features list
-    if (onFeatureAdd) {
-      onFeatureAdd(newSketch);
+      // Normalize line endpoints
+      const normalizedLines = sketchData.lines.map(line => [
+        {
+          x: (line[0].x - centerX) / centerX,
+          y: -(line[0].y - centerY) / centerY
+        },
+        {
+          x: (line[1].x - centerX) / centerX,
+          y: -(line[1].y - centerY) / centerY
+        }
+      ]);
+
+      newSketch = {
+        id: `sketch_${Date.now()}`,
+        type: 'lines',
+        name: `Lines ${sketches.length + 1}`,
+        lines: normalizedLines,
+        originalLines: sketchData.lines,
+        closed: sketchData.closed,
+        visible: true,
+        created: new Date().toISOString()
+      };
+    } else if (sketchData.type === 'polygon') {
+      // Handle polygon/closed shape
+      if (!sketchData.points || sketchData.points.length < 3) return;
+
+      // Convert 2D points to normalized coordinates
+      const normalizedPoints = sketchData.points.map(point => ({
+        x: (point.x - centerX) / centerX,
+        y: -(point.y - centerY) / centerY
+      }));
+
+      newSketch = {
+        id: `sketch_${Date.now()}`,
+        type: 'polygon',
+        name: `Polygon ${sketches.length + 1}`,
+        points: normalizedPoints,
+        original2DPoints: sketchData.points,
+        closed: true,
+        visible: true,
+        created: new Date().toISOString()
+      };
+    } else if (sketchData.type === 'circles') {
+      // Handle circles
+      if (!sketchData.circles || sketchData.circles.length === 0) return;
+
+      // Normalize circle data
+      const normalizedCircles = sketchData.circles.map(circle => ({
+        center: {
+          x: (circle.center.x - centerX) / centerX,
+          y: -(circle.center.y - centerY) / centerY
+        },
+        radius: circle.radius / centerX // Normalize radius
+      }));
+
+      newSketch = {
+        id: `sketch_${Date.now()}`,
+        type: 'circles',
+        name: `Circles ${sketches.length + 1}`,
+        circles: normalizedCircles,
+        originalCircles: sketchData.circles,
+        closed: true,
+        visible: true,
+        created: new Date().toISOString()
+      };
+    }
+
+    if (newSketch) {
+      setSketches(prev => [...prev, newSketch]);
+      
+      // Add to features list
+      if (onFeatureAdd) {
+        onFeatureAdd(newSketch);
+      }
     }
   };
 
@@ -343,6 +692,7 @@ const ViewportManager = forwardRef(({
             sketches={sketches}
             activeSketch={activeSketch}
             onPointAdd={handlePointAdd}
+            activeTool={activeTool}
           />
         ) : (
           <ThreeViewer

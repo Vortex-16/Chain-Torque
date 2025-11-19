@@ -18,6 +18,8 @@ import {
   FaCut,
   FaPaste,
   FaRobot,
+  FaTrash,
+  FaEraser,
 } from "react-icons/fa";
 
 import ViewportManager from "./components/ViewportManager";
@@ -202,19 +204,32 @@ const App = () => {
           <div className="tool-section">
             <h3>Draw</h3>
             <FaSlash 
-              title="Line Tool" 
+              title="Line Tool (L)" 
               className={activeTool === 'line' ? 'active' : ''} 
               onClick={() => handleToolSelect('line')}
             />
+            <FaVectorSquare 
+              title="Polygon Tool (P)" 
+              className={activeTool === 'polygon' ? 'active' : ''} 
+              onClick={() => handleToolSelect('polygon')}
+            />
             <FaCircle 
-              title="Circle Tool" 
+              title="Circle Tool (C)" 
               className={activeTool === 'circle' ? 'active' : ''} 
               onClick={() => handleToolSelect('circle')}
             />
-            <FaVectorSquare 
-              title="Rectangle Tool" 
-              className={activeTool === 'rectangle' ? 'active' : ''} 
-              onClick={() => handleToolSelect('rectangle')}
+          </div>
+          <div className="tool-section">
+            <h3>Edit</h3>
+            <FaEraser 
+              title="Undo Last (Backspace)" 
+              className={activeTool === 'eraser' ? 'active' : ''} 
+              onClick={() => handleToolSelect('eraser')}
+            />
+            <FaTrash 
+              title="Clear All (ESC)" 
+              className={activeTool === 'delete' ? 'active' : ''} 
+              onClick={() => handleToolSelect('delete')}
             />
           </div>
         </div>
@@ -261,6 +276,7 @@ const App = () => {
               onFeatureUpdate={handleFeatureUpdate}
               selectedFeature={selectedFeature}
               onFeatureSelect={handleFeatureSelect}
+              activeTool={activeTool}
             />
           </div>
         </div>
