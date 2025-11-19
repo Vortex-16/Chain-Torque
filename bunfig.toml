@@ -1,0 +1,24 @@
+[install]
+# Optimize installation
+cache = true
+frozen = false
+production = false
+
+[install.scopes]
+# Use fastest registry mirrors
+"@openzeppelin" = "https://registry.npmjs.org/"
+"@radix-ui" = "https://registry.npmjs.org/"
+"@react-three" = "https://registry.npmjs.org/"
+
+[run]
+# Bun native features
+bun = true
+silent = false
+
+[test]
+# Use bun's built-in test runner
+preload = []
+
+# Performance optimizations
+[define]
+"process.env.NODE_ENV" = "development"

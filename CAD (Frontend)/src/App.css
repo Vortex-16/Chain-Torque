@@ -1,4 +1,12 @@
 /* General Layout */
+body, html, #root {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  height: 100vh;
+  width: 100vw;
+}
+
 .app {
   height: 100vh;
   width: 100vw;
@@ -7,6 +15,7 @@
   background-color: hsl(224 71.4% 4.1%);
   color: hsl(210 20% 98%);
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  overflow: hidden;
 }
 
 /* Top Bar */
@@ -134,6 +143,7 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  min-height: 0;
 }
 
 .canvas-header {
@@ -678,6 +688,7 @@
   flex-direction: column;
   height: 100%;
   background: hsl(224 71.4% 4.1%);
+  overflow: hidden;
 }
 
 .viewport-header {
@@ -748,6 +759,8 @@
   flex: 1;
   display: flex;
   position: relative;
+  overflow: hidden;
+  min-height: 0;
 }
 
 .viewport-status {
@@ -776,6 +789,8 @@
   display: flex;
   flex-direction: column;
   background: hsl(224 71.4% 4.1%);
+  overflow: hidden;
+  position: relative;
 }
 
 .canvas-2d-toolbar {
@@ -814,6 +829,10 @@
 .sketch-canvas {
   flex: 1;
   background: hsl(224 71.4% 4.1%);
+  display: block;
+  object-fit: contain;
+  touch-action: none;
+  user-select: none;
 }
 
 .sketch-canvas:hover {

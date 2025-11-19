@@ -15,12 +15,12 @@ const Web3Manager = require('./web3');
 const path = require('path');
 const dotenv = require('dotenv');
 
+// Load environment variables from root .env file
+dotenv.config({ path: path.join(__dirname, '..', '.env') });
+
 // Import models
 const User = require('./models/User');
 const Transaction = require('./models/Transaction');
-
-// Environment variables are loaded by the root script via dotenv -e .env
-// No need to load again here
 
 const app = express();
 const PORT = process.env.PORT || 5000;

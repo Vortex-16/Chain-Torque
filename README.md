@@ -26,8 +26,9 @@ ChainTorque/
 
 ## 🛠️ **Technologies Used**
 
-- **Frontend**: Next.js, React, Three.js, Tailwind CSS
-- **Backend**: Node.js + Express, WASM + Rust, Socket.IO, MongoDB, IPFS
+- **Runtime**: Bun (3x faster than Node.js)
+- **Frontend**: Next.js, React, Three.js, Tailwind CSS, Vite
+- **Backend**: Express, WASM + Rust, Socket.IO, MongoDB, IPFS
 - **Blockchain**: Solidity (ERC-721), Hardhat, Ethereum/Polygon, Web3.js, OpenZeppelin
 - **AI/ML**: Python (Scikit-learn, Pandas, PyTorch/TensorFlow, HuggingFaceTransformers), VectorDB
 - **DevOps**: Github Actions, Docker, AWS EC2/Azure
@@ -43,25 +44,36 @@ ChainTorque uses a dual-storage approach for optimal performance and decentraliz
 This architecture provides instant user experiences while maintaining true Web3 decentralization for engineering assets.
 
 
-## 🚀 **Quick Start (PNPM)**
+## 🚀 **Quick Start**
 
+### Prerequisites
+Install [Bun](https://bun.sh) - a fast all-in-one JavaScript runtime:
+```sh
+# Windows (PowerShell)
+powershell -c "irm bun.sh/install.ps1|iex"
+
+# macOS/Linux
+curl -fsSL https://bun.sh/install | bash
+```
+
+### Installation & Running
 ```sh
 # Clone and install
 git clone https://github.com/Dealer-09/ChainTorque.git
 cd ChainTorque
-pnpm install
+bun install
 
-# Start all services
-pnpm dev
+# Start all services (⚡ 3x faster than npm/pnpm)
+bun run dev
 
 # Or run individual services
-pnpm --filter "Landing Page (Frontend)" dev      # Landing page
-pnpm --filter "Marketplace (Frontend)" dev       # Marketplace frontend
-pnpm --filter "Marketplace (Backend)" dev        # Backend API
-pnpm --filter "CAD (Frontend)" dev               # CAD editor with Torquy
+bun run dev:landing      # Landing page (Port 5000)
+bun run dev:marketplace  # Marketplace frontend (Port 5173)
+bun run dev:backend      # Backend API (Port 5001)
+bun run dev:cad          # CAD editor with Torquy (Port 3000)
 ```
 
-> **Note:** This monorepo uses [PNPM](https://pnpm.io/) for package management. Do not use npm or yarn. See `pnpm-workspace.yaml` for workspace configuration.
+> **Why Bun?** This project uses [Bun](https://bun.sh) for lightning-fast performance, smaller footprint, and native TypeScript support. No more slow installs! 🚀
 
 ## 🎯 **Key Features**
 

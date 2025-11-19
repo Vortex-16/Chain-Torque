@@ -5,6 +5,7 @@ import ThreeViewer from './ThreeViewer';
 // Integrated 2D Canvas Component
 const Canvas2D = ({ onSketchComplete, sketches, activeSketch, onPointAdd, activeTool, onToolAction }) => {
   const canvasRef = useRef(null);
+  const containerRef = useRef(null);
   const [drawMode, setDrawMode] = useState('line'); // 'line', 'polygon', or 'circle'
   const [lines, setLines] = useState([]); // Array of completed line segments
   const [currentLine, setCurrentLine] = useState([]); // Current line being drawn
@@ -14,6 +15,10 @@ const Canvas2D = ({ onSketchComplete, sketches, activeSketch, onPointAdd, active
   const [circles, setCircles] = useState([]); // Completed circles
   const [snapToGrid, setSnapToGrid] = useState(true);
   const [gridSize] = useState(20);
+  const [zoom, setZoom] = useState(1);
+  const [pan, setPan] = useState({ x: 0, y: 0 });
+  const [isPanning, setIsPanning] = useState(false);
+  const [lastPanPos, setLastPanPos] = useState({ x: 0, y: 0 });
 
   // Update draw mode when activeTool changes
   useEffect(() => {
@@ -94,29 +99,36 @@ const Canvas2D = ({ onSketchComplete, sketches, activeSketch, onPointAdd, active
         ctx.stroke();
       }
       
-      // Draw origin
-      ctx.strokeStyle = '#333';
-      ctx.lineWidth = 2;
+      // Draw origin - prominent center marker
       const centerX = width / 2;
       const centerY = height / 2;
       
+      // Center crosshair - more visible
+      ctx.strokeStyle = 'hsl(217 91% 65%)';
+      ctx.lineWidth = 2;
+      
       // X axis
       ctx.beginPath();
-      ctx.moveTo(centerX - 50, centerY);
-      ctx.lineTo(centerX + 50, centerY);
+      ctx.moveTo(centerX - 60, centerY);
+      ctx.lineTo(centerX + 60, centerY);
       ctx.stroke();
       
       // Y axis
       ctx.beginPath();
-      ctx.moveTo(centerX, centerY - 50);
-      ctx.lineTo(centerX, centerY + 50);
+      ctx.moveTo(centerX, centerY - 60);
+      ctx.lineTo(centerX, centerY + 60);
       ctx.stroke();
       
-      // Origin point
-      ctx.fillStyle = '#333';
+      // Origin point - larger and more visible
+      ctx.fillStyle = 'hsl(217 91% 65%)';
       ctx.beginPath();
-      ctx.arc(centerX, centerY, 3, 0, 2 * Math.PI);
+      ctx.arc(centerX, centerY, 5, 0, 2 * Math.PI);
       ctx.fill();
+      
+      // Origin label
+      ctx.fillStyle = 'hsl(217 91% 65%)';
+      ctx.font = '12px monospace';
+      ctx.fillText('0,0', centerX + 10, centerY - 10);
     };
 
     const drawLine = (ctx, p1, p2, color, lineWidth = 2) => {
@@ -304,6 +316,65 @@ const Canvas2D = ({ onSketchComplete, sketches, activeSketch, onPointAdd, active
       const radius = Math.sqrt(dx * dx + dy * dy);
       setCircleRadius(radius);
     }
+
+    // Pan with middle mouse or space+drag
+    if (isPanning) {
+      const dx = e.clientX - lastPanPos.x;
+      const dy = e.clientY - lastPanPos.y;
+      setPan(prev => ({ x: prev.x + dx, y: prev.y + dy }));
+      setLastPanPos({ x: e.clientX, y: e.clientY });
+    }
+  };
+
+  const handleWheel = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const delta = e.deltaY * -0.001;
+    const newZoom = Math.min(Math.max(0.1, zoom + delta), 5);
+    setZoom(newZoom);
+  };
+
+  // Prevent browser zoom on the canvas container
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    const container = containerRef.current;
+    
+    const preventBrowserZoom = (e) => {
+      if (e.ctrlKey || e.metaKey) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    };
+
+    if (canvas) {
+      canvas.addEventListener('wheel', preventBrowserZoom, { passive: false });
+    }
+    if (container) {
+      container.addEventListener('wheel', preventBrowserZoom, { passive: false });
+    }
+
+    return () => {
+      if (canvas) {
+        canvas.removeEventListener('wheel', preventBrowserZoom);
+      }
+      if (container) {
+        container.removeEventListener('wheel', preventBrowserZoom);
+      }
+    };
+  }, []);
+
+  const handleMiddleMouseDown = (e) => {
+    if (e.button === 1 || (e.button === 0 && e.shiftKey)) {
+      e.preventDefault();
+      setIsPanning(true);
+      setLastPanPos({ x: e.clientX, y: e.clientY });
+    }
+  };
+
+  const handleMiddleMouseUp = (e) => {
+    if (e.button === 1 || (e.button === 0 && e.shiftKey)) {
+      setIsPanning(false);
+    }
   };
 
   const handleDoubleClick = () => {
@@ -464,27 +535,53 @@ const Canvas2D = ({ onSketchComplete, sketches, activeSketch, onPointAdd, active
         </div>
         <div className="toolbar-section">
           <span className="help-text">
-            L: line • P: polygon • C: circle • Backspace: undo • ESC: cancel • Enter: save • I: 3D view
+            L: line • P: polygon • C: circle • Scroll: zoom • Shift+Drag: pan • Backspace: undo • ESC: cancel • Enter: save • I: 3D
+          </span>
+        </div>
+        <div className="toolbar-section">
+          <span className="status-text">
+            Zoom: {(zoom * 100).toFixed(0)}%
           </span>
         </div>
       </div>
       
-      <canvas
-        ref={canvasRef}
-        width={800}
-        height={600}
-        className="sketch-canvas"
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onDoubleClick={handleDoubleClick}
+      <div 
+        ref={containerRef}
         style={{ 
-          border: '1px solid #ccc', 
-          cursor: 'crosshair',
-          backgroundColor: '#fafafa',
-          width: '100%',
-          height: '100%'
+          flex: 1, 
+          overflow: 'hidden', 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center',
+          position: 'relative',
+          backgroundColor: 'hsl(224 71.4% 4.1%)'
         }}
-      />
+      >
+        <canvas
+          ref={canvasRef}
+          width={800}
+          height={600}
+          className="sketch-canvas"
+          onMouseDown={(e) => {
+            handleMiddleMouseDown(e);
+            if (e.button === 0 && !e.shiftKey) handleMouseDown(e);
+          }}
+          onMouseUp={handleMiddleMouseUp}
+          onMouseMove={handleMouseMove}
+          onWheel={handleWheel}
+          onDoubleClick={handleDoubleClick}
+          style={{ 
+            border: '1px solid hsl(240 3.7% 15.9%)', 
+            cursor: isPanning ? 'grabbing' : 'crosshair',
+            backgroundColor: '#fafafa',
+            transform: `scale(${zoom}) translate(${pan.x / zoom}px, ${pan.y / zoom}px)`,
+            transformOrigin: 'center',
+            maxWidth: '100%',
+            maxHeight: '100%',
+            height: '100%'
+          }}
+        />
+      </div>
     </div>
   );
 };
