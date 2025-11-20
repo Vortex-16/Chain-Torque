@@ -71,6 +71,10 @@
     "Marketplace (Backend)": {
       "name": "chaintorque-backend",
       "version": "1.0.0",
+      "devDependencies": {
+        "@nomiclabs/hardhat-ethers": "^2.2.3",
+        "ethers": "^5.7.2",
+      },
     },
     "Marketplace (Frontend)": {
       "name": "chaintorque-marketplace",

@@ -17,5 +17,9 @@
     "hardhat"
   ],
   "author": "ChainTorque Team",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "@nomiclabs/hardhat-ethers": "^2.2.3",
+    "ethers": "^5.7.2"
+  }
 }

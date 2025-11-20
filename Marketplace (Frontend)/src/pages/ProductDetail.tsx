@@ -280,29 +280,35 @@ const ProductDetail = () => {
         return;
       }
 
-      // Handle real product purchase
-      const authToken = localStorage.getItem('authToken');
+      // Get wallet address from Clerk user or localStorage
+      const walletAddress = user?.primaryWeb3Wallet?.web3Wallet || localStorage.getItem('walletAddress');
 
-      if (!authToken) {
-        alert('Please sign in to purchase items.');
+      if (!walletAddress) {
+        alert('Please connect your wallet to purchase items.');
+        setShowWalletDialog(true);
         return;
       }
 
-      if (!model?.tokenId) {
+      if (!model?.tokenId || !model?.priceETH) {
         alert('Product information not available.');
         return;
       }
 
-      const response = await apiService.purchaseMarketplaceItem(model.tokenId, authToken);
+      // Call the correct backend API with required parameters
+      const response = await apiService.purchaseNFT(
+        model.tokenId,
+        walletAddress,
+        model.priceETH
+      );
 
       if (response.success) {
-        alert('Purchase successful! Check your wallet for the NFT.');
+        alert(`Purchase successful! Transaction hash: ${response.data.transactionHash}\nCheck your wallet for the NFT.`);
       } else {
         throw new Error(response.error || 'Purchase failed');
       }
     } catch (err) {
       console.error('Purchase error:', err);
-      alert('Purchase failed. Please try again.');
+      alert(`Purchase failed: ${err.message || 'Please try again.'}`);
     } finally {
       setIsPurchasing(false);
     }
