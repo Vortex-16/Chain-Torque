@@ -20,6 +20,7 @@ contract ChainTorqueMarketplace is ERC721URIStorage, Ownable, ReentrancyGuard, P
 
     // Market item (packed)
     struct MarketItem {
+        uint256 tokenId;
         uint128 price;
         uint64 createdAt;
         uint32 category;
@@ -112,6 +113,7 @@ contract ChainTorqueMarketplace is ERC721URIStorage, Ownable, ReentrancyGuard, P
             _setTokenURI(newTokenId, tokenURIs[i]);
 
             _marketItems[newTokenId] = MarketItem({
+                tokenId: newTokenId,
                 price: prices[i],
                 createdAt: timestamp,
                 category: categories[i],
@@ -155,6 +157,7 @@ contract ChainTorqueMarketplace is ERC721URIStorage, Ownable, ReentrancyGuard, P
         _setTokenURI(newTokenId, tokenURI);
 
         _marketItems[newTokenId] = MarketItem({
+            tokenId: newTokenId,
             price: price,
             createdAt: timestamp,
             category: category,

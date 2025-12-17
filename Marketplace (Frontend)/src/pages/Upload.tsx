@@ -86,9 +86,12 @@ const Upload: React.FC = () => {
       formData.append('category', uploadData.category);
       formData.append('tags', JSON.stringify(uploadData.tags));
 
+      // Add wallet address for user association
       if (user?.unsafeMetadata?.walletAddress) {
         formData.append('walletAddress', String(user.unsafeMetadata.walletAddress));
       }
+
+      // Add username for display (prefer full name)
       if (user?.firstName || user?.lastName) {
         const displayName = `${user?.firstName || ''} ${user?.lastName || ''}`.trim();
         formData.append('username', displayName);
@@ -98,20 +101,33 @@ const Upload: React.FC = () => {
 
       if (uploadData.files.length > 0) {
         formData.append('model', uploadData.files[0]);
-      }
-      if (uploadData.images.length > 0) {
-        formData.append('image', uploadData.images[0]);
+      } else {
+        throw new Error('Please select a model file to upload.');
       }
 
+      // Add image files (support multiple)
+      if (uploadData.images.length > 0) {
+        uploadData.images.forEach((image) => {
+          formData.append('image', image);
+        });
+      } else {
+        throw new Error('Please select at least one preview image.');
+      }
+
+      // Get the Clerk session token
       const token = await getToken();
       if (!token) {
         throw new Error('Authentication required. Please sign in.');
       }
 
+      // Call the API
       const response = await apiService.createMarketplaceItem(formData, token);
 
       if (response.success) {
-        alert(`Model uploaded successfully! Token ID: ${response.data?.tokenId || 'Unknown'}`);
+        alert(
+          `Model uploaded successfully! \nToken ID: ${response.data?.tokenId || 'Unknown'}\nStatus: Active on Marketplace`
+        );
+        // Reset form
         setUploadData({
           modelName: '',
           description: '',
@@ -123,10 +139,11 @@ const Upload: React.FC = () => {
         });
         setStep(1);
       } else {
-        throw new Error(response.error || 'Upload failed');
+        throw new Error(response.error || response.message || 'Upload failed');
       }
-    } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+    } catch (error: any) {
+      console.error('Upload error:', error);
+      const errorMessage = error.message || 'Unknown error occurred';
       alert(`Upload failed: ${errorMessage}`);
     } finally {
       setIsUploading(false);
@@ -148,8 +165,8 @@ const Upload: React.FC = () => {
             <div className='flex flex-col items-center'>
               <div
                 className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${step >= s.num
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-muted text-muted-foreground'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-muted text-muted-foreground'
                   }`}
               >
                 {step > s.num ? (

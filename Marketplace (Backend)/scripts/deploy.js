@@ -13,7 +13,7 @@ async function main() {
   console.log('📦 Deploying contract...');
   const marketplace = await ChainTorqueMarketplace.deploy();
 
-  // Wait for deployment to complete (using older API)
+  // Wait for deployment to complete (using v5 API for hardhat-ethers v2)
   await marketplace.deployed();
   const address = marketplace.address;
 
@@ -21,8 +21,8 @@ async function main() {
   console.log(`📍 Contract Address: ${address}`);
 
   // Get deployment info
-  const deploymentTx = marketplace.deployTransaction;
-  console.log(`🔗 Deployment Transaction: ${deploymentTx.hash}`);
+  const deploymentTxHash = marketplace.deployTransaction.hash;
+  console.log(`🔗 Deployment Transaction: ${deploymentTxHash}`);
 
   // Get contract constants for verification
   const listingPrice = await marketplace.getListingPrice();
@@ -39,7 +39,7 @@ async function main() {
   // Save deployment info
   const deploymentInfo = {
     ChainTorqueMarketplace: address,
-    deploymentTransaction: deploymentTx.hash,
+    deploymentTransaction: deploymentTxHash,
     network: 'hardhat',
     chainId: 31337,
     listingPrice: ethers.utils.formatEther(listingPrice),

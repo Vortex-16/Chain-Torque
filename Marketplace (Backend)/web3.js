@@ -257,23 +257,7 @@ class Web3Manager {
 
       for (let i = 0; i < items.length; i++) {
         const item = items[i];
-        let tokenId = i + 1;
-
-        // Attempt to identify the correct tokenId by scanning known tokens
-        const totalSupply = await this.contract.getCurrentTokenId();
-        for (let id = 1; id <= totalSupply; id++) {
-          try {
-            const marketItem = await this.contract.getMarketItem(id);
-            if (!marketItem.sold &&
-              marketItem.price.toString() === item.price.toString() &&
-              marketItem.seller === item.seller) {
-              tokenId = id;
-              break;
-            }
-          } catch (e) {
-            continue;
-          }
-        }
+        let tokenId = Number(item.tokenId); // Direct access thanks to contract update
 
         // Default metadata values
         let tokenURI = '';
