@@ -50,14 +50,39 @@
 }
 
 /* Theme transition and body background */
+html {
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+  /* Match hero gradient start color to prevent white bars on scroll bounce */
+  background-color: #667eea;
+  height: 100%;
+}
+
+html.dark {
+  background-color: #0f0f1a;
+}
+
 body,
 .dark {
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
+body {
+  overflow-x: hidden;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+}
+
 /* Light mode body should match hero gradient start */
 body:not(.dark) {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #6b8dd6 100%);
+  background-attachment: fixed;
+}
+
+/* Dark mode body background */
+.dark {
+  background: linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 50%, #0f0f1a 100%);
   background-attachment: fixed;
 }
 
@@ -232,6 +257,46 @@ body:not(.dark) {
   60% {
     transform: translateY(-5px);
   }
+}
+
+/* ========================================
+   Scroll Reveal Animations
+   ======================================== */
+
+/* Base reveal - fade up */
+.reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.reveal.active {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Reveal from left */
+.reveal-left {
+  opacity: 0;
+  transform: translateX(-50px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.reveal-left.active {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* Reveal from right */
+.reveal-right {
+  opacity: 0;
+  transform: translateX(50px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.reveal-right.active {
+  opacity: 1;
+  transform: translateX(0);
 }
 
 /* ========================================
@@ -624,50 +689,28 @@ body:not(.dark) {
   background: transparent;
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 0 30px rgba(99, 102, 241, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
   position: relative;
-  border-radius: 25px;
+  border-radius: 50px;
   overflow: hidden;
-}
-
-/* Animated gradient border */
-.navbar-pill::before {
-  content: '';
-  position: absolute;
-  top: -2px;
-  left: -2px;
-  right: -2px;
-  bottom: -2px;
-  background: linear-gradient(90deg,
-      #6366f1, #8b5cf6, #ec4899, #6366f1);
-  background-size: 300% 100%;
-  border-radius: 9999px;
-  z-index: -1;
-  animation: gradientBorder 4s ease infinite;
-  opacity: 0.6;
-}
-
-@keyframes gradientBorder {
-  0% {
-    background-position: 0% 50%;
-  }
-
-  50% {
-    background-position: 100% 50%;
-  }
-
-  100% {
-    background-position: 0% 50%;
-  }
+  pointer-events: auto;
 }
 
 /* Light mode navbar - transparent to blend with hero */
 body:not(.dark) .navbar-pill {
   background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  box-shadow: 0 0 30px rgba(99, 102, 241, 0.1);
-  border-radius: 25px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 20px rgba(99, 102, 241, 0.15);
+  border-radius: 50px;
+}
+
+/* Dark mode navbar - also transparent */
+.dark .navbar-pill {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: none;
+  border-radius: 50px;
 }
 
 body:not(.dark) .navbar-pill .nav-pill-link {
@@ -710,7 +753,7 @@ body:not(.dark) .navbar-pill .nav-pill-link:hover {
   background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
   position: relative;
   overflow: hidden;
-  border-radius: 25px;
+  border-radius: 50px;
 }
 
 .nav-login-btn::before {
@@ -722,35 +765,36 @@ body:not(.dark) .navbar-pill .nav-pill-link:hover {
   height: 100%;
   background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
   transition: left 0.5s ease;
-  border-radius: 25px;
+  border-radius: 50px;
 }
 
 .nav-login-btn:hover::before {
   left: 100%;
-  border-radius: 25px;
+  border-radius: 50px;
 }
 
 .nav-login-btn:hover {
   transform: scale(1.05);
   box-shadow: 0 4px 20px var(--glow-color);
-  border-radius: 25px;
+  border-radius: 50px;
 }
 
 /* Legacy navbar classes for compatibility */
 .navbar-glass {
-  background: var(--card-bg);
+  background: transparent;
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--card-border);
   transition: all 0.3s ease;
-  border-radius: 25px;
+  border-radius: 50px;
 }
 
 .navbar-scrolled {
-  background: var(--card-bg);
-  backdrop-filter: blur(30px);
+  background: transparent;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   box-shadow: 0 4px 30px var(--shadow-color);
-  border-radius: 25px;
+  border-radius: 50px;
 }
 
 .nav-link {
@@ -1173,4 +1217,60 @@ body:not(.dark) .navbar-pill .nav-pill-link:hover {
 .designation {
   color: var(--text-muted);
   font-size: 0.85rem;
+}
+
+/* Back to Top Button - Glass Effect */
+.glass-btn-top {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  width: 3.5rem;
+  height: 3.5rem;
+  background: rgba(99, 102, 241, 0.2);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  border-width: 1px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  z-index: 9999;
+  /* Higher index to float above everything */
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(20px) scale(0.8);
+  pointer-events: none;
+  transition: opacity 0.4s ease, transform 0.4s ease, background 0.3s ease;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  outline: none;
+  /* Remove outline */
+}
+
+/* Remove focus outline explicitly */
+.glass-btn-top:focus {
+  outline: none;
+}
+
+.glass-btn-top.show {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto !important;
+}
+
+.glass-btn-top:hover {
+  background: rgba(99, 102, 241, 0.4);
+  box-shadow: 0 0 30px var(--glow-color);
+  transform: translateY(-5px) scale(1.1);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.glass-btn-top i {
+  font-size: 1.2rem;
+  transition: transform 0.3s ease;
+}
+
+.glass-btn-top:hover i {
+  transform: translateY(-3px);
 }
