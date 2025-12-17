@@ -64,6 +64,21 @@
       font-family: 'Inter', system-ui, sans-serif;
     }
   </style>
+  <script async crossorigin="anonymous" data-clerk-publishable-key="<%= process.env.CLERK_PUBLISHABLE_KEY %>"
+    src="https://cdn.jsdelivr.net/npm/@clerk/clerk-js@latest/dist/clerk.browser.js"></script>
+  <script>
+    // Redirect authenticated user to main app
+    window.addEventListener("load", async function () {
+      try {
+        await Clerk.load();
+        if (Clerk.user) {
+          window.location.href = "http://localhost:8080";
+        }
+      } catch (error) {
+        console.log("Clerk not loaded yet");
+      }
+    });
+  </script>
 </head>
 
 <body>
