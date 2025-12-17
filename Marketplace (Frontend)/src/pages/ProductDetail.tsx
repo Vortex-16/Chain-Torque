@@ -25,8 +25,10 @@ import {
   Loader2,
   AlertCircle,
   Play,
+
   Wallet,
 } from 'lucide-react';
+
 
 // Import fallback images
 import cadGear from '@/assets/cad-gear.jpg';
@@ -228,7 +230,7 @@ const ProductDetail = () => {
         setLoading(false);
         return;
       }
-      
+
       setLoading(true);
       try {
         const response = await apiService.getMarketplaceItem(id);
@@ -270,45 +272,48 @@ const ProductDetail = () => {
 
     setIsPurchasing(true);
     try {
-      // Check if this is mock data (no real tokenId from backend)
-      const isRealProduct = model?.tokenId && model.tokenId > 1000; // Real tokenIds are typically larger
-
+      // Check if this is mock data
+      const isRealProduct = model?.tokenId && model.tokenId > 0;
       if (!isRealProduct) {
-        // Handle mock data purchase
-        await new Promise((resolve) => setTimeout(resolve, 1500)); // Simulate processing
-        alert('Demo purchase successful! This was a mock transaction for demonstration purposes.');
+        await new Promise((resolve) => setTimeout(resolve, 1500));
+        alert('Demo purchase successful! (Mock)');
         return;
       }
 
-      // Get wallet address from Clerk user or localStorage
-      const walletAddress = user?.primaryWeb3Wallet?.web3Wallet || localStorage.getItem('walletAddress');
+      console.log('Initiating decentralized purchase for:', model.title, model.priceETH);
 
-      if (!walletAddress) {
-        alert('Please connect your wallet to purchase items.');
-        setShowWalletDialog(true);
-        return;
-      }
+      // 1. Sign and Pay via Metamask (Decentralized)
+      const { web3Service } = await import('@/services/web3Service');
+      const tx = await web3Service.purchaseItem(model.tokenId!, model.priceETH!);
 
-      if (!model?.tokenId || !model?.priceETH) {
-        alert('Product information not available.');
-        return;
-      }
+      console.log('Transaction sent:', tx.transactionHash);
 
-      // Call the correct backend API with required parameters
-      const response = await apiService.purchaseNFT(
-        model.tokenId,
-        walletAddress,
-        model.priceETH
-      );
+      // 2. Sync with Backend
+      const userAddress = user?.primaryWeb3Wallet?.web3Wallet || localStorage.getItem('walletAddress');
 
-      if (response.success) {
-        alert(`Purchase successful! Transaction hash: ${response.data.transactionHash}\nCheck your wallet for the NFT.`);
-      } else {
-        throw new Error(response.error || 'Purchase failed');
-      }
-    } catch (err) {
+      await apiService.request('/marketplace/sync-purchase', {
+        method: 'POST',
+        body: JSON.stringify({
+          tokenId: model.tokenId,
+          transactionHash: tx.transactionHash,
+          buyerAddress: userAddress,
+          price: model.priceETH
+        })
+      });
+
+      alert(`Purchase Successful! \nTx: ${tx.transactionHash}\nOwner updated on Blockchain & Database.`);
+
+      // Refresh
+      window.location.reload();
+
+    } catch (err: any) {
       console.error('Purchase error:', err);
-      alert(`Purchase failed: ${err.message || 'Please try again.'}`);
+      // User rejected or failed
+      if (err.message && err.message.includes('user rejected')) {
+        alert('Transaction failed: User rejected request.');
+      } else {
+        alert(`Purchase failed: ${err.message || 'Unknown error'}`);
+      }
     } finally {
       setIsPurchasing(false);
     }
@@ -401,10 +406,10 @@ const ProductDetail = () => {
             {/* Main Image/3D Viewer */}
             <div className="relative aspect-square bg-muted rounded-lg overflow-hidden">
               {show3D ? (
-                <Model3DViewer 
-                  modelUrl={model.modelUrl} 
+                <Model3DViewer
+                  modelUrl={model.modelUrl}
                   className="w-full h-full"
-                  fileType={model.specs.fileTypes[0]} 
+                  fileType={model.specs.fileTypes[0]}
                 />
               ) : (
                 <img src={model.images[selectedImage]} alt={model.title} className="w-full h-full object-cover" />
@@ -436,9 +441,8 @@ const ProductDetail = () => {
                     setSelectedImage(index);
                     setShow3D(false);
                   }}
-                  className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-colors ${
-                    selectedImage === index && !show3D ? 'border-primary' : 'border-transparent'
-                  }`}
+                  className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-colors ${selectedImage === index && !show3D ? 'border-primary' : 'border-transparent'
+                    }`}
                 >
                   <img src={image} alt={`${model.title} view ${index + 1}`} className="w-full h-full object-cover" />
                 </button>
@@ -447,9 +451,8 @@ const ProductDetail = () => {
               {model.modelUrl && !model.modelUrl.includes('.SLDPRT') && !model.modelUrl.includes('.SLDASM') && (
                 <button
                   onClick={() => setShow3D(true)}
-                  className={`flex-shrink-0 w-20 h-20 rounded-lg border-2 transition-colors bg-muted flex items-center justify-center ${
-                    show3D ? 'border-primary' : 'border-transparent'
-                  }`}
+                  className={`flex-shrink-0 w-20 h-20 rounded-lg border-2 transition-colors bg-muted flex items-center justify-center ${show3D ? 'border-primary' : 'border-transparent'
+                    }`}
                 >
                   <Play className="h-6 w-6 text-muted-foreground" />
                 </button>
@@ -497,13 +500,13 @@ const ProductDetail = () => {
 
             {/* Purchase Buttons */}
             <div className="space-y-3">
-              <Button 
-                size="lg" 
-                className={hasWallet 
-                  ? "w-full bg-gradient-primary hover:bg-primary-hover" 
+              <Button
+                size="lg"
+                className={hasWallet
+                  ? "w-full bg-gradient-primary hover:bg-primary-hover"
                   : "w-full bg-muted text-muted-foreground cursor-not-allowed opacity-60"
-                } 
-                onClick={handlePurchase} 
+                }
+                onClick={handlePurchase}
                 disabled={isPurchasing || !hasWallet}
               >
                 {isPurchasing ? (
