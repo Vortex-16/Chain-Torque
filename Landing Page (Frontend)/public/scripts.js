@@ -109,11 +109,16 @@ document.addEventListener('DOMContentLoaded', function () {
     window.addEventListener('scroll', () => {
       if (window.scrollY > 50) {
         navbar.classList.add('navbar-scrolled');
-        // Only increase blur, no background change
-        navbar.style.backdropFilter = 'blur(20px)';
+        // Clear inline styles so class takes effect
+        navbar.style.backdropFilter = '';
+        navbar.style.webkitBackdropFilter = '';
+        navbar.style.boxShadow = '';
       } else {
         navbar.classList.remove('navbar-scrolled');
-        navbar.style.backdropFilter = 'blur(12px)';
+        // Clear inline styles
+        navbar.style.backdropFilter = '';
+        navbar.style.webkitBackdropFilter = '';
+        navbar.style.boxShadow = '';
       }
     });
   }
