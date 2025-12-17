@@ -11,7 +11,7 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 const path = require('path');
 const dotenv = require('dotenv');
-const { web3Manager: web3 } = require('./web3');
+const { web3Manager: web3, utils: web3Utils } = require('./web3');
 
 // Load environment variables
 dotenv.config({ path: path.join(__dirname, '..', '.env') });
@@ -26,6 +26,15 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// Health Check
+app.get('/health', (req, res) => {
+  res.json({
+    status: 'healthy',
+    message: 'ChainTorque Backend is running',
+    timestamp: new Date().toISOString(),
+  });
+});
 
 // Routes
 const marketplaceRoutes = require('./routes/marketplace');
@@ -63,7 +72,7 @@ app.get('/api/web3/balance/:address', async (req, res) => {
   try {
     if (!web3.isReady()) throw new Error('Web3 not initialized');
     const balance = await web3.provider.getBalance(userAddress);
-    res.json({ success: true, address: userAddress, balance: require('ethers').utils.formatEther(balance) });
+    res.json({ success: true, address: userAddress, balance: web3Utils.formatEther(balance) });
   } catch (error) {
     res.status(404).json({ success: false, error: error.message });
   }
