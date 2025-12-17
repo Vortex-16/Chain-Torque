@@ -1,355 +1,384 @@
-<%- include('partials/header')  %>
-
+<%- include('partials/header') %>
 
   <style>
+    /* Hero specific animations */
     @keyframes bounce {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(8px); }
+
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform: translateY(8px);
+      }
     }
 
-    h1.hello{
-      text-shadow: 1px 1px 3px rgba(0,0,0,0.4);
+    .hero-title {
+      text-shadow: none;
     }
   </style>
-</head>
-<body class="bg-background text-foreground">
 
   <!-- Hero Section -->
-  <section class="min-h-[60vh] flex flex-col items-center justify-center text-center bg-gradient-to-br from-blue-900 via-purple-800 to-indigo-900 dark:from-background dark:via-background dark:to-background relative px-4 py-12">
-    <h1 class="text-5xl md:text-6xl font-extrabold mb-4 tracking-tight text-white dark:text-primary drop-shadow-lg animate-fade-in-up">Build. Share. Explore.</h1>
-    <p class="text-xl md:text-2xl text-blue-100 dark:text-muted-foreground max-w-2xl mb-8 animate-fade-in-up delay-300">Welcome to the future of CAD modeling – a marketplace where creativity meets collaboration.</p>
+  <section
+    class="min-h-screen flex flex-col items-center justify-center text-center relative overflow-hidden hero-gradient px-4 pt-24 pb-20">
+    <!-- Floating Orbs Background -->
+    <div class="floating-orbs">
+      <div class="orb orb-1"></div>
+      <div class="orb orb-2"></div>
+      <div class="orb orb-3"></div>
+    </div>
 
+    <!-- Geometric Shapes -->
+    <div class="geo-shape hexagon" style="top: 15%; left: 10%;"></div>
+    <div class="geo-shape circle-outline" style="top: 25%; right: 15%;"></div>
+    <div class="geo-shape hexagon" style="bottom: 20%; right: 10%;"></div>
+    <div class="geo-shape circle-outline" style="bottom: 30%; left: 15%;"></div>
 
-    <!-- Scroll Down Arrow -->
-    <div class="absolute bottom-8 text-white text-3xl animate-bounce">
-      <svg class="w-8 h-8 mx-auto" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+    <!-- Content -->
+    <div class="relative z-10 max-w-4xl mx-auto">
+      <h1 class="text-5xl md:text-7xl font-extrabold mb-6 hero-title animate-fade-in-up">
+        Build. Share. Explore.
+      </h1>
+      <p class="text-xl md:text-2xl hero-subtitle max-w-2xl mx-auto mb-10 animate-fade-in-up delay-200">
+        Welcome to the future of CAD modeling – a marketplace where creativity meets collaboration on Web3.
+      </p>
+
+      <!-- CTA Buttons -->
+      <div class="flex flex-wrap gap-4 justify-center animate-fade-in-up delay-400">
+        <a href="/signup" class="glass-button">
+          Get Started Free
+          <i class="fas fa-arrow-right ml-2"></i>
+        </a>
+        <a href="#library"
+          class="hero-btn-outline px-8 py-3 rounded-full text-white font-semibold border-2 border-white/30 backdrop-blur-sm hover:border-white/60 hover:bg-white/10 transition-all duration-300">
+          Explore Models
+        </a>
+      </div>
+    </div>
+
+    <!-- Scroll Indicator -->
+    <div class="absolute bottom-10 scroll-indicator">
+      <svg class="w-8 h-8 text-white/70 mx-auto" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
       </svg>
     </div>
   </section>
 
   <!-- Popular CAD Collections Section -->
-  <section class="py-16 px-6 bg-gradient-to-br from-blue-50 via-purple-50 to-white dark:from-background dark:via-background dark:to-background text-gray-900 dark:text-foreground" id="library">
-  <h2 class="text-4xl font-extrabold text-center mb-14 text-blue-900 dark:text-primary animate-fade-in-up">Popular CAD Collections</h2>
-    <div class="grid md:grid-cols-3 gap-10">
-      <div class="bg-card rounded-2xl shadow-xl p-8 flex flex-col items-center hover:scale-105 hover:shadow-2xl transition duration-300">
-        <div class="bg-gradient-to-br from-blue-400 to-purple-500 text-white rounded-full w-16 h-16 flex items-center justify-center mb-4 text-3xl">⚙️</div>
-  <h3 class="text-2xl font-bold mb-2 text-blue-800 dark:text-primary">Mechanical Parts</h3>
-  <p class="text-base text-gray-600 text-center dark:text-muted-foreground">Explore gears, joints, bolts, and more...</p>
-      </div>
-      <div class="bg-card rounded-2xl shadow-xl p-8 flex flex-col items-center hover:scale-105 hover:shadow-2xl transition duration-300">
-        <div class="bg-gradient-to-br from-purple-400 to-blue-500 text-white rounded-full w-16 h-16 flex items-center justify-center mb-4 text-3xl">🏛️</div>
-  <h3 class="text-2xl font-bold mb-2 text-blue-800 dark:text-primary">Architectural Blocks</h3>
-  <p class="text-base text-gray-600 text-center dark:text-muted-foreground">Find building CADs, elevations & blueprints.</p>
-      </div>
-      <div class="bg-card rounded-2xl shadow-xl p-8 flex flex-col items-center hover:scale-105 hover:shadow-2xl transition duration-300">
-        <div class="bg-gradient-to-br from-pink-400 to-blue-500 text-white rounded-full w-16 h-16 flex items-center justify-center mb-4 text-3xl">🖨️</div>
-  <h3 class="text-2xl font-bold mb-2 text-blue-800 dark:text-primary">3D Print Ready</h3>
-  <p class="text-base text-gray-600 text-center dark:text-muted-foreground">Perfectly optimized models for printing.</p>
-      </div>
-    </div>
-  </section>
+  <section class="py-20 px-6 section-light relative" id="library">
+    <div class="max-w-6xl mx-auto">
+      <h2 class="text-4xl md:text-5xl font-extrabold text-center mb-4 section-title reveal">
+        Popular CAD <span class="text-gradient">Collections</span>
+      </h2>
+      <p class="text-center text-lg section-subtitle mb-14 reveal">
+        Discover high-quality 3D models from our community
+      </p>
 
-</body>
-</html>
-<body class="bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 text-gray-800">
+      <div class="grid md:grid-cols-3 gap-8">
+        <!-- Card 1 -->
+        <div class="card-modern glass-card reveal">
+          <div class="card-icon">⚙️</div>
+          <h3 class="text-2xl font-bold mb-3 section-title">Mechanical Parts</h3>
+          <p class="section-subtitle">Explore precision-engineered gears, joints, bolts, and more...</p>
+        </div>
 
-  <!-- Hero Section -->
-  <section class="min-h-screen flex flex-col justify-center items-center text-center px-4">
-    <h1 class="text-5xl md:text-6xl font-extrabold bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500 bg-clip-text text-transparent animate-fade-in-up">
-      Welcome to Our CAD World
-    </h1>
-    <p class="mt-6 text-lg md:text-xl max-w-xl animate-fade-in-up delay-300">
-      Discover, Share, and Explore Modern CAD Designs with a Touch of Elegance and Simplicity.
-    </p>
-    <div class="mt-8 animate-bounce">
-      <svg class="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-      </svg>
-    </div>
-  </section>
+        <!-- Card 2 -->
+        <div class="card-modern glass-card reveal">
+          <div class="card-icon">🏛️</div>
+          <h3 class="text-2xl font-bold mb-3 section-title">Architectural Blocks</h3>
+          <p class="section-subtitle">Find stunning building CADs, elevations & blueprints.</p>
+        </div>
 
-  
-    </div>
-  </section>
-
-  <!-- Tailwind Animation Support -->
-  <style>
-    @keyframes fade-in-up {
-      0% {
-        opacity: 0;
-        transform: translateY(20px);
-      }
-      100% {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-    .animate-fade-in-up {
-      animation: fade-in-up 1s ease-out forwards;
-    }
-    .delay-300 {
-      animation-delay: 0.3s;
-    }
-  </style>
-
-<section class="bg-white py-16">
-  <div class="container mx-auto">
-    <h2 class="text-3xl font-bold text-center mb-10 text-gray-800">Featured CAD Models</h2>
-    <div class="row justify-content-center">
-
-      <% for (let i = 0; i < 3; i++) { %>
-      <div class="col-md-4 mb-4">
-        <div class="card transition-all duration-300 hover:scale-105 hover:shadow-2xl rounded-xl overflow-hidden shadow-md bg-white">
-          
-          <!-- CARD IMAGE -->
-          <img src="/images/model<%= i + 1 %>.jpg" alt="CAD Model" class="w-full h-48 object-cover">
-
-          <!-- CARD BODY -->
-          <div class="p-4">
-            <h5 class="text-xl font-semibold text-gray-800 mb-2">Model Title <%= i + 1 %></h5>
-            <p class="text-gray-600 text-sm mb-4">Short description of the model, showing features or type.</p>
-            <a href="/model/<%= i + 1 %>" class="inline-block px-4 py-2 text-sm text-white bg-blue-600 hover:bg-blue-700 rounded-md">View Details</a>
-          </div>
+        <!-- Card 3 -->
+        <div class="card-modern glass-card reveal">
+          <div class="card-icon">🖨️</div>
+          <h3 class="text-2xl font-bold mb-3 section-title">3D Print Ready</h3>
+          <p class="section-subtitle">Perfectly optimized models ready for your 3D printer.</p>
         </div>
       </div>
-      <% } %>
-
     </div>
-  </div>
-</section>
+  </section>
 
-<!-- Why Choose Our Platform Section -->
-<section class="px-6 py-12 bg-white">
-  <h2 class="text-3xl font-bold text-center mb-8 text-gray-800">Why Choose Our Platform</h2>
-  <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3 max-w-6xl mx-auto">
-    <% const features = [
-      { title: "Instant Uploads", icon: "🚀", desc: "Upload and access your 3D CAD models instantly." },
-      { title: "Secure Storage", icon: "🔒", desc: "All your files are securely stored and encrypted." },
-      { title: "Easy Navigation", icon: "🧭", desc: "Browse, filter, and search CAD models easily." }
-    ]; %>
-    <% features.forEach(feature => { %>
-      <div class="bg-gradient-to-br from-white to-blue-50 rounded-2xl p-6 shadow-xl transform transition hover:scale-105 hover:shadow-2xl hover:-translate-y-1" data-aos="fade-up">
-        <div class="text-4xl mb-4"><%= feature.icon %></div>
-        <h3 class="text-xl font-semibold mb-2 text-blue-900"><%= feature.title %></h3>
-        <p class="text-gray-600 text-sm"><%= feature.desc %></p>
-      </div>
-    <% }) %>
-  </div>
-</section>
+  <!-- Why Choose Our Platform Section -->
+  <section class="px-6 py-20 section-gradient">
+    <div class="max-w-6xl mx-auto">
+      <h2 class="text-4xl font-extrabold text-center mb-14 section-title reveal">
+        Why Choose <span class="text-gradient">Our Platform</span>
+      </h2>
 
-<!-- How to Use -->
-<section class="how-to-use py-16 bg-white mt-16">
-  <div class="container mx-auto px-4">
-    <h2 class="text-4xl font-bold text-center text-gray-800 mb-12">How to Use</h2>
-    <div class="flex flex-col md:flex-row items-center justify-center gap-8">
-      <!-- Step 1 -->
-      <div class="text-center" data-aos="zoom-in">
-        <div class="bg-blue-500 text-white p-6 rounded-full w-24 h-24 flex items-center justify-center mx-auto text-3xl font-bold shadow-lg">1</div>
-        <h3 class="mt-4 font-semibold text-xl">Sign Up</h3>
-        <p class="text-gray-600 mt-1">Create your account to access features.</p>
-      </div>
-      <!-- Arrow -->
-      <i class="fas fa-arrow-right text-2xl text-blue-500 hidden md:inline"></i>
-      
-      <!-- Step 2 -->
-      <div class="text-center" data-aos="zoom-in" data-aos-delay="100">
-        <div class="bg-blue-500 text-white p-6 rounded-full w-24 h-24 flex items-center justify-center mx-auto text-3xl font-bold shadow-lg">2</div>
-        <h3 class="mt-4 font-semibold text-xl">Login</h3>
-        <p class="text-gray-600 mt-1">Access your dashboard and profile.</p>
-      </div>
-      <!-- Arrow -->
-      <i class="fas fa-arrow-right text-2xl text-blue-500 hidden md:inline"></i>
-      
-      <!-- Step 3 -->
-      <div class="text-center" data-aos="zoom-in" data-aos-delay="200">
-        <div class="bg-blue-500 text-white p-6 rounded-full w-24 h-24 flex items-center justify-center mx-auto text-3xl font-bold shadow-lg">3</div>
-        <h3 class="mt-4 font-semibold text-xl">Browse</h3>
-        <p class="text-gray-600 mt-1">Explore 3D CAD models from other users.</p>
+      <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+        <% const features=[ { title: "Instant Uploads" , icon: "🚀" ,
+          desc: "Upload and access your 3D CAD models instantly with our lightning-fast infrastructure." }, {
+          title: "Secure Storage" , icon: "🔒" ,
+          desc: "All your files are securely stored and encrypted with blockchain verification." }, {
+          title: "Easy Navigation" , icon: "🧭" ,
+          desc: "Browse, filter, and search CAD models with our intuitive interface." } ]; %>
+          <% features.forEach((feature, index)=> { %>
+            <div class="card-modern glass-card reveal text-center flex flex-col items-center"
+              style="animation-delay: <%= index * 0.1 %>s">
+              <div class="card-icon mx-auto">
+                <%= feature.icon %>
+              </div>
+              <h3 class="text-xl font-bold mb-3 section-title">
+                <%= feature.title %>
+              </h3>
+              <p class="section-subtitle">
+                <%= feature.desc %>
+              </p>
+            </div>
+            <% }) %>
       </div>
     </div>
-    
-    <!-- More steps if needed -->
-    <div class="flex flex-col md:flex-row items-center justify-center gap-8 mt-12">
-      <div class="text-center" data-aos="zoom-in" data-aos-delay="300">
-        <div class="bg-blue-500 text-white p-6 rounded-full w-24 h-24 flex items-center justify-center mx-auto text-3xl font-bold shadow-lg">4</div>
-        <h3 class="mt-4 font-semibold text-xl">Upload</h3>
-        <p class="text-gray-600 mt-1">Showcase your own CAD files securely.</p>
+  </section>
+
+  <!-- How to Use Section -->
+  <section class="py-20 px-6 section-light">
+    <div class="max-w-6xl mx-auto">
+      <h2 class="text-4xl font-extrabold text-center mb-16 section-title reveal">
+        How It <span class="text-gradient">Works</span>
+      </h2>
+
+      <!-- Steps Row 1 -->
+      <div class="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-4 mb-12">
+        <div class="text-center reveal">
+          <div class="step-circle mx-auto">1</div>
+          <h3 class="mt-4 font-bold text-xl section-title">Sign Up</h3>
+          <p class="section-subtitle mt-2 max-w-[180px] mx-auto">Create your account to unlock all features</p>
+        </div>
+
+        <div class="step-connector hidden md:block"></div>
+
+        <div class="text-center reveal">
+          <div class="step-circle mx-auto">2</div>
+          <h3 class="mt-4 font-bold text-xl section-title">Login</h3>
+          <p class="section-subtitle mt-2 max-w-[180px] mx-auto">Access your personalized dashboard</p>
+        </div>
+
+        <div class="step-connector hidden md:block"></div>
+
+        <div class="text-center reveal">
+          <div class="step-circle mx-auto">3</div>
+          <h3 class="mt-4 font-bold text-xl section-title">Browse</h3>
+          <p class="section-subtitle mt-2 max-w-[180px] mx-auto">Explore 3D models from creators worldwide</p>
+        </div>
       </div>
-      <i class="fas fa-arrow-right text-2xl text-blue-500 hidden md:inline"></i>
-      <div class="text-center" data-aos="zoom-in" data-aos-delay="400">
-        <div class="bg-blue-500 text-white p-6 rounded-full w-24 h-24 flex items-center justify-center mx-auto text-3xl font-bold shadow-lg">5</div>
-        <h3 class="mt-4 font-semibold text-xl">Download / Share</h3>
-        <p class="text-gray-600 mt-1">Use or share models with your team.</p>
-      </div>
-    </div>
-  </div>
-</section>
 
+      <!-- Steps Row 2 -->
+      <div class="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-4">
+        <div class="text-center reveal">
+          <div class="step-circle mx-auto">4</div>
+          <h3 class="mt-4 font-bold text-xl section-title">Upload</h3>
+          <p class="section-subtitle mt-2 max-w-[180px] mx-auto">Share your CAD files securely on-chain</p>
+        </div>
 
-<section class="py-16 px-6 bg-white dark:bg-background">
-  <h2 class="text-4xl font-extrabold text-center mb-8 text-gray-900 dark:text-primary">Explore Stunning CAD Creations</h2>
-  <p class="text-lg text-center mb-8 text-gray-700 dark:text-muted-foreground">Experience the power of design with featured models from our vibrant community.</p>
-  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 justify-center items-center">
-    <div class="rounded-2xl shadow-xl bg-white dark:bg-card p-4 flex flex-col items-center">
-      <img src="/images/cad1.jpeg" alt="CAD Model 1" class="w-full h-48 object-cover rounded-xl">
-    </div>
-    <div class="rounded-2xl shadow-xl bg-white dark:bg-card p-4 flex flex-col items-center">
-      <img src="/images/cad2.jpeg" alt="CAD Model 2" class="w-full h-48 object-cover rounded-xl">
-    </div>
-    <div class="rounded-2xl shadow-xl bg-white dark:bg-card p-4 flex flex-col items-center">
-      <img src="/images/cad3.jpeg" alt="CAD Model 3" class="w-full h-48 object-cover rounded-xl">
-    </div>
-    <div class="rounded-2xl shadow-xl bg-white dark:bg-card p-4 flex flex-col items-center">
-      <img src="/images/cad4.jpeg" alt="CAD Model 4" class="w-full h-48 object-cover rounded-xl">
-    </div>
-  </div>
-</section>
+        <div class="step-connector hidden md:block"></div>
 
-<section class="testimonials-section bg-white dark:bg-background py-16" id="testimonials">
-  <h2 class="text-gray-900 dark:text-primary">What Our Users Say</h2>
-  <p class="subtitle text-gray-700 dark:text-muted-foreground">Real experiences from real designers and engineers using our CAD platform.</p>
-
-  <div class="testimonial-cards">
-    
-    <div class="testimonial-card">
-      <img src="/images/user1.jpg" alt="Arjun Mehta" class="user-img">
-      <div class="testimonial-content">
-        <p><i class="fas fa-quote-left"></i> This platform has changed the way I share and explore CAD designs. The UI is sleek and uploading is a breeze! <i class="fas fa-quote-right"></i></p>
-        <h4>Arjun Mehta</h4>
-        <p class="designation">Mechanical Engineer</p>
-      </div>
-    </div>
-
-  <div class="testimonial-card bg-white dark:bg-card rounded-2xl shadow-xl">
-      <img src="/images/user2.jpg" alt="Rhea Das" class="user-img">
-      <div class="testimonial-content">
-        <p><i class="fas fa-quote-left"></i> Beautifully crafted. The features like real-time preview and easy model access are just mind-blowing.<i class="fas fa-quote-right"></i></p>
-        <h4>Rhea Das</h4>
-        <p class="designation">3D Model Artist</p>
+        <div class="text-center reveal">
+          <div class="step-circle mx-auto">5</div>
+          <h3 class="mt-4 font-bold text-xl section-title">Connect</h3>
+          <p class="section-subtitle mt-2 max-w-[180px] mx-auto">Collaborate and share with your team</p>
+        </div>
       </div>
     </div>
+  </section>
 
-    <div class="testimonial-card">
-      <img src="/images/user3.jpg" alt="Imran Shaikh" class="user-img">
-      <div class="testimonial-content">
-        <p><i class="fas fa-quote-left"></i> One of the most professional CAD platforms I've seen. Highly recommended to all design enthusiasts! <i class="fas fa-quote-right"></i></p>
-        <h4>Imran Shaikh</h4>
-        <p class="designation">Product Designer</p>
+  <!-- CAD Gallery Section -->
+  <section class="py-20 px-6 section-gradient">
+    <div class="max-w-6xl mx-auto">
+      <h2 class="text-4xl font-extrabold text-center mb-4 section-title reveal">
+        Stunning CAD <span class="text-gradient">Creations</span>
+      </h2>
+      <p class="text-lg text-center mb-12 section-subtitle reveal">
+        Experience the power of design with featured models from our vibrant community.
+      </p>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+        <div class="gallery-card glass-card overflow-hidden reveal">
+          <img src="/images/cad1.jpeg" alt="CAD Model 1" class="w-full h-56 object-cover">
+        </div>
+        <div class="gallery-card glass-card overflow-hidden reveal">
+          <img src="/images/cad2.jpeg" alt="CAD Model 2" class="w-full h-56 object-cover">
+        </div>
+        <div class="gallery-card glass-card overflow-hidden reveal">
+          <img src="/images/cad3.jpeg" alt="CAD Model 3" class="w-full h-56 object-cover">
+        </div>
+        <div class="gallery-card glass-card overflow-hidden reveal">
+          <img src="/images/cad4.jpeg" alt="CAD Model 4" class="w-full h-56 object-cover">
+        </div>
       </div>
     </div>
+  </section>
 
-  </div>
-</section>
+  <!-- Testimonials Section -->
+  <section class="py-20 px-6 section-light" id="testimonials">
+    <div class="max-w-6xl mx-auto text-center">
+      <h2 class="text-4xl font-extrabold mb-4 section-title reveal">
+        What Our <span class="text-gradient">Users Say</span>
+      </h2>
+      <p class="text-lg mb-14 section-subtitle reveal">
+        Real experiences from designers and engineers using our platform.
+      </p>
 
-<section class="bg-white py-16 px-6 lg:px-32" id="features">
-  <div class="max-w-7xl mx-auto grid md:grid-cols-2 gap-16 items-center">
-    <!-- Left Content -->
-    <div>
-      <h2 class="text-4xl font-extrabold text-gray-900 mb-6">Powerful Features for Designers & Engineers</h2>
-      <ul class="space-y-4 text-lg text-gray-700">
-        <li class="flex items-start">
-          <span class="text-green-500 mr-3 mt-1">
-            <i class="fas fa-check-circle"></i>
-          </span>
-          <span><strong>Real-time 3D Previews:</strong> Instantly visualize your CAD models online.</span>
-        </li>
-        <li class="flex items-start">
-          <span class="text-green-500 mr-3 mt-1">
-            <i class="fas fa-check-circle"></i>
-          </span>
-          <span><strong>Secure Uploads:</strong> All files are encrypted for maximum security.</span>
-        </li>
-        <li class="flex items-start">
-          <span class="text-green-500 mr-3 mt-1">
-            <i class="fas fa-check-circle"></i>
-          </span>
-          <span><strong>Easy Sharing:</strong> Generate unique links to share your designs with clients or teammates.</span>
-        </li>
-        <li class="flex items-start">
-          <span class="text-green-500 mr-3 mt-1">
-            <i class="fas fa-check-circle"></i>
-          </span>
-          <span><strong>Version History:</strong> Keep track of changes and revert when needed.</span>
-        </li>
-        <li class="flex items-start">
-          <span class="text-green-500 mr-3 mt-1">
-            <i class="fas fa-check-circle"></i>
-          </span>
-          <span><strong>Cross-Platform Support:</strong> Works seamlessly on desktop and mobile devices.</span>
-        </li>
-      </ul>
+      <div class="grid md:grid-cols-3 gap-8">
+        <div class="testimonial-card-modern glass-card text-left reveal">
+          <img src="/images/user1.jpg" alt="Arjun Mehta" class="testimonial-avatar mb-4">
+          <p class="section-subtitle italic mb-4">
+            "This platform has changed the way I share and explore CAD designs. The UI is sleek and uploading is a
+            breeze!"
+          </p>
+          <h4 class="font-bold section-title">Arjun Mehta</h4>
+          <p class="text-sm text-gradient">Mechanical Engineer</p>
+        </div>
 
-      <!-- Buttons -->
-      <div class="mt-8 space-x-4">
-        <a href="#" class="inline-block bg-blue-600 text-white px-6 py-3 rounded-xl shadow hover:bg-blue-700 transition duration-300">Start Free Trial</a>
-        <a href="#" class="inline-block border border-blue-600 text-blue-600 px-6 py-3 rounded-xl hover:bg-blue-50 transition duration-300">Download for Free</a>
+        <div class="testimonial-card-modern glass-card text-left reveal">
+          <img src="/images/user2.jpg" alt="Rhea Das" class="testimonial-avatar mb-4">
+          <p class="section-subtitle italic mb-4">
+            "Beautifully crafted. The features like real-time preview and easy model access are just mind-blowing."
+          </p>
+          <h4 class="font-bold section-title">Rhea Das</h4>
+          <p class="text-sm text-gradient">3D Model Artist</p>
+        </div>
+
+        <div class="testimonial-card-modern glass-card text-left reveal">
+          <img src="/images/user3.jpg" alt="Imran Shaikh" class="testimonial-avatar mb-4">
+          <p class="section-subtitle italic mb-4">
+            "One of the most professional CAD platforms I've seen. Highly recommended to all design enthusiasts!"
+          </p>
+          <h4 class="font-bold section-title">Imran Shaikh</h4>
+          <p class="text-sm text-gradient">Product Designer</p>
+        </div>
       </div>
     </div>
+  </section>
 
-    <!-- Right Image or Illustration -->
-    <div class="relative w-full h-full">
-      <img src="/images/img2.png" alt="CAD Platform Features" class="w-full rounded-xl shadow-xl">
-      <!-- Optional: Overlay or Icon -->
+  <!-- Features Section -->
+  <section class="py-20 px-6 section-gradient" id="features">
+    <div class="max-w-6xl mx-auto grid md:grid-cols-2 gap-16 items-center">
+      <!-- Left Content -->
+      <div class="reveal-left">
+        <h2 class="text-4xl font-extrabold mb-8 section-title">
+          Powerful Features for <span class="text-gradient">Designers & Engineers</span>
+        </h2>
+
+        <ul class="space-y-5">
+          <li class="flex items-start gap-4">
+            <span class="feature-check mt-1">✓</span>
+            <span class="section-subtitle"><strong class="section-title">Real-time 3D Previews:</strong> Instantly
+              visualize your CAD models online.</span>
+          </li>
+          <li class="flex items-start gap-4">
+            <span class="feature-check mt-1">✓</span>
+            <span class="section-subtitle"><strong class="section-title">Secure Uploads:</strong> All files are
+              encrypted with blockchain verification.</span>
+          </li>
+          <li class="flex items-start gap-4">
+            <span class="feature-check mt-1">✓</span>
+            <span class="section-subtitle"><strong class="section-title">Easy Sharing:</strong> Generate unique links to
+              share with clients or teammates.</span>
+          </li>
+          <li class="flex items-start gap-4">
+            <span class="feature-check mt-1">✓</span>
+            <span class="section-subtitle"><strong class="section-title">Version History:</strong> Keep track of changes
+              and revert when needed.</span>
+          </li>
+          <li class="flex items-start gap-4">
+            <span class="feature-check mt-1">✓</span>
+            <span class="section-subtitle"><strong class="section-title">Cross-Platform:</strong> Works seamlessly on
+              desktop and mobile devices.</span>
+          </li>
+        </ul>
+
+        <div class="mt-10 flex flex-wrap gap-4">
+          <a href="/signup" class="glass-button">Start Free Trial</a>
+          <a href="#" class="btn-outline-modern">Learn More</a>
+        </div>
+      </div>
+
+      <!-- Right Image -->
+      <div class="reveal-right">
+        <div class="glass-card p-4 overflow-hidden">
+          <img src="/images/img2.png" alt="CAD Platform Features" class="w-full rounded-xl">
+        </div>
+      </div>
     </div>
-  </div>
-</section>
+  </section>
 
-<section class="bg-gradient-to-b from-[#eef2f3] to-[#d6e4f0] dark:from-background dark:to-background py-20 px-6 md:px-20 text-gray-800 dark:text-foreground">
-  <!-- Main Heading -->
-  <h2 class="text-4xl font-bold text-center mb-16 text-gray-900 dark:text-primary">Explore Our Features & Plans</h2>
+  <!-- Pricing Section -->
+  <section class="py-20 px-6 section-light">
+    <div class="max-w-6xl mx-auto">
+      <h2 class="text-4xl font-extrabold text-center mb-4 section-title reveal">
+        Explore Our <span class="text-gradient">Plans</span>
+      </h2>
+      <p class="text-lg text-center mb-14 section-subtitle reveal">
+        Choose the perfect plan for your needs
+      </p>
 
-  <!-- Row 1: Image + Why You'll Love Our Platform -->
-  <div class="grid md:grid-cols-2 gap-10 items-center mb-20">
-    <!-- Left Image Placeholder -->
-    <div>
-      <img src="/images/img3.jpg" alt="CAD Feature Image" class="rounded-2xl shadow-xl w-full object-cover">
+      <div class="grid md:grid-cols-3 gap-8 items-start">
+        <!-- Free Plan -->
+        <div class="pricing-card-modern glass-card reveal">
+          <h4 class="text-2xl font-bold mb-2 section-title">Starter</h4>
+          <p class="text-4xl font-extrabold mb-6 text-gradient">Free</p>
+          <ul class="space-y-4 mb-8">
+            <li class="flex items-center gap-3 section-subtitle">
+              <span class="feature-check text-sm">✓</span> Basic CAD uploads
+            </li>
+            <li class="flex items-center gap-3 section-subtitle">
+              <span class="feature-check text-sm">✓</span> Community feedback
+            </li>
+            <li class="flex items-center gap-3 section-subtitle">
+              <span class="feature-check text-sm">✓</span> Limited cloud storage
+            </li>
+            <li class="flex items-center gap-3 section-subtitle">
+              <span class="feature-check text-sm">✓</span> Email support
+            </li>
+          </ul>
+          <button class="w-full btn-outline-modern">Get Started</button>
+        </div>
+
+        <!-- Pro Plan -->
+        <div class="pricing-card-modern glass-card featured reveal">
+          <h4 class="text-2xl font-bold mb-2 section-title">Professional</h4>
+          <p class="text-4xl font-extrabold mb-6 text-gradient">$29<span class="text-lg">/mo</span></p>
+          <ul class="space-y-4 mb-8">
+            <li class="flex items-center gap-3 section-subtitle">
+              <span class="feature-check text-sm">✓</span> Unlimited uploads
+            </li>
+            <li class="flex items-center gap-3 section-subtitle">
+              <span class="feature-check text-sm">✓</span> Real-time CAD rendering
+            </li>
+            <li class="flex items-center gap-3 section-subtitle">
+              <span class="feature-check text-sm">✓</span> Priority support
+            </li>
+            <li class="flex items-center gap-3 section-subtitle">
+              <span class="feature-check text-sm">✓</span> Team collaboration
+            </li>
+          </ul>
+          <button class="w-full glass-button">Start Free Trial</button>
+        </div>
+
+        <!-- Enterprise Plan -->
+        <div class="pricing-card-modern glass-card reveal">
+          <h4 class="text-2xl font-bold mb-2 section-title">Enterprise</h4>
+          <p class="text-4xl font-extrabold mb-6 text-gradient">Custom</p>
+          <ul class="space-y-4 mb-8">
+            <li class="flex items-center gap-3 section-subtitle">
+              <span class="feature-check text-sm">✓</span> Everything in Pro
+            </li>
+            <li class="flex items-center gap-3 section-subtitle">
+              <span class="feature-check text-sm">✓</span> Custom integrations
+            </li>
+            <li class="flex items-center gap-3 section-subtitle">
+              <span class="feature-check text-sm">✓</span> Dedicated support
+            </li>
+            <li class="flex items-center gap-3 section-subtitle">
+              <span class="feature-check text-sm">✓</span> SLA guarantees
+            </li>
+          </ul>
+          <button class="w-full btn-outline-modern">Contact Sales</button>
+        </div>
+      </div>
     </div>
+  </section>
 
-    <!-- Right Text -->
-    <div>
-      <h3 class="text-2xl font-semibold mb-4">Why You'll Love Our Platform</h3>
-      <ul class="space-y-4">
-        <li class="flex items-start"><span class="text-green-600 mt-1">&#10003;</span><span class="ml-3">Seamless CAD file sharing and collaboration</span></li>
-        <li class="flex items-start"><span class="text-green-600 mt-1">&#10003;</span><span class="ml-3">Integrated 3D viewing with real-time feedback</span></li>
-        <li class="flex items-start"><span class="text-green-600 mt-1">&#10003;</span><span class="ml-3">Robust version control and backups</span></li>
-        <li class="flex items-start"><span class="text-green-600 mt-1">&#10003;</span><span class="ml-3">Lightning-fast CAD rendering support</span></li>
-        <li class="flex items-start"><span class="text-green-600 mt-1">&#10003;</span><span class="ml-3">Trusted by engineers and designers worldwide</span></li>
-      </ul>
-    </div>
-  </div>
-
-  <!-- Row 2: Pricing Plans -->
-  <div class="grid md:grid-cols-3 gap-8 items-start">
-    <!-- Pre-Planning Card -->
-    <div class="bg-white dark:bg-card rounded-2xl shadow-lg p-8 hover:shadow-2xl transition">
-      <h4 class="text-xl font-bold mb-4 text-gray-900 dark:text-primary">Pre-Planning</h4>
-      <ul class="space-y-3 text-sm text-gray-700 dark:text-muted-foreground">
-        <li class="flex items-center"><span class="text-green-500">&#10003;</span><span class="ml-2">Basic CAD uploads</span></li>
-        <li class="flex items-center"><span class="text-green-500">&#10003;</span><span class="ml-2">Community feedback</span></li>
-        <li class="flex items-center"><span class="text-green-500">&#10003;</span><span class="ml-2">Limited cloud storage</span></li>
-        <li class="flex items-center"><span class="text-green-500">&#10003;</span><span class="ml-2">Support</span></li>
-      </ul>
-      <button class="mt-6 w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg transition">Start Free</button>
-    </div>
-
-    <!-- Pro-Planning Card -->
-    <div class="bg-white dark:bg-card rounded-2xl shadow-lg p-8 hover:shadow-2xl transition">
-      <h4 class="text-xl font-bold mb-4 text-gray-900 dark:text-primary">Pro-Planning</h4>
-      <ul class="space-y-3 text-sm text-gray-700 dark:text-muted-foreground">
-        <li class="flex items-center"><span class="text-green-500">&#10003;</span><span class="ml-2">Unlimited uploads</span></li>
-        <li class="flex items-center"><span class="text-green-500">&#10003;</span><span class="ml-2">Real-time CAD rendering</span></li>
-        <li class="flex items-center"><span class="text-green-500">&#10003;</span><span class="ml-2">Priority support</span></li>
-        <li class="flex items-center"><span class="text-green-500">&#10003;</span><span class="ml-2">Team collaboration tools</span></li>
-      </ul>
-      <button class="mt-6 w-full bg-purple-600 hover:bg-purple-700 text-white py-2 rounded-lg transition">Start Free Trial</button>
-    </div>
-
-    <!-- Right-side Image Placeholder -->
-    <div>
-      <img src="/images/img5.webp" alt="CAD Platform Showcase" class="rounded-2xl shadow-xl w-full object-cover">
-    </div>
-  </div>
-</section>
-
-<%- include('partials/footer')  %>
+  <%- include('partials/footer') %>
