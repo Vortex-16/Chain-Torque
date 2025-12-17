@@ -1,90 +1,96 @@
-<footer class="relative py-16 px-6 overflow-hidden" style="background: var(--bg-secondary);">
-  <!-- Subtle background gradient -->
-  <div class="absolute inset-0 opacity-50">
-    <div class="orb orb-1" style="width: 200px; height: 200px; top: -50px; right: -50px;"></div>
-    <div class="orb orb-2" style="width: 150px; height: 150px; bottom: -30px; left: -30px;"></div>
+<footer class="relative py-16 px-6 overflow-hidden footer-modern">
+  <!-- Elegant gradient overlay -->
+  <div
+    class="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-900/30 dark:from-slate-950 dark:via-slate-900 dark:to-indigo-950/40">
   </div>
 
-  <div class="max-w-7xl mx-auto relative z-10">
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-10 mb-12">
+  <!-- Subtle decorative elements -->
+  <div class="absolute top-0 left-1/4 w-64 h-64 bg-indigo-500/5 rounded-full blur-3xl"></div>
+  <div class="absolute bottom-0 right-1/4 w-48 h-48 bg-purple-500/5 rounded-full blur-3xl"></div>
 
-      <!-- Brand -->
-      <div class="reveal">
-        <h3 class="text-2xl font-extrabold text-gradient mb-4">ChainTorque</h3>
-        <p class="section-subtitle text-sm leading-relaxed">
-          The future of CAD modeling. A Web3 marketplace where creativity meets collaboration.
+  <div class="max-w-6xl mx-auto relative z-10">
+    <!-- Main Footer Content -->
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-12 mb-14">
+
+      <!-- Brand Section - Takes more space -->
+      <div class="md:col-span-5 reveal">
+        <a href="/" class="inline-block mb-6">
+          <span
+            class="text-3xl font-bold bg-gradient-to-r from-white via-indigo-200 to-purple-200 bg-clip-text text-transparent">
+            ChainTorque
+          </span>
+        </a>
+        <p class="text-slate-400 text-sm leading-relaxed max-w-sm mb-8">
+          The future of CAD modeling — a Web3 marketplace where creativity meets collaboration. Build, share, and
+          explore on the blockchain.
         </p>
+
         <!-- Social Icons -->
-        <div class="flex gap-4 mt-6">
-          <a href="#"
-            class="w-10 h-10 glass rounded-full flex items-center justify-center hover:scale-110 transition-transform section-subtitle hover:text-primary">
+        <div class="flex gap-3">
+          <a href="#" class="footer-social-btn" aria-label="Twitter">
             <i class="fab fa-twitter"></i>
           </a>
-          <a href="#"
-            class="w-10 h-10 glass rounded-full flex items-center justify-center hover:scale-110 transition-transform section-subtitle hover:text-primary">
+          <a href="#" class="footer-social-btn" aria-label="GitHub">
             <i class="fab fa-github"></i>
           </a>
-          <a href="#"
-            class="w-10 h-10 glass rounded-full flex items-center justify-center hover:scale-110 transition-transform section-subtitle hover:text-primary">
-            <i class="fab fa-linkedin"></i>
+          <a href="#" class="footer-social-btn" aria-label="LinkedIn">
+            <i class="fab fa-linkedin-in"></i>
           </a>
-          <a href="#"
-            class="w-10 h-10 glass rounded-full flex items-center justify-center hover:scale-110 transition-transform section-subtitle hover:text-primary">
+          <a href="#" class="footer-social-btn" aria-label="Discord">
             <i class="fab fa-discord"></i>
           </a>
         </div>
       </div>
 
-      <!-- Quick Links -->
-      <div class="reveal">
-        <h4 class="section-title font-bold mb-4">Quick Links</h4>
-        <ul class="space-y-3">
-          <li><a href="/" class="section-subtitle hover:text-primary transition-colors text-sm">Home</a></li>
-          <li><a href="/library" class="section-subtitle hover:text-primary transition-colors text-sm">Library</a></li>
-          <li><a href="/upload" class="section-subtitle hover:text-primary transition-colors text-sm">Upload Model</a>
-          </li>
-          <li><a href="#features" class="section-subtitle hover:text-primary transition-colors text-sm">Features</a>
-          </li>
-        </ul>
-      </div>
+      <!-- Links Section -->
+      <div class="md:col-span-7">
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-8">
+          <!-- Product -->
+          <div class="reveal">
+            <h4 class="text-white font-semibold text-sm uppercase tracking-wider mb-5">Product</h4>
+            <ul class="space-y-3">
+              <li><a href="/" class="footer-link">Home</a></li>
+              <li><a href="/library" class="footer-link">Library</a></li>
+              <li><a href="/upload" class="footer-link">Upload</a></li>
+              <li><a href="#features" class="footer-link">Features</a></li>
+            </ul>
+          </div>
 
-      <!-- Resources -->
-      <div class="reveal">
-        <h4 class="section-title font-bold mb-4">Resources</h4>
-        <ul class="space-y-3">
-          <li><a href="#" class="section-subtitle hover:text-primary transition-colors text-sm">Documentation</a></li>
-          <li><a href="#" class="section-subtitle hover:text-primary transition-colors text-sm">API Access</a></li>
-          <li><a href="#" class="section-subtitle hover:text-primary transition-colors text-sm">License Info</a></li>
-          <li><a href="#" class="section-subtitle hover:text-primary transition-colors text-sm">Terms of Service</a>
-          </li>
-        </ul>
-      </div>
+          <!-- Resources -->
+          <div class="reveal">
+            <h4 class="text-white font-semibold text-sm uppercase tracking-wider mb-5">Resources</h4>
+            <ul class="space-y-3">
+              <li><a href="#" class="footer-link">Documentation</a></li>
+              <li><a href="#" class="footer-link">API</a></li>
+              <li><a href="#" class="footer-link">Guides</a></li>
+              <li><a href="#" class="footer-link">Support</a></li>
+            </ul>
+          </div>
 
-      <!-- Newsletter -->
-      <div class="reveal">
-        <h4 class="section-title font-bold mb-4">Stay Updated</h4>
-        <p class="section-subtitle text-sm mb-4">Get the latest news and updates.</p>
-        <div class="flex gap-2">
-          <input type="email" placeholder="Enter email"
-            class="flex-1 px-4 py-2 rounded-full glass text-sm section-subtitle placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-          <button class="glass-button py-2 px-4 text-sm">
-            <i class="fas fa-paper-plane"></i>
-          </button>
+          <!-- Company -->
+          <div class="reveal">
+            <h4 class="text-white font-semibold text-sm uppercase tracking-wider mb-5">Company</h4>
+            <ul class="space-y-3">
+              <li><a href="#" class="footer-link">About</a></li>
+              <li><a href="#" class="footer-link">Blog</a></li>
+              <li><a href="#" class="footer-link">Careers</a></li>
+              <li><a href="#" class="footer-link">Contact</a></li>
+            </ul>
+          </div>
         </div>
       </div>
-
     </div>
 
-    <!-- Divider -->
-    <div class="border-t border-gray-700/30 dark:border-gray-700/50 pt-8">
-      <div class="flex flex-col md:flex-row justify-between items-center gap-4">
-        <p class="section-subtitle text-sm">
+    <!-- Bottom Bar -->
+    <div class="pt-8 border-t border-white/10">
+      <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
+        <p class="text-slate-500 text-sm">
           &copy; 2025 ChainTorque. All rights reserved.
         </p>
-        <div class="flex gap-6">
-          <a href="#" class="section-subtitle hover:text-primary transition-colors text-sm">Privacy</a>
-          <a href="#" class="section-subtitle hover:text-primary transition-colors text-sm">Terms</a>
-          <a href="#" class="section-subtitle hover:text-primary transition-colors text-sm">Contact</a>
+        <div class="flex items-center gap-6">
+          <a href="#" class="text-slate-500 hover:text-white text-sm transition-colors">Privacy</a>
+          <a href="#" class="text-slate-500 hover:text-white text-sm transition-colors">Terms</a>
+          <a href="#" class="text-slate-500 hover:text-white text-sm transition-colors">Cookies</a>
         </div>
       </div>
     </div>

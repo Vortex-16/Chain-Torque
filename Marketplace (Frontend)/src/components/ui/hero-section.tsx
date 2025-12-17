@@ -1,82 +1,292 @@
+import { Search, ChevronRight, Zap, Star, TrendingUp, Clock, ArrowRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { CadCard } from '@/components/ui/cad-card';
+import { Button } from '@/components/ui/button';
+import { useMarketplace } from '@/hooks/useWeb3';
+import { useEffect, useState } from 'react';
+import { WalletConnectionDialog } from '@/components/ui/wallet-connection-dialog';
+
+// Import fallback images
+import cadGear from '@/assets/cad-gear.jpg';
+import cadDrone from '@/assets/cad-drone.jpg';
+import cadEngine from '@/assets/cad-engine.jpg';
+import cadRobot from '@/assets/cad-robot.jpg';
+
+interface DisplayItem {
+  id: number;
+  tokenId: number;
+  title: string;
+  image: string;
+  price: string;
+  seller: string;
+  rating: number;
+  downloads: number;
+  fileTypes: string[];
+  software: string[];
+}
+
+const featuredModels: DisplayItem[] = [
+  { id: 1, tokenId: 1, title: 'Professional Gear Assembly', image: cadGear, price: '$49.99', seller: 'MechDesign Pro', rating: 4.8, downloads: 1245, fileTypes: ['GLB', 'STL'], software: ['Blender', 'Three.js'] },
+  { id: 2, tokenId: 2, title: 'Carbon Fiber Drone Frame', image: cadDrone, price: '$29.99', seller: 'AeroTech', rating: 4.9, downloads: 856, fileTypes: ['GLB', 'OBJ'], software: ['Blender', 'WebGL'] },
+  { id: 3, tokenId: 3, title: 'Engine Cylinder Head', image: cadEngine, price: '$89.99', seller: 'AutoCAD Masters', rating: 4.7, downloads: 2134, fileTypes: ['GLTF', 'GLB'], software: ['Three.js', 'WebGL'] },
+  { id: 4, tokenId: 4, title: 'Robotic Arm Joint', image: cadRobot, price: '$75.00', seller: 'RoboDesign', rating: 4.9, downloads: 967, fileTypes: ['GLB', 'STL'], software: ['SolidWorks', 'Fusion360'] },
+];
+
+const categories = [
+  { name: 'Mechanical', icon: '⚙️', count: '450+' },
+  { name: 'Automotive', icon: '🚗', count: '320+' },
+  { name: 'Aerospace', icon: '✈️', count: '180+' },
+  { name: 'Robotics', icon: '🤖', count: '290+' },
+  { name: 'Architecture', icon: '🏛️', count: '410+' },
+  { name: 'Electronics', icon: '💡', count: '260+' },
+];
+
 export function HeroSection() {
-  const scrollToLibrary = () => {
-    const libraryElement = document.getElementById('library');
-    if (libraryElement) {
-      libraryElement.scrollIntoView({ behavior: 'smooth' });
+  const { items, loading } = useMarketplace();
+  const [displayItems, setDisplayItems] = useState<DisplayItem[]>(featuredModels);
+  const [showWalletDialog, setShowWalletDialog] = useState(false);
+
+  useEffect(() => {
+    if (items && items.length > 0) {
+      const nftItems = items.slice(0, 4).map((item: any, index: number) => ({
+        id: item.tokenId || index,
+        tokenId: item.tokenId || index,
+        title: item.title || item.name || `Model #${item.tokenId}`,
+        image: item.imageUrl && item.imageUrl !== '/placeholder.jpg'
+          ? item.imageUrl.startsWith('http') ? item.imageUrl : `http://localhost:5001${item.imageUrl}`
+          : featuredModels[index % featuredModels.length].image,
+        price: item.price ? `${parseFloat(item.price).toFixed(4)} ETH` : '0.01 ETH',
+        seller: item.username || 'Creator',
+        rating: 4.5 + Math.random() * 0.5,
+        downloads: Math.floor(Math.random() * 1000) + 100,
+        fileTypes: ['GLB', 'STL'],
+        software: ['Blender', 'Three.js'],
+      }));
+      setDisplayItems(nftItems.length > 0 ? nftItems : featuredModels);
     }
-  };
+  }, [items]);
 
   return (
     <>
-      {/* First Hero Section - Build. Share. Explore. */}
-      <section className='h-[50vh] flex flex-col items-center justify-center text-center bg-gradient-to-br from-purple-800 via-primary to-secondary relative px-4 dark:from-purple-900 dark:via-primary dark:to-secondary'>
-        <h1
-          className='text-4xl md:text-5xl font-bold mb-2 tracking-tight text-white'
-          style={{ textShadow: '1px 1px 3px rgba(0,0,0,0.4)' }}
-        >
-          Build. Share. Explore.
-        </h1>
-        <p className='text-lg md:text-xl text-white/90 max-w-2xl mb-6'>
-          Welcome to the future of CAD modeling – a marketplace where creativity
-          meets collaboration.
-        </p>
+      {/* Hero Banner */}
+      <section className='relative bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 py-8'>
+        <div className='container mx-auto px-4'>
+          <div className='grid lg:grid-cols-3 gap-6'>
+            {/* Main Hero Card */}
+            <div className='lg:col-span-2 relative rounded-2xl overflow-hidden bg-gradient-to-br from-indigo-600 to-purple-700 p-8 min-h-[300px] flex flex-col justify-end'>
+              <div className='absolute inset-0 opacity-20'>
+                <div className='absolute top-10 right-10 w-40 h-40 rounded-full bg-white/20 blur-2xl' />
+                <div className='absolute bottom-10 left-10 w-32 h-32 rounded-full bg-white/20 blur-2xl' />
+              </div>
+              <div className='relative z-10'>
+                <div className='inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 text-white text-xs font-medium mb-4'>
+                  <Zap className='h-3 w-3' />
+                  Featured Collection
+                </div>
+                <h1 className='text-3xl md:text-4xl font-bold text-white mb-3'>
+                  Premium CAD Models
+                </h1>
+                <p className='text-white/80 mb-6 max-w-md'>
+                  Discover high-quality 3D models from verified creators. Trade securely on the blockchain.
+                </p>
+                <Link
+                  to='/upload'
+                  className='inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-white text-indigo-600 font-medium hover:bg-white/90 transition-all text-sm'
+                >
+                  Start Selling
+                  <ArrowRight className='h-4 w-4' />
+                </Link>
+              </div>
+            </div>
 
-        {/* Search + Explore */}
-        <div className='flex flex-col md:flex-row items-center gap-4 w-full max-w-xl'>
-          <input
-            type='text'
-            placeholder='Search CAD models...'
-            className='w-full md:w-3/4 px-5 py-3 rounded-full text-foreground bg-background border border-border focus:outline-none focus:ring-2 focus:ring-primary shadow-md'
-          />
-          <button
-            onClick={scrollToLibrary}
-            className='bg-background text-primary font-semibold px-6 py-3 rounded-full shadow hover:bg-muted transition-all duration-200'
-          >
-            Explore
-          </button>
-        </div>
-
-        {/* Scroll Down Arrow */}
-        <div
-          className='absolute bottom-6 text-white text-2xl animate-bounce cursor-pointer'
-          onClick={scrollToLibrary}
-        >
-          ↓
-        </div>
-      </section>
-
-      {/* Categories Section */}
-      <section className='py-12 px-6 bg-muted/30 text-foreground' id='library'>
-        <h2 className='text-3xl font-bold text-center mb-10'>
-          Popular CAD Collections
-        </h2>
-        <div className='grid md:grid-cols-3 gap-6'>
-          <div className='bg-card rounded-xl shadow-card p-5 hover:shadow-card-hover transition-all border border-border'>
-            <h3 className='text-xl font-semibold mb-2 text-card-foreground'>
-              Mechanical Parts
-            </h3>
-            <p className='text-sm text-muted-foreground'>
-              Explore gears, joints, bolts, and more...
-            </p>
-          </div>
-          <div className='bg-card rounded-xl shadow-card p-5 hover:shadow-card-hover transition-all border border-border'>
-            <h3 className='text-xl font-semibold mb-2 text-card-foreground'>
-              Architectural Blocks
-            </h3>
-            <p className='text-sm text-muted-foreground'>
-              Find building CADs, elevations & blueprints.
-            </p>
-          </div>
-          <div className='bg-card rounded-xl shadow-card p-5 hover:shadow-card-hover transition-all border border-border'>
-            <h3 className='text-xl font-semibold mb-2 text-card-foreground'>
-              3D Print Ready
-            </h3>
-            <p className='text-sm text-muted-foreground'>
-              Perfectly optimized models for printing.
-            </p>
+            {/* Side Cards */}
+            <div className='flex flex-col gap-4'>
+              <div className='rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 p-5 flex-1'>
+                <div className='text-white/80 text-xs font-medium mb-2'>Today's Deal</div>
+                <div className='text-white font-bold text-xl mb-1'>30% Off</div>
+                <div className='text-white/70 text-sm'>First purchase discount</div>
+              </div>
+              <div className='rounded-xl bg-gradient-to-br from-orange-500 to-rose-500 p-5 flex-1'>
+                <div className='text-white/80 text-xs font-medium mb-2'>New Arrivals</div>
+                <div className='text-white font-bold text-xl mb-1'>50+ Models</div>
+                <div className='text-white/70 text-sm'>Added this week</div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
+
+      {/* Search Bar */}
+      <section className='bg-background border-b border-border/50 py-4 sticky top-16 z-40'>
+        <div className='container mx-auto px-4'>
+          <div className='flex items-center gap-3 max-w-3xl mx-auto'>
+            <div className='relative flex-1'>
+              <Search className='absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground' />
+              <input
+                type='text'
+                placeholder='Search for 3D models, CAD files, designs...'
+                className='w-full pl-11 pr-4 py-2.5 rounded-lg bg-muted/50 border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all'
+              />
+            </div>
+            <Button className='px-5'>Search</Button>
+          </div>
+        </div>
+      </section>
+
+      {/* Categories Strip */}
+      <section className='bg-muted/30 border-b border-border/50 py-4'>
+        <div className='container mx-auto px-4'>
+          <div className='flex items-center gap-6 overflow-x-auto pb-2'>
+            {categories.map((cat) => (
+              <button
+                key={cat.name}
+                className='flex items-center gap-2 px-4 py-2 rounded-lg bg-background border border-border/50 hover:border-primary/30 hover:bg-primary/5 transition-all whitespace-nowrap group'
+              >
+                <span className='text-lg'>{cat.icon}</span>
+                <div className='text-left'>
+                  <div className='text-sm font-medium text-foreground group-hover:text-primary transition-colors'>{cat.name}</div>
+                  <div className='text-xs text-muted-foreground'>{cat.count} models</div>
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Trending Now Section */}
+      <section className='py-10 bg-background' id='library'>
+        <div className='container mx-auto px-4'>
+          <div className='flex items-center justify-between mb-6'>
+            <div className='flex items-center gap-3'>
+              <TrendingUp className='h-5 w-5 text-primary' />
+              <h2 className='text-xl font-semibold text-foreground'>Trending Now</h2>
+            </div>
+            <Link to='#' className='text-sm text-primary hover:text-primary/80 flex items-center gap-1'>
+              See all <ChevronRight className='h-4 w-4' />
+            </Link>
+          </div>
+          <div className='grid grid-cols-2 md:grid-cols-4 gap-4'>
+            {displayItems.map((model, index) => (
+              <CadCard
+                key={`trending-${model.id}-${index}`}
+                id={model.tokenId}
+                title={model.title}
+                image={model.image}
+                price={model.price}
+                seller={model.seller}
+                rating={model.rating}
+                downloads={model.downloads}
+                fileTypes={model.fileTypes}
+                software={model.software}
+                onWalletRequired={() => setShowWalletDialog(true)}
+              />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Featured Products Grid */}
+      <section className='py-10 bg-muted/20'>
+        <div className='container mx-auto px-4'>
+          <div className='grid md:grid-cols-2 lg:grid-cols-4 gap-6'>
+            {/* Best Sellers Card */}
+            <div className='bg-card rounded-xl p-5 border border-border/50'>
+              <div className='flex items-center gap-2 mb-4'>
+                <Star className='h-4 w-4 text-amber-500' />
+                <h3 className='font-semibold text-foreground'>Best Sellers</h3>
+              </div>
+              <div className='grid grid-cols-2 gap-2'>
+                {displayItems.slice(0, 4).map((item, i) => (
+                  <Link key={`best-${i}`} to={`/product/${item.tokenId}`} className='aspect-square rounded-lg overflow-hidden bg-muted hover:opacity-80 transition-opacity'>
+                    <img src={item.image} alt={item.title} className='w-full h-full object-cover' />
+                  </Link>
+                ))}
+              </div>
+              <Link to='#' className='text-xs text-primary mt-3 inline-block hover:underline'>See more</Link>
+            </div>
+
+            {/* New Arrivals Card */}
+            <div className='bg-card rounded-xl p-5 border border-border/50'>
+              <div className='flex items-center gap-2 mb-4'>
+                <Clock className='h-4 w-4 text-emerald-500' />
+                <h3 className='font-semibold text-foreground'>New Arrivals</h3>
+              </div>
+              <div className='grid grid-cols-2 gap-2'>
+                {displayItems.slice(0, 4).map((item, i) => (
+                  <Link key={`new-${i}`} to={`/product/${item.tokenId}`} className='aspect-square rounded-lg overflow-hidden bg-muted hover:opacity-80 transition-opacity'>
+                    <img src={item.image} alt={item.title} className='w-full h-full object-cover' />
+                  </Link>
+                ))}
+              </div>
+              <Link to='#' className='text-xs text-primary mt-3 inline-block hover:underline'>See more</Link>
+            </div>
+
+            {/* Top Rated Card */}
+            <div className='bg-card rounded-xl p-5 border border-border/50'>
+              <div className='flex items-center gap-2 mb-4'>
+                <Star className='h-4 w-4 text-primary fill-primary' />
+                <h3 className='font-semibold text-foreground'>Top Rated</h3>
+              </div>
+              <div className='grid grid-cols-2 gap-2'>
+                {displayItems.slice(0, 4).map((item, i) => (
+                  <Link key={`top-${i}`} to={`/product/${item.tokenId}`} className='aspect-square rounded-lg overflow-hidden bg-muted hover:opacity-80 transition-opacity'>
+                    <img src={item.image} alt={item.title} className='w-full h-full object-cover' />
+                  </Link>
+                ))}
+              </div>
+              <Link to='#' className='text-xs text-primary mt-3 inline-block hover:underline'>See more</Link>
+            </div>
+
+            {/* Deals Card */}
+            <div className='bg-gradient-to-br from-indigo-500/10 to-purple-500/10 rounded-xl p-5 border border-primary/20'>
+              <div className='flex items-center gap-2 mb-4'>
+                <Zap className='h-4 w-4 text-primary' />
+                <h3 className='font-semibold text-foreground'>Today's Deals</h3>
+              </div>
+              <div className='text-center py-4'>
+                <div className='text-4xl font-bold text-primary mb-2'>30%</div>
+                <div className='text-sm text-muted-foreground mb-4'>Off your first purchase</div>
+                <Button size='sm' className='w-full'>Claim Now</Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* More Products */}
+      <section className='py-10 bg-background'>
+        <div className='container mx-auto px-4'>
+          <div className='flex items-center justify-between mb-6'>
+            <h2 className='text-xl font-semibold text-foreground'>Recommended for You</h2>
+            <Button variant='outline' size='sm'>
+              View All
+            </Button>
+          </div>
+          <div className='grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4'>
+            {[...displayItems, ...displayItems].slice(0, 5).map((model, index) => (
+              <CadCard
+                key={`recommended-${model.id}-${index}`}
+                id={model.tokenId}
+                title={model.title}
+                image={model.image}
+                price={model.price}
+                seller={model.seller}
+                rating={model.rating}
+                downloads={model.downloads}
+                fileTypes={model.fileTypes}
+                software={model.software}
+                onWalletRequired={() => setShowWalletDialog(true)}
+              />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <WalletConnectionDialog
+        isOpen={showWalletDialog}
+        onClose={() => setShowWalletDialog(false)}
+        onConnect={() => window.location.reload()}
+      />
     </>
   );
 }

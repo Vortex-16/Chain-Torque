@@ -36,11 +36,9 @@ export function CadCard({
   const navigate = useNavigate();
   const { user } = useUser();
 
-  // Check if user has wallet connected
   const hasWallet = !!user?.unsafeMetadata?.walletAddress;
 
   const handleCardClick = () => {
-    // Prefer tokenId if present, fallback to id
     let detailId: string | number = '';
     if (id && typeof id === 'object' && 'tokenId' in id && id.tokenId != null) {
       detailId = id.tokenId;
@@ -48,124 +46,119 @@ export function CadCard({
       detailId = id;
     }
     navigate(`/product/${detailId}`);
-  }
+  };
 
   const handleAddToCart = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent card click when clicking the button
-    
+    e.stopPropagation();
     if (!hasWallet) {
-      // If no wallet connected, trigger wallet connection popup
       if (onWalletRequired) {
         onWalletRequired();
-      } else {
-        alert('Please connect your wallet to purchase items');
       }
       return;
     }
-    
-    // Add to cart logic here (only if wallet is connected)
     console.log(`Added ${title} to cart`);
   };
 
   const handleToggleWishlist = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent card click when clicking the button
-    // Wishlist logic here
+    e.stopPropagation();
     console.log(`Toggled wishlist for ${title}`);
   };
+
   return (
     <Card
       className={cn(
-        'group cursor-pointer bg-gradient-card border-border/50 hover:animate-card-hover transition-all duration-300 hover:shadow-glow hover:border-primary/20',
+        'group cursor-pointer overflow-hidden bg-card border border-border/50 rounded-2xl',
+        'hover:border-border hover:shadow-lg transition-all duration-300',
         className
       )}
       onClick={handleCardClick}
     >
       <CardContent className='p-0'>
         {/* Image */}
-        <div className='relative overflow-hidden rounded-t-lg'>
+        <div className='relative aspect-[4/3] overflow-hidden bg-muted'>
           <img
             src={image}
             alt={title}
-            className='w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105'
+            className='w-full h-full object-cover transition-transform duration-500 group-hover:scale-105'
           />
-          <div className='absolute top-3 right-3'>
-            <Button
-              size='sm'
-              variant='secondary'
-              className='h-8 w-8 p-0 bg-background/80 backdrop-blur-sm hover:bg-secondary hover:scale-110 transition-all'
-              onClick={handleToggleWishlist}
-              aria-label='Add to wishlist'
-            >
-              <Heart className='h-4 w-4 transition-colors group-hover:text-secondary' />
-            </Button>
-          </div>
-          {/* File type badges */}
-          <div className='absolute bottom-3 left-3 flex gap-1 flex-wrap'>
-            {fileTypes.map((type, index) => (
-              <Badge
+
+          {/* Wishlist */}
+          <Button
+            size='sm'
+            variant='ghost'
+            className='absolute top-2 right-2 h-8 w-8 p-0 rounded-full bg-background/80 backdrop-blur-sm hover:bg-background'
+            onClick={handleToggleWishlist}
+          >
+            <Heart className='h-3.5 w-3.5 text-muted-foreground' />
+          </Button>
+
+          {/* File types */}
+          <div className='absolute bottom-2 left-2 flex gap-1'>
+            {fileTypes.slice(0, 2).map((type) => (
+              <span
                 key={type}
-                variant='secondary'
-                className='text-xs bg-background/80 backdrop-blur-sm transition-all hover:bg-accent hover:text-background'
-                style={{ animationDelay: `${index * 0.1}s` }}
+                className='px-1.5 py-0.5 text-[10px] font-medium uppercase rounded bg-background/80 backdrop-blur-sm text-foreground/70'
               >
                 {type}
-              </Badge>
+              </span>
             ))}
           </div>
         </div>
 
         {/* Content */}
-        <div className='p-4'>
-          <h3 className='font-semibold text-foreground mb-2 line-clamp-2 group-hover:text-primary transition-colors'>
+        <div className='p-3'>
+          <h3 className='font-medium text-sm text-foreground mb-1.5 line-clamp-1 group-hover:text-primary transition-colors'>
             {title}
           </h3>
 
-          <div className='flex items-center justify-between text-sm text-muted-foreground mb-3'>
-            <span>by {seller}</span>
-            <div className='flex items-center gap-1'>
-              <Star className='h-3 w-3 fill-warning text-warning' />
-              <span>{rating}</span>
+          <div className='flex items-center justify-between text-xs text-muted-foreground mb-2'>
+            <span className='truncate'>{seller}</span>
+            <div className='flex items-center gap-0.5'>
+              <Star className='h-3 w-3 fill-amber-400 text-amber-400' />
+              <span>{rating.toFixed(1)}</span>
             </div>
           </div>
 
-          {/* Software compatibility */}
-          <div className='flex gap-1 mb-3 flex-wrap'>
-            {software.map(sw => (
-              <Badge key={sw} variant='outline' className='text-xs'>
+          {/* Software */}
+          <div className='flex gap-1 mb-3'>
+            {software.slice(0, 2).map((sw) => (
+              <Badge
+                key={sw}
+                variant='secondary'
+                className='text-[10px] px-1.5 py-0 h-4 font-normal bg-muted/50'
+              >
                 {sw}
               </Badge>
             ))}
           </div>
 
-          {/* Price and actions */}
-          <div className='flex items-center justify-between'>
-            <div className='flex flex-col'>
-              <span className='text-lg font-bold text-primary'>{price}</span>
-              <span className='text-xs text-muted-foreground flex items-center gap-1'>
-                <Download className='h-3 w-3' />
-                {downloads} downloads
-              </span>
+          {/* Price & CTA */}
+          <div className='flex items-center justify-between pt-2 border-t border-border/50'>
+            <div>
+              <span className='text-base font-semibold text-primary'>{price}</span>
+              <div className='flex items-center gap-1 text-[10px] text-muted-foreground'>
+                <Download className='h-2.5 w-2.5' />
+                {downloads.toLocaleString()}
+              </div>
             </div>
             <Button
               size='sm'
               className={cn(
-                'transition-all hover:scale-105',
-                hasWallet 
-                  ? 'bg-gradient-primary hover:bg-primary-hover animate-glow-pulse' 
-                  : 'bg-muted text-muted-foreground cursor-not-allowed opacity-60'
+                'h-8 px-3 text-xs rounded-lg',
+                hasWallet
+                  ? 'bg-primary hover:bg-primary/90'
+                  : 'bg-muted text-muted-foreground hover:bg-muted'
               )}
               onClick={handleAddToCart}
-              aria-label={hasWallet ? 'Add to cart' : 'Connect wallet to purchase'}
-              disabled={!hasWallet}
             >
               {hasWallet ? (
                 <>
-                  <ShoppingCart className='h-4 w-4 mr-1' />
+                  <ShoppingCart className='h-3 w-3 mr-1' />
                   Add
                 </>
               ) : (
                 <>
-                  <Wallet className='h-4 w-4 mr-1' />
+                  <Wallet className='h-3 w-3 mr-1' />
                   Connect
                 </>
               )}

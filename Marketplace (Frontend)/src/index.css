@@ -2,160 +2,143 @@
 @tailwind components;
 @tailwind utilities;
 
-/* CAD Market Design System - Professional engineering aesthetic
-All colors MUST be HSL.
-*/
+/* ChainTorque Marketplace - Clean, Minimal & Elegant Design System */
 
 @layer base {
   :root {
-    /* Light Mode Variables */
-    --background: 0 0% 100%;
-    --foreground: 224 71.4% 4.1%;
+    /* Light Mode - Clean & Minimal */
+    --background: 0 0% 99%;
+    --foreground: 220 20% 10%;
 
     --card: 0 0% 100%;
-    --card-foreground: 224 71.4% 4.1%;
+    --card-foreground: 220 20% 10%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 224 71.4% 4.1%;
+    --popover-foreground: 220 20% 10%;
 
-    /* Blue primary matching Landing Page */
-    --primary: 217 91% 60%;
+    /* Refined Blue Primary */
+    --primary: 220 90% 56%;
     --primary-foreground: 0 0% 100%;
-    --primary-hover: 217 91% 55%;
+    --primary-hover: 220 85% 50%;
 
-    /* Purple/Indigo accent for gradients */
-    --secondary: 259 94% 51%;
+    /* Soft Purple Accent */
+    --secondary: 250 60% 60%;
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 220 14.3% 95.9%;
-    --muted-foreground: 220 8.9% 46.1%;
+    --muted: 220 15% 96%;
+    --muted-foreground: 220 10% 50%;
 
-    --accent: 259 94% 51%;
+    --accent: 250 60% 60%;
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 84.2% 60.2%;
+    --destructive: 0 70% 55%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
-    --ring: 217 91% 60%;
+    --border: 220 15% 92%;
+    --input: 220 15% 92%;
+    --ring: 220 90% 56%;
 
-    /* CAD Market specific colors - Light Mode */
-    --engineering-blue: 217 91% 60%;
-    --technical-gray: 220 8.9% 46.1%;
-    --success-green: 142 76% 36%;
-    --warning-orange: 25 95% 53%;
+    /* Clean palette variables */
+    --engineering-blue: 220 90% 56%;
+    --technical-gray: 220 10% 50%;
+    --success-green: 150 60% 42%;
+    --warning-orange: 35 90% 55%;
 
-    /* Light mode gradients */
-    --gradient-primary: linear-gradient(
-      135deg,
-      hsl(217 91% 60%),
-      hsl(259 94% 51%)
-    );
-    --gradient-hero: linear-gradient(
-      135deg,
-      hsl(259 94% 51%),
-      hsl(217 91% 60%),
-      hsl(172 76% 41%)
-    );
-    --gradient-card: linear-gradient(
-      145deg,
-      hsl(0 0% 100%),
-      hsl(220 14.3% 95.9%)
-    );
+    /* Elegant gradients */
+    --gradient-primary: linear-gradient(135deg,
+        hsl(220 90% 56%),
+        hsl(250 60% 60%));
+    --gradient-hero: linear-gradient(160deg,
+        hsl(220 90% 56% / 0.9),
+        hsl(250 60% 60% / 0.85));
+    --gradient-card: linear-gradient(145deg,
+        hsl(0 0% 100%),
+        hsl(220 15% 98%));
 
-    /* Light shadows */
-    --shadow-card:
-      0 1px 3px 0 hsl(0 0% 0% / 0.1), 0 1px 2px -1px hsl(0 0% 0% / 0.1);
-    --shadow-card-hover:
-      0 4px 6px -1px hsl(0 0% 0% / 0.1), 0 2px 4px -2px hsl(0 0% 0% / 0.1);
-    --shadow-professional:
-      0 10px 15px -3px hsl(0 0% 0% / 0.1), 0 4px 6px -4px hsl(0 0% 0% / 0.1);
+    /* Subtle, elegant shadows */
+    --shadow-xs: 0 1px 2px 0 hsl(220 20% 10% / 0.03);
+    --shadow-card: 0 1px 3px 0 hsl(220 20% 10% / 0.04), 0 1px 2px -1px hsl(220 20% 10% / 0.03);
+    --shadow-card-hover: 0 8px 24px -4px hsl(220 90% 56% / 0.12), 0 4px 8px -2px hsl(220 20% 10% / 0.04);
+    --shadow-professional: 0 16px 48px -8px hsl(220 20% 10% / 0.08);
+    --shadow-glow: 0 0 24px hsl(220 90% 56% / 0.15);
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
 
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 217 91% 60%;
+    --sidebar-background: 0 0% 99%;
+    --sidebar-foreground: 220 10% 30%;
+    --sidebar-primary: 220 90% 56%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 14.3% 95.9%;
-    --sidebar-accent-foreground: 240 5.3% 26.1%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217 91% 60%;
+    --sidebar-accent: 220 15% 96%;
+    --sidebar-accent-foreground: 220 10% 30%;
+    --sidebar-border: 220 15% 92%;
+    --sidebar-ring: 220 90% 56%;
   }
 
   .dark {
-    /* Dark Mode Variables */
-    --background: 224 71.4% 4.1%;
-    --foreground: 210 20% 98%;
+    /* Dark Mode - Elegant & Refined */
+    --background: 220 20% 7%;
+    --foreground: 220 15% 95%;
 
-    --card: 224 71.4% 4.1%;
-    --card-foreground: 210 20% 98%;
+    --card: 220 20% 10%;
+    --card-foreground: 220 15% 95%;
 
-    --popover: 224 71.4% 4.1%;
-    --popover-foreground: 210 20% 98%;
+    --popover: 220 20% 10%;
+    --popover-foreground: 220 15% 95%;
 
     /* Bright primary for dark mode */
-    --primary: 217 91% 65%;
-    --primary-foreground: 224 71.4% 4.1%;
-    --primary-hover: 217 91% 70%;
+    --primary: 220 90% 65%;
+    --primary-foreground: 220 20% 7%;
+    --primary-hover: 220 85% 70%;
 
-    /* Purple secondary */
-    --secondary: 259 94% 65%;
-    --secondary-foreground: 224 71.4% 4.1%;
+    /* Softer purple */
+    --secondary: 250 60% 68%;
+    --secondary-foreground: 220 20% 7%;
 
-    --muted: 215 27.9% 16.9%;
-    --muted-foreground: 217.9 10.6% 64.9%;
+    --muted: 220 20% 14%;
+    --muted-foreground: 220 15% 60%;
 
-    --accent: 259 94% 65%;
-    --accent-foreground: 224 71.4% 4.1%;
+    --accent: 250 60% 68%;
+    --accent-foreground: 220 20% 7%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 20% 98%;
+    --destructive: 0 62% 45%;
+    --destructive-foreground: 220 15% 95%;
 
-    --border: 215 27.9% 16.9%;
-    --input: 215 27.9% 16.9%;
-    --ring: 217 91% 65%;
+    --border: 220 20% 16%;
+    --input: 220 20% 16%;
+    --ring: 220 90% 65%;
 
-    /* CAD Market specific colors - Dark Mode */
-    --engineering-blue: 217 91% 65%;
-    --technical-gray: 217.9 10.6% 64.9%;
-    --success-green: 142 76% 46%;
-    --warning-orange: 25 95% 63%;
+    /* Dark mode palette */
+    --engineering-blue: 220 90% 65%;
+    --technical-gray: 220 15% 60%;
+    --success-green: 150 60% 50%;
+    --warning-orange: 35 90% 60%;
 
     /* Dark mode gradients */
-    --gradient-primary: linear-gradient(
-      135deg,
-      hsl(217 91% 65%),
-      hsl(259 94% 65%)
-    );
-    --gradient-hero: linear-gradient(
-      135deg,
-      hsl(259 94% 65%),
-      hsl(217 91% 65%),
-      hsl(172 76% 51%)
-    );
-    --gradient-card: linear-gradient(
-      145deg,
-      hsl(224 71.4% 4.1%),
-      hsl(215 27.9% 16.9%)
-    );
+    --gradient-primary: linear-gradient(135deg,
+        hsl(220 90% 65%),
+        hsl(250 60% 68%));
+    --gradient-hero: linear-gradient(160deg,
+        hsl(220 90% 65% / 0.9),
+        hsl(250 60% 68% / 0.85));
+    --gradient-card: linear-gradient(145deg,
+        hsl(220 20% 10%),
+        hsl(220 20% 12%));
 
-    /* Dark shadows with glow */
-    --shadow-card:
-      0 4px 6px -1px hsl(0 0% 0% / 0.3), 0 2px 4px -2px hsl(0 0% 0% / 0.3);
-    --shadow-card-hover:
-      0 10px 15px -3px hsl(217 91% 65% / 0.2), 0 4px 6px -4px hsl(0 0% 0% / 0.3);
-    --shadow-professional: 0 25px 50px -12px hsl(0 0% 0% / 0.5);
+    /* Dark elegant shadows */
+    --shadow-xs: 0 1px 2px 0 hsl(0 0% 0% / 0.2);
+    --shadow-card: 0 2px 4px -1px hsl(0 0% 0% / 0.2), 0 1px 2px -1px hsl(0 0% 0% / 0.15);
+    --shadow-card-hover: 0 12px 32px -6px hsl(220 90% 65% / 0.2), 0 4px 12px -2px hsl(0 0% 0% / 0.2);
+    --shadow-professional: 0 24px 64px -12px hsl(0 0% 0% / 0.4);
+    --shadow-glow: 0 0 32px hsl(220 90% 65% / 0.2);
 
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 217 91% 65%;
-    --sidebar-primary-foreground: 224 71.4% 4.1%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217 91% 65%;
+    --sidebar-background: 220 20% 9%;
+    --sidebar-foreground: 220 15% 95%;
+    --sidebar-primary: 220 90% 65%;
+    --sidebar-primary-foreground: 220 20% 7%;
+    --sidebar-accent: 220 20% 14%;
+    --sidebar-accent-foreground: 220 15% 95%;
+    --sidebar-border: 220 20% 16%;
+    --sidebar-ring: 220 90% 65%;
   }
 }
 
@@ -165,7 +148,55 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
+  }
+}
+
+@layer components {
+
+  /* Glassmorphism utility */
+  .glass {
+    @apply bg-background/80 backdrop-blur-lg border border-border/50;
+  }
+
+  /* Clean card styling */
+  .card-clean {
+    @apply bg-card border border-border/60 shadow-[var(--shadow-card)] transition-all duration-300;
+  }
+
+  .card-clean:hover {
+    @apply shadow-[var(--shadow-card-hover)] border-primary/20;
+  }
+
+  /* Elegant button styling */
+  .btn-elegant {
+    @apply px-5 py-2.5 rounded-lg font-medium transition-all duration-200;
+    @apply hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0;
+  }
+
+  /* Subtle link underline animation */
+  .link-underline {
+    @apply relative;
+  }
+
+  .link-underline::after {
+    content: '';
+    @apply absolute bottom-0 left-0 w-0 h-[2px] bg-primary transition-all duration-300;
+  }
+
+  .link-underline:hover::after {
+    @apply w-full;
+  }
+
+  /* Minimal badge */
+  .badge-minimal {
+    @apply px-2.5 py-0.5 text-xs font-medium rounded-md border;
+    @apply bg-transparent border-border text-muted-foreground;
+    @apply transition-colors duration-200;
+  }
+
+  .badge-minimal:hover {
+    @apply border-primary/40 text-primary;
   }
 }
 
@@ -174,6 +205,7 @@ All colors MUST be HSL.
   from {
     transform: rotateY(0deg);
   }
+
   to {
     transform: rotateY(360deg);
   }
@@ -181,4 +213,21 @@ All colors MUST be HSL.
 
 .animate-spin-y {
   animation: spin-y 4s linear infinite;
+}
+
+/* Smooth fade-in animation */
+@keyframes fade-in-smooth {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-smooth {
+  animation: fade-in-smooth 0.4s ease-out;
 }
