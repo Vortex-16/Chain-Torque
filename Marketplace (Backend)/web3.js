@@ -25,7 +25,7 @@ class Web3Manager {
     };
 
     // Contract constants (matching Solidity)
-    this.LISTING_PRICE = ethers.utils.parseEther('0.00025'); // 0.00025 ETH
+    this.LISTING_PRICE = ethers.parseEther('0.00025'); // 0.00025 ETH
     this.MAX_BATCH_SIZE = 50;
     this.PLATFORM_FEE_BPS = 250; // 2.5%
   }
@@ -42,7 +42,7 @@ class Web3Manager {
         throw new Error('RPC_URL or PRIVATE_KEY not set in environment');
       }
 
-      this.provider = new ethers.providers.JsonRpcProvider(rpcUrl);
+      this.provider = new ethers.JsonRpcProvider(rpcUrl);
       this.signer = new ethers.Wallet(privateKey, this.provider);
 
       await this.loadContract();
@@ -99,7 +99,7 @@ class Web3Manager {
       if (!tokenURI || !price) throw new Error('Token URI and price are required');
 
       const categoryId = this.getCategoryId(category);
-      const priceWei = ethers.utils.parseEther(price.toString());
+      const priceWei = ethers.parseEther(price.toString());
       const royaltyBps = Math.floor(royalty * 100); // percentage -> basis points
 
       const tx = await this.contract.createToken(
@@ -116,7 +116,7 @@ class Web3Manager {
       const receipt = await tx.wait();
 
       // Try to extract tokenId from MarketItemCreated event
-      const eventTopic = ethers.utils.id('MarketItemCreated(uint256,address,uint128,uint32,uint256)');
+      const eventTopic = ethers.id('MarketItemCreated(uint256,address,uint128,uint32,uint256)');
       const marketItemCreatedEvent = receipt.logs.find(log => log.topics[0] === eventTopic);
 
       if (marketItemCreatedEvent) {
@@ -127,7 +127,7 @@ class Web3Manager {
           transactionHash: tx.hash,
           blockNumber: receipt.blockNumber,
           gasUsed: receipt.gasUsed.toString(),
-          listingFee: ethers.utils.formatEther(this.LISTING_PRICE),
+          listingFee: ethers.formatEther(this.LISTING_PRICE),
         };
       }
 
@@ -167,12 +167,12 @@ class Web3Manager {
         if (!tokenURI || !price) throw new Error('Each item must have tokenURI and price');
 
         tokenURIs.push(tokenURI);
-        prices.push(ethers.utils.parseEther(price.toString()));
+        prices.push(ethers.parseEther(price.toString()));
         categories.push(this.getCategoryId(category));
         royalties.push(Math.floor(royalty * 100));
       }
 
-      const totalListingFee = this.LISTING_PRICE.mul(itemsData.length);
+      const totalListingFee = this.LISTING_PRICE * BigInt(itemsData.length);
 
       const tx = await this.contract.batchCreateTokens(
         tokenURIs,
@@ -187,7 +187,7 @@ class Web3Manager {
 
       const receipt = await tx.wait();
 
-      const batchEventTopic = ethers.utils.id('BatchItemsCreated(uint256,uint256,address)');
+      const batchEventTopic = ethers.id('BatchItemsCreated(uint256,uint256,address)');
       const batchEvent = receipt.logs.find(log => log.topics[0] === batchEventTopic);
 
       let startTokenId = null;
@@ -202,7 +202,7 @@ class Web3Manager {
         transactionHash: tx.hash,
         blockNumber: receipt.blockNumber,
         gasUsed: receipt.gasUsed.toString(),
-        totalListingFee: ethers.utils.formatEther(totalListingFee),
+        totalListingFee: ethers.formatEther(totalListingFee),
         gasSavings: `~${Math.floor(itemsData.length * 0.8 * 100)}% vs individual transactions`,
       };
     } catch (error) {
@@ -220,7 +220,7 @@ class Web3Manager {
 
       const itemPrice = marketItem.price;
 
-      if (expectedPrice && ethers.utils.parseEther(expectedPrice.toString()) !== itemPrice) {
+      if (expectedPrice && ethers.parseEther(expectedPrice.toString()) !== itemPrice) {
         throw new Error('Price has changed. Please refresh and try again.');
       }
 
@@ -234,7 +234,7 @@ class Web3Manager {
       return {
         success: true,
         tokenId,
-        price: ethers.utils.formatEther(itemPrice),
+        price: ethers.formatEther(itemPrice),
         transactionHash: tx.hash,
         blockNumber: receipt.blockNumber,
         gasUsed: receipt.gasUsed.toString(),
@@ -265,8 +265,8 @@ class Web3Manager {
           try {
             const marketItem = await this.contract.getMarketItem(id);
             if (!marketItem.sold &&
-                marketItem.price.toString() === item.price.toString() &&
-                marketItem.seller === item.seller) {
+              marketItem.price.toString() === item.price.toString() &&
+              marketItem.seller === item.seller) {
               tokenId = id;
               break;
             }
@@ -337,7 +337,7 @@ class Web3Manager {
 
         formattedItems.push({
           tokenId,
-          price: ethers.utils.formatEther(item.price),
+          price: ethers.formatEther(item.price),
           category: this.getCategoryName(item.category),
           categoryId: item.category,
           seller: item.seller,
@@ -389,8 +389,8 @@ class Web3Manager {
         totalItems: Number(stats.totalItems),
         totalSold: Number(stats.totalSold),
         totalActive: Number(stats.totalActive),
-        totalValue: ethers.utils.formatEther(stats.totalValue),
-        listingPrice: ethers.utils.formatEther(this.LISTING_PRICE),
+        totalValue: ethers.formatEther(stats.totalValue),
+        listingPrice: ethers.formatEther(this.LISTING_PRICE),
         platformFee: `${this.PLATFORM_FEE_BPS / 100}%`,
       };
 
@@ -452,9 +452,9 @@ class Web3Manager {
         chainId: Number(network.chainId),
         name: network.name,
         address,
-        balance: ethers.utils.formatEther(balance),
+        balance: ethers.formatEther(balance),
         contractAddress: this.contractAddress,
-        listingPrice: ethers.utils.formatEther(this.LISTING_PRICE),
+        listingPrice: ethers.formatEther(this.LISTING_PRICE),
       };
     } catch (error) {
       console.error('Error getting network info:', error.message);
@@ -496,7 +496,7 @@ class Web3Manager {
       return {
         gasLimit: gasEstimate.toString(),
         gasLimitHex: `0x${gasEstimate.toString(16)}`,
-        estimatedCost: ethers.utils.formatEther(gasEstimate.mul(20000000000)), // assuming 20 gwei
+        estimatedCost: ethers.formatEther(gasEstimate * 20000000000n), // assuming 20 gwei
       };
     } catch (error) {
       console.error(`Error estimating gas for ${operation}:`, error.message);
@@ -506,7 +506,7 @@ class Web3Manager {
 
   getContractConstants() {
     return {
-      LISTING_PRICE: ethers.utils.formatEther(this.LISTING_PRICE),
+      LISTING_PRICE: ethers.formatEther(this.LISTING_PRICE),
       LISTING_PRICE_WEI: this.LISTING_PRICE.toString(),
       MAX_BATCH_SIZE: this.MAX_BATCH_SIZE,
       PLATFORM_FEE_PERCENTAGE: this.PLATFORM_FEE_BPS / 100,
@@ -522,8 +522,8 @@ const web3Manager = new Web3Manager();
 module.exports.web3Manager = web3Manager;
 
 module.exports.utils = {
-  formatEther: ethers.utils.formatEther,
-  parseEther: ethers.utils.parseEther,
-  isAddress: ethers.utils.isAddress,
-  getAddress: ethers.utils.getAddress,
+  formatEther: ethers.formatEther,
+  parseEther: ethers.parseEther,
+  isAddress: ethers.isAddress,
+  getAddress: ethers.getAddress,
 };
