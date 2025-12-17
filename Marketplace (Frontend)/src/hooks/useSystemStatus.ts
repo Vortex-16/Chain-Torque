@@ -53,10 +53,11 @@ export const useSystemStatus = () => {
         );
         if (marketplaceResponse.ok) {
           const marketplaceData = await marketplaceResponse.json();
-          const items = marketplaceData.items || marketplaceData.data || [];
+          // Backend refactor returns { success: true, data: [...] }
+          const items = marketplaceData.data || marketplaceData.items || [];
           itemCount = Array.isArray(items)
             ? items.length
-            : marketplaceData.count || 0;
+            : marketplaceData.total || 0;
         }
       } catch (error) {
         console.log('Marketplace API error:', error);
