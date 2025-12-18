@@ -30,6 +30,10 @@
   <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
+  <!-- GSAP -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
   <script>
     tailwind.config = {
       darkMode: 'class',
@@ -96,7 +100,7 @@
       </a>
 
       <!-- Divider -->
-      <div class="w-px h-6 bg-gradient-to-b from-transparent via-white/20 to-transparent"></div>
+      <div class="w-px h-6 bg-slate-200 dark:bg-white/20 hidden sm:block"></div>
 
       <!-- Nav Links -->
       <div class="hidden md:flex items-center">
@@ -109,14 +113,15 @@
       </div>
 
       <!-- Divider -->
-      <div class="w-px h-6 bg-gradient-to-b from-transparent via-white/20 to-transparent hidden md:block"></div>
+      <div class="w-px h-6 bg-slate-200 dark:bg-white/20 hidden md:block"></div>
 
       <!-- Right Actions -->
       <div class="flex items-center gap-2">
         <!-- Theme Toggle -->
         <button id="themeToggleBtn"
-          class="w-9 h-9 rounded-full flex items-center justify-center hover:bg-white/10 transition-all duration-300 group">
-          <i class="fas fa-moon section-subtitle group-hover:text-yellow-400 transition-colors" id="themeIcon"></i>
+          class="w-9 h-9 rounded-full flex items-center justify-center bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 transition-all duration-300 group">
+          <i class="fas fa-moon text-slate-600 dark:text-slate-400 group-hover:text-amber-500 transition-colors"
+            id="themeIcon"></i>
         </button>
 
         <!-- Login Button -->
@@ -129,10 +134,12 @@
     </div>
   </nav>
 
-  <!-- Scroll To Top Button -->
-  <button id="scrollToTopBtn" class="glass-btn-top" aria-label="Back to Top">
-    <i class="fas fa-arrow-up"></i>
-  </button>
+  <!-- Unique Back To Top Button with Progress Ring -->
+  <div id="scrollToTopBtn" class="progress-wrap">
+    <svg class="progress-circle svg-content" width="100%" height="100%" viewBox="-1 -1 102 102">
+      <path d="M50,1 a49,49 0 0,1 0,98 a49,49 0 0,1 0,-98" />
+    </svg>
+  </div>
 
   <script>
     // Theme toggle with icon update
@@ -165,58 +172,72 @@
     }
     updateThemeIcon();
 
-    // Scroll To Top Button Logic
+    // Scroll To Top with Progress Ring Logic
     document.addEventListener('DOMContentLoaded', () => {
+      const progressPath = document.querySelector('.progress-wrap path');
+      const pathLength = progressPath.getTotalLength();
+
+      progressPath.style.transition = progressPath.style.WebkitTransition = 'none';
+      progressPath.style.strokeDasharray = pathLength + ' ' + pathLength;
+      progressPath.style.strokeDashoffset = pathLength;
+      progressPath.getBoundingClientRect();
+      progressPath.style.transition = progressPath.style.WebkitTransition = 'stroke-dashoffset 10ms linear';
+
+      const updateProgress = () => {
+        const scroll = window.scrollY;
+        const height = document.documentElement.scrollHeight - window.innerHeight;
+        const progress = pathLength - (scroll * pathLength / height);
+        progressPath.style.strokeDashoffset = progress;
+      };
+
       const btn = document.getElementById('scrollToTopBtn');
 
-      const toggleButtonVisibility = () => {
-        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-
-        if (scrollTop > 120) {
-          btn.classList.add('show');
+      const handleScroll = () => {
+        updateProgress();
+        if (window.scrollY > 150) {
+          btn.classList.add('active-progress');
         } else {
-          btn.classList.remove('show');
+          btn.classList.remove('active-progress');
         }
       };
 
-      if (btn) {
-        // Check on scroll
-        window.addEventListener('scroll', toggleButtonVisibility);
+      window.addEventListener('scroll', handleScroll);
 
-        // Check on load
-        toggleButtonVisibility();
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return false;
+      });
 
-        btn.addEventListener('click', (e) => {
-          e.preventDefault(); // Prevent any default behavior
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-          // Blur the button to remove focus visual artifacts
-          btn.blur();
-        });
-      }
+      // Initial call
+      handleScroll();
     });
   </script>
 
   <!-- Scroll Reveal Animation Script -->
   <script>
-    // Scroll Reveal for .reveal, .reveal-left, .reveal-right classes
     document.addEventListener('DOMContentLoaded', () => {
-      const revealEls = document.querySelectorAll(
-        '.reveal, .reveal-left, .reveal-right'
-      );
-
-      const revealOnScroll = () => {
-        revealEls.forEach(el => {
-          const rect = el.getBoundingClientRect();
-          if (rect.top < window.innerHeight - 100) {
-            el.classList.add('active');
-          }
-        });
+      const observerOptions = {
+        threshold: 0.15,
+        rootMargin: '0px 0px -50px 0px'
       };
 
-      window.addEventListener('scroll', revealOnScroll);
-      window.addEventListener('load', revealOnScroll);
-      // Initial check
-      revealOnScroll();
+      const revealObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            // Add a small delay for staggered effect if data-delay is present
+            const delay = entry.target.getAttribute('data-delay') || 0;
+            setTimeout(() => {
+              entry.target.classList.add('active');
+            }, delay);
+            // Once revealed, no need to observe anymore
+            revealObserver.unobserve(entry.target);
+          }
+        });
+      }, observerOptions);
+
+      const revealEls = document.querySelectorAll('.reveal, .reveal-left, .reveal-right');
+      revealEls.forEach(el => revealObserver.observe(el));
     });
   </script>
 
