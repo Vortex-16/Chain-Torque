@@ -38,7 +38,8 @@ export interface MarketplaceItem {
   format?: string;
 }
 
-const API_BASE_URL = 'http://localhost:5001/api';
+// Use environment variable or fallback to localhost
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
 
 class ApiService {
   public baseUrl: string;
@@ -69,43 +70,33 @@ class ApiService {
     };
 
     try {
-      console.log('📤 Making fetch request to:', url);
-      console.log('📤 Request config:', {
-        method: config.method,
-        headers: config.headers,
-      });
-
       const response = await fetch(url, config);
-
-      console.log('📥 Response received:', {
-        status: response.status,
-        statusText: response.statusText,
-        ok: response.ok,
-        url: response.url,
-      });
-
       const data = await response.json();
 
-      console.log('📦 Response data:', data);
-
       if (!response.ok) {
-        throw new Error(data.error || `HTTP error! status: ${response.status}`);
+        throw new Error(data.error || data.message || `HTTP error! status: ${response.status}`);
       }
 
       return data;
-    } catch (error) {
+    } catch (error: any) {
       console.error(`❌ API request failed for ${endpoint}:`, error);
-      throw error;
+      // Return a consistent error structure even if fetch fails
+      return {
+        success: false,
+        data: null as any,
+        message: 'Network or Server Error',
+        error: error.message || 'Unknown error'
+      };
     }
   }
 
   // Health check
   async healthCheck(): Promise<{ status: string; timestamp: string }> {
-    const response = await fetch('http://localhost:5001/health');
+    const response = await fetch(this.baseUrl.replace('/api', '/health'));
     return response.json();
   }
 
-  // Web3 endpoints (FIXED to match backend)
+  // Web3 endpoints
   async getWeb3Status(): Promise<ApiResponse<Web3Status>> {
     return this.request('/web3/status', { method: 'GET' });
   }
@@ -125,9 +116,8 @@ class ApiService {
     return this.request(`/web3/balance/${address}`, { method: 'GET' });
   }
 
-  // Marketplace endpoints (FIXED to match backend)
+  // Marketplace endpoints
   async getMarketplaceItems(): Promise<ApiResponse<MarketplaceItem[]>> {
-    // Add cache-busting parameter to force fresh data
     const timestamp = Date.now();
     return this.request(`/marketplace?_t=${timestamp}`, {
       method: 'GET',
@@ -147,52 +137,54 @@ class ApiService {
   }
 
   async createMarketplaceItem(formData: FormData, authToken: string): Promise<ApiResponse<{ tokenId: number }>> {
+    // For FormData, we must NOT set Content-Type header; browser sets it with boundary
+    const headers: any = { Authorization: `Bearer ${authToken}` };
+    
     return this.request('/marketplace/create', {
       method: 'POST',
-      headers: {
-        Authorization: `Bearer ${authToken}`,
-        // Remove Content-Type for FormData
-      },
+      headers,
       body: formData,
     });
   }
 
-  async purchaseMarketplaceItem(tokenId: number | string, authToken: string): Promise<ApiResponse<{ transactionHash: string }>> {
-    return this.request(`/marketplace/purchase/${tokenId}`, {
+  /**
+   * Syncs a client-side purchase with the backend database
+   */
+  async syncPurchase(tokenId: number | string, transactionHash: string, buyerAddress: string, price: string): Promise<ApiResponse<any>> {
+    return this.request('/marketplace/sync-purchase', {
       method: 'POST',
-      headers: {
-        Authorization: `Bearer ${authToken}`,
-      },
+      body: JSON.stringify({
+        tokenId: Number(tokenId),
+        transactionHash,
+        buyerAddress,
+        price
+      }),
     });
   }
 
-  // User NFT endpoints (FIXED to match backend)
+  // User NFT endpoints
   async getUserNFTs(userAddress: string): Promise<ApiResponse<any[]>> {
     return this.request(`/user/${userAddress}/nfts`, { method: 'GET' });
   }
 
-  // Get user's purchase history
   async getUserPurchases(userAddress: string): Promise<ApiResponse<any[]>> {
     return this.request(`/user/${userAddress}/purchases`, { method: 'GET' });
   }
 
-  // Get user's sales history
   async getUserSales(userAddress: string): Promise<ApiResponse<any[]>> {
     return this.request(`/user/${userAddress}/sales`, { method: 'GET' });
   }
 
-  // Get user profile with stats
   async getUserProfileByAddress(userAddress: string): Promise<ApiResponse<any>> {
     return this.request(`/user/${userAddress}/profile`, { method: 'GET' });
   }
 
-  // Purchase an NFT (updated method)
+  /**
+   * Legacy method: Server attempts to purchase (deprecated in favor of client-side purchase + sync)
+   */
   async purchaseNFT(tokenId: number | string, buyerAddress: string, price: number): Promise<ApiResponse<any>> {
     return this.request('/marketplace/purchase', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
       body: JSON.stringify({
         tokenId: Number(tokenId),
         buyerAddress,
@@ -210,24 +202,20 @@ class ApiService {
     });
   }
 
-  // File upload (FIXED to match backend)
   async uploadFile(file: File, authToken: string): Promise<ApiResponse<{ url: string; filename: string; size: number }>> {
     const formData = new FormData();
     formData.append('file', file);
+    const headers: any = { Authorization: `Bearer ${authToken}` };
 
     return this.request('/upload', {
       method: 'POST',
-      headers: {
-        Authorization: `Bearer ${authToken}`,
-        // Remove Content-Type for FormData
-      },
+      headers,
       body: formData,
     });
   }
 
-  // Legacy method aliases for backward compatibility
+  // Legacy aliases
   async getMyNFTs(_authToken: string): Promise<ApiResponse<any[]>> {
-    // This would need a user address - for now return empty
     return {
       success: true,
       data: [],
@@ -239,10 +227,9 @@ class ApiService {
     return this.createMarketplaceItem(formData, authToken);
   }
 
-  // Direct fetch for health check
   async isBackendConnected(): Promise<boolean> {
     try {
-      const response = await fetch('http://localhost:5001/health');
+      const response = await fetch(this.baseUrl.replace('/api', '/health'));
       return response.ok;
     } catch (error) {
       return false;
@@ -250,12 +237,9 @@ class ApiService {
   }
 }
 
-// Create singleton instance
 const apiService = new ApiService();
-
 export default apiService;
 
-// Export individual methods for convenience (UPDATED)
 export const {
   healthCheck,
   getWeb3Status,
@@ -270,12 +254,11 @@ export const {
   getUserProfileByAddress,
   getMarketplaceStats,
   createMarketplaceItem,
-  purchaseMarketplaceItem,
+  syncPurchase,
   purchaseNFT,
   getUserProfile,
   uploadFile,
   isBackendConnected,
-  // Legacy aliases
   getMyNFTs,
   createNFT,
 } = apiService;

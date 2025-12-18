@@ -33,6 +33,8 @@ if (!clerkPubKey) {
   throw new Error('Missing Clerk Publishable Key');
 }
 
+import Torquy from './components/Torquy';
+
 const AppContent = () => {
   const { showStatusPanel, closeStatusPanel } = useStatusPanel();
 
@@ -41,6 +43,7 @@ const AppContent = () => {
       <BackendStatus isVisible={showStatusPanel} onClose={closeStatusPanel} />
       <Toaster />
       <Sonner />
+      <Torquy />
       <BrowserRouter
         future={{
           v7_startTransition: true,

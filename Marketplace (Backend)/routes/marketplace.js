@@ -5,6 +5,7 @@ const MarketItem = require('../models/MarketItem');
 const Transaction = require('../models/Transaction');
 const User = require('../models/User');
 const upload = require('../middleware/upload');
+const { ethers } = require('ethers');
 const { web3Manager: web3 } = require('../web3'); // Using singleton
 const { uploadFile, uploadMetadata } = require('../services/lighthouseStorage');
 
@@ -204,15 +205,54 @@ router.post('/sync-purchase', async (req, res) => {
 
         console.log(`Syncing purchase for Token ID ${tokenId} (Tx: ${transactionHash})`);
 
-        const receipt = await web3.provider.getTransactionReceipt(transactionHash);
-        if (!receipt) {
-            console.warn('Transaction receipt not found immediately.');
+        if (!web3.isReady()) {
+            return res.status(503).json({ success: false, message: 'Web3 provider not ready' });
         }
 
+        // 1. Verify Transaction on Chain
+        let receipt;
+        try {
+            receipt = await web3.provider.getTransactionReceipt(transactionHash);
+        } catch (e) {
+            return res.status(400).json({ success: false, message: 'Invalid transaction hash format' });
+        }
+
+        if (!receipt) {
+            return res.status(404).json({ success: false, message: 'Transaction not found on chain' });
+        }
+
+        if (receipt.status === 0) {
+            return res.status(400).json({ success: false, message: 'Transaction failed on chain' });
+        }
+
+        // 2. Verify Event (MarketItemSold)
+        // Event signature: event MarketItemSold(uint256 indexed tokenId, address indexed seller, address indexed buyer, uint128 price);
+        const eventTopic = ethers.id('MarketItemSold(uint256,address,address,uint128)');
+        const soldEvent = receipt.logs.find(log => log.topics[0] === eventTopic);
+
+        if (!soldEvent) {
+            console.warn('MarketItemSold event not found in logs. Checking for legacy/fallback...');
+            // Fallback: If contract doesn't emit this exact event (unlikely if source matches), or if using different ABI.
+            // But for security, strict mode is preferred.
+            return res.status(400).json({ success: false, message: 'Transaction does not contain valid MarketItemSold event' });
+        }
+
+        // parsing indexed tokenId (topics[1])
+        const eventTokenId = parseInt(soldEvent.topics[1], 16);
+        if (eventTokenId !== parseInt(tokenId)) {
+            return res.status(400).json({ success: false, message: `Token ID mismatch. Event: ${eventTokenId}, Request: ${tokenId}` });
+        }
+
+        // 3. Update Database (Idempotent)
         const item = await MarketItem.findOne({ tokenId: tokenId });
 
         if (!item) {
             return res.status(404).json({ success: false, message: 'Item not found in DB' });
+        }
+
+        if (item.status === 'sold') {
+            // Already processed
+            return res.json({ success: true, message: 'Purchase already synced (Idempotent)' });
         }
 
         item.owner = buyerAddress.toLowerCase();
@@ -221,9 +261,10 @@ router.post('/sync-purchase', async (req, res) => {
         item.soldAt = new Date();
         await item.save();
 
+        // 4. Record Transaction
         const transaction = new Transaction({
             transactionHash: transactionHash,
-            blockNumber: receipt ? receipt.blockNumber : 0,
+            blockNumber: receipt.blockNumber,
             tokenId: parseInt(tokenId),
             contractAddress: web3.contractAddress,
             type: 'purchase',
@@ -243,6 +284,7 @@ router.post('/sync-purchase', async (req, res) => {
 
         await transaction.save();
 
+        // 5. Update User Stats
         let buyer = await User.findByWallet(buyerAddress);
         if (!buyer) {
             buyer = new User({ walletAddress: buyerAddress.toLowerCase() });

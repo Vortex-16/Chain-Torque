@@ -276,7 +276,7 @@ const ProductDetail = () => {
       const isRealProduct = model?.tokenId && model.tokenId > 0;
       if (!isRealProduct) {
         await new Promise((resolve) => setTimeout(resolve, 1500));
-        alert('Demo purchase successful! (Mock)');
+        alert('Demo purchase successful! (Mock Mode - No Blockchain Interaction)');
         return;
       }
 
@@ -284,24 +284,37 @@ const ProductDetail = () => {
 
       // 1. Sign and Pay via Metamask (Decentralized)
       const { web3Service } = await import('@/services/web3Service');
-      const tx = await web3Service.purchaseItem(model.tokenId!, model.priceETH!);
 
-      console.log('Transaction sent:', tx.transactionHash);
+      let tx;
+      try {
+        tx = await web3Service.purchaseItem(model.tokenId!, model.priceETH!);
+        console.log('Transaction sent:', tx.transactionHash);
+      } catch (web3Error: any) {
+        // Handle Metamask rejections explicitly
+        if (web3Error.code === 'ACTION_REJECTED' || web3Error.message?.includes('user rejected')) {
+          throw new Error('Transaction cancelled by user.');
+        }
+        throw new Error(`Blockchain transaction failed: ${web3Error.message}`);
+      }
 
       // 2. Sync with Backend
-      const userAddress = user?.primaryWeb3Wallet?.web3Wallet || localStorage.getItem('walletAddress');
+      const userAddress = user?.primaryWeb3Wallet?.web3Wallet || localStorage.getItem('walletAddress') || '';
 
-      await apiService.request('/marketplace/sync-purchase', {
-        method: 'POST',
-        body: JSON.stringify({
-          tokenId: model.tokenId,
-          transactionHash: tx.transactionHash,
-          buyerAddress: userAddress,
-          price: model.priceETH
-        })
-      });
+      console.log('Syncing purchase with backend...');
+      const syncResponse = await apiService.syncPurchase(
+        model.tokenId!,
+        tx.transactionHash,
+        userAddress,
+        model.priceETH?.toString() || '0'
+      );
 
-      alert(`Purchase Successful! \nTx: ${tx.transactionHash}\nOwner updated on Blockchain & Database.`);
+      if (!syncResponse.success) {
+        // If sync fails but blockchain succeeded, warn the user but don't fail the whole flow
+        console.warn('Backend sync failed:', syncResponse);
+        alert(`Purchase successful on blockchain! \nTx: ${tx.transactionHash}\n\nNote: Database sync failed. Please refresh later.`);
+      } else {
+        alert(`Purchase Successful! \nTx: ${tx.transactionHash}\nOwner updated on Blockchain & Database.`);
+      }
 
       // Refresh
       window.location.reload();
