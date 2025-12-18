@@ -256,37 +256,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   });
 
-  // ========================================
-  // Dynamic Orb Creation
-  // ========================================
-  function createFloatingOrbs(container) {
-    if (!container || container.querySelector('.floating-orbs')) return;
-
-    const orbsContainer = document.createElement('div');
-    orbsContainer.className = 'floating-orbs';
-
-    const orbs = [
-      { class: 'orb orb-1' },
-      { class: 'orb orb-2' },
-      { class: 'orb orb-3' }
-    ];
-
-    orbs.forEach(orbConfig => {
-      const orb = document.createElement('div');
-      orb.className = orbConfig.class;
-      orbsContainer.appendChild(orb);
-    });
-
-    container.style.position = 'relative';
-    container.insertBefore(orbsContainer, container.firstChild);
-  }
-
-  // Add orbs to hero section
-  const heroSectionForOrbs = document.querySelector('section:first-of-type');
-  if (heroSectionForOrbs) {
-    createFloatingOrbs(heroSectionForOrbs);
-    heroSectionForOrbs.classList.add('hero-gradient');
-  }
+  // Orbs and hero gradient logic removed per user request
 
   // ========================================
   // Staggered Animation for Grid Items
