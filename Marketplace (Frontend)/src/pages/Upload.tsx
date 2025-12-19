@@ -32,7 +32,10 @@ const Upload: React.FC = () => {
   });
   const [isUploading, setIsUploading] = useState(false);
 
-  const hasWallet = !!user?.unsafeMetadata?.walletAddress;
+  // Check both MetaMask installed AND wallet connected in Clerk
+  const hasMetaMask = typeof window !== 'undefined' && typeof window.ethereum !== 'undefined';
+  const hasWalletConnected = !!user?.unsafeMetadata?.walletAddress;
+  const canUpload = hasMetaMask && hasWalletConnected;
 
   const handleInputChange = (field: keyof UploadData, value: any) => {
     setUploadData(prev => ({ ...prev, [field]: value }));
@@ -544,22 +547,37 @@ const Upload: React.FC = () => {
             <p className='text-muted-foreground'>Share your creativity with the world</p>
           </div>
 
-          {!hasWallet ? (
+          {!canUpload ? (
             <div className='rounded-xl border border-border/60 bg-card p-10 text-center shadow-[var(--shadow-card)]'>
               <div className='w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4'>
                 <Wallet className='h-7 w-7 text-primary' />
               </div>
-              <h2 className='text-xl font-semibold mb-2'>Wallet Required</h2>
+              <h2 className='text-xl font-semibold mb-2'>
+                {!hasMetaMask ? 'MetaMask Required' : 'Wallet Required'}
+              </h2>
               <p className='text-muted-foreground mb-6 max-w-sm mx-auto'>
-                Connect your wallet to upload models to the blockchain marketplace.
+                {!hasMetaMask
+                  ? 'Please install MetaMask browser extension to upload models to the blockchain marketplace.'
+                  : 'Connect your wallet to upload models to the blockchain marketplace.'
+                }
               </p>
-              <Button
-                onClick={() => setShowWalletDialog(true)}
-                className='bg-primary hover:bg-primary-hover text-primary-foreground px-6'
-              >
-                <Wallet className='h-4 w-4 mr-2' />
-                Connect Wallet
-              </Button>
+              {!hasMetaMask ? (
+                <Button
+                  onClick={() => window.open('https://metamask.io/download/', '_blank')}
+                  className='bg-primary hover:bg-primary-hover text-primary-foreground px-6'
+                >
+                  <Wallet className='h-4 w-4 mr-2' />
+                  Install MetaMask
+                </Button>
+              ) : (
+                <Button
+                  onClick={() => setShowWalletDialog(true)}
+                  className='bg-primary hover:bg-primary-hover text-primary-foreground px-6'
+                >
+                  <Wallet className='h-4 w-4 mr-2' />
+                  Connect Wallet
+                </Button>
+              )}
             </div>
           ) : (
             <>

@@ -141,13 +141,13 @@ contract ChainTorqueMarketplace is ERC721URIStorage, Ownable, ReentrancyGuard, P
         emit BatchItemsCreated(_currentTokenId - length + 1, length, seller);
     }
 
-    // Create single token
+    // Create single token (open to anyone - decentralized marketplace)
     function createToken(
         string calldata tokenURI,
         uint128 price,
         uint32 category,
         uint24 royalty
-    ) external payable nonReentrant whenNotPaused onlyAuthorized returns (uint256) {
+    ) external payable nonReentrant whenNotPaused returns (uint256) {
         require(msg.value == LISTING_PRICE, "Incorrect listing fee");
         require(price > 0, "Price must be positive");
         require(royalty <= 1000, "Royalty too high");

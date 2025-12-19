@@ -1,4 +1,4 @@
-export const CONTRACT_ADDRESS = "0x412085b60cC5F479582fCdB165Ec2ECf9A85Bf79";
+export const CONTRACT_ADDRESS = "0x6b1D135b5dc77cbCeBDDC3287f75f10fcbA89921";
 export const MARKETPLACE_ABI = [
     "function purchaseToken(uint256 tokenId) external payable",
     "function createToken(string memory tokenURI, uint128 price, uint32 category, uint24 royalty) external payable returns (uint256)",
