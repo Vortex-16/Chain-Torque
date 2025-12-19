@@ -115,27 +115,52 @@ class Web3Manager {
 
       const receipt = await tx.wait();
 
-      // Try to extract tokenId from MarketItemCreated event
-      const eventTopic = ethers.id('MarketItemCreated(uint256,address,uint128,uint32,uint256)');
-      const marketItemCreatedEvent = receipt.logs.find(log => log.topics[0] === eventTopic);
+      // DEBUG: Log receipt details
+      console.log('[DEBUG] Transaction Hash:', tx.hash);
+      console.log('[DEBUG] Receipt Status:', receipt.status);
+      console.log('[DEBUG] Logs Count:', receipt.logs.length);
+      console.log('[DEBUG] Contract Address:', this.contractAddress);
 
-      if (marketItemCreatedEvent) {
-        const tokenId = parseInt(marketItemCreatedEvent.topics[1], 16);
-        return {
-          success: true,
-          tokenId,
-          transactionHash: tx.hash,
-          blockNumber: receipt.blockNumber,
-          gasUsed: receipt.gasUsed.toString(),
-          listingFee: ethers.formatEther(this.LISTING_PRICE),
-        };
+      // Log each event topic for debugging
+      for (let i = 0; i < receipt.logs.length; i++) {
+        const log = receipt.logs[i];
+        console.log(`[DEBUG] Log ${i}: address=${log.address}, topic0=${log.topics[0]}`);
+      }
+
+      // Calculate expected topic for comparison
+      const expectedTopic = ethers.id('MarketItemCreated(uint256,address,uint128,uint32,uint256)');
+      console.log('[DEBUG] Expected MarketItemCreated topic:', expectedTopic);
+
+      // Robustly extract tokenId using contract interface
+      let tokenId = null;
+      for (const log of receipt.logs) {
+        try {
+          const parsedLog = this.contract.interface.parseLog(log);
+          console.log('[DEBUG] Parsed log name:', parsedLog?.name);
+          if (parsedLog && parsedLog.name === 'MarketItemCreated') {
+            tokenId = Number(parsedLog.args.tokenId);
+            console.log('[DEBUG] Found tokenId:', tokenId);
+            break;
+          }
+        } catch (e) {
+          // Log not from this contract or parsing failed (expected for some logs)
+          console.log('[DEBUG] Parse failed for log:', log.topics[0], 'Error:', e.message);
+          continue;
+        }
+      }
+
+      if (tokenId === null) {
+        console.error('[DEBUG] FAILED: No MarketItemCreated event found in', receipt.logs.length, 'logs');
+        throw new Error('Transaction succeeded but MarketItemCreated event occurred not found. Could not retrieve Token ID.');
       }
 
       return {
         success: true,
+        tokenId,
         transactionHash: tx.hash,
         blockNumber: receipt.blockNumber,
         gasUsed: receipt.gasUsed.toString(),
+        listingFee: ethers.formatEther(this.LISTING_PRICE),
       };
     } catch (error) {
       console.error('Error creating market item:', error.message);
@@ -241,6 +266,33 @@ class Web3Manager {
       };
     } catch (error) {
       console.error('Error purchasing token:', error.message);
+      return { success: false, error: error.message };
+    }
+  }
+
+  async relistItem(tokenId, price) {
+    try {
+      if (!this.isReady()) throw new Error('Web3 Manager not initialized');
+      if (!price || price <= 0) throw new Error('Price must be positive');
+
+      const priceWei = ethers.parseEther(price.toString());
+
+      const tx = await this.contract.relistToken(tokenId, priceWei, {
+        value: this.LISTING_PRICE, // Pay listing fee again
+        gasLimit: 300000,
+      });
+
+      const receipt = await tx.wait();
+
+      return {
+        success: true,
+        tokenId,
+        price,
+        transactionHash: tx.hash,
+        blockNumber: receipt.blockNumber,
+      };
+    } catch (error) {
+      console.error('Error relisting token:', error.message);
       return { success: false, error: error.message };
     }
   }

@@ -4,7 +4,6 @@ import { Footer } from '../components/ui/footer';
 import { Button } from '../components/ui/button';
 import { WalletConnectionDialog } from '@/components/ui/wallet-connection-dialog';
 import { useAuthContext } from '@/hooks/useAuth';
-import { useAuth } from '@clerk/clerk-react';
 import apiService from '@/services/apiService';
 import { Wallet, Upload as UploadIcon, Check, ImageIcon, FileType, Tag } from 'lucide-react';
 
@@ -20,7 +19,6 @@ interface UploadData {
 
 const Upload: React.FC = () => {
   const { user } = useAuthContext();
-  const { getToken } = useAuth();
   const [step, setStep] = useState(1);
   const [showWalletDialog, setShowWalletDialog] = useState(false);
   const [uploadData, setUploadData] = useState<UploadData>({
@@ -79,72 +77,164 @@ const Upload: React.FC = () => {
   const handleSubmit = async () => {
     setIsUploading(true);
     try {
-      const formData = new FormData();
-      formData.append('title', uploadData.modelName);
-      formData.append('description', uploadData.description);
-      formData.append('price', uploadData.price);
-      formData.append('category', uploadData.category);
-      formData.append('tags', JSON.stringify(uploadData.tags));
+      // ============================================================
+      // DECENTRALIZED UPLOAD FLOW
+      // 1. Check MetaMask is installed (before wasting IPFS uploads)
+      // 2. Upload files to IPFS (via backend)
+      // 3. User signs createToken() with MetaMask (frontend web3)
+      // 4. Sync result to backend database
+      // ============================================================
 
-      // Add wallet address for user association
-      if (user?.unsafeMetadata?.walletAddress) {
-        formData.append('walletAddress', String(user.unsafeMetadata.walletAddress));
+      // CHECK 1: MetaMask must be installed
+      if (typeof window.ethereum === 'undefined') {
+        throw new Error('MetaMask is not installed! Please install MetaMask to create NFTs.\n\nDownload: https://metamask.io/download/');
       }
 
-      // Add username for display (prefer full name)
+      // CHECK 2: Wallet must be connected
+      const walletAddress = user?.unsafeMetadata?.walletAddress as string;
+      if (!walletAddress) {
+        throw new Error('Please connect your wallet first. Your wallet will sign the transaction.');
+      }
+
+      // Prepare username for display
+      let username = 'Creator';
       if (user?.firstName || user?.lastName) {
-        const displayName = `${user?.firstName || ''} ${user?.lastName || ''}`.trim();
-        formData.append('username', displayName);
+        username = `${user?.firstName || ''} ${user?.lastName || ''}`.trim();
       } else if (user?.username) {
-        formData.append('username', String(user.username));
+        username = String(user.username);
       }
 
-      if (uploadData.files.length > 0) {
-        formData.append('model', uploadData.files[0]);
-      } else {
+      // CHECK 3: Validate files
+      if (uploadData.files.length === 0) {
         throw new Error('Please select a model file to upload.');
       }
-
-      // Add image files (support multiple)
-      if (uploadData.images.length > 0) {
-        uploadData.images.forEach((image) => {
-          formData.append('image', image);
-        });
-      } else {
+      if (uploadData.images.length === 0) {
         throw new Error('Please select at least one preview image.');
       }
 
-      // Get the Clerk session token
-      const token = await getToken();
-      if (!token) {
-        throw new Error('Authentication required. Please sign in.');
+      // STEP 1: Upload files to IPFS (backend handles IPFS upload only)
+      console.log('[Upload] Step 1: Uploading files to IPFS...');
+      const formData = new FormData();
+      formData.append('title', uploadData.modelName);
+      formData.append('description', uploadData.description);
+      formData.append('category', uploadData.category);
+
+      // Add model file
+      formData.append('model', uploadData.files[0]);
+
+      // Add image files
+      uploadData.images.forEach((image) => {
+        formData.append('image', image);
+      });
+
+      const ipfsResponse = await apiService.uploadFilesToIPFS(formData);
+      if (!ipfsResponse.success || !ipfsResponse.data?.tokenURI) {
+        throw new Error(ipfsResponse.error || 'Failed to upload files to IPFS');
       }
 
-      // Call the API
-      const response = await apiService.createMarketplaceItem(formData, token);
+      const { tokenURI, imageUrl, images, modelUrl } = ipfsResponse.data;
+      console.log('[Upload] IPFS upload complete:', tokenURI);
 
-      if (response.success) {
-        alert(
-          `Model uploaded successfully! \nToken ID: ${response.data?.tokenId || 'Unknown'}\nStatus: Active on Marketplace`
-        );
-        // Reset form
-        setUploadData({
-          modelName: '',
-          description: '',
-          category: '',
-          price: '',
-          files: [],
-          images: [],
-          tags: [],
-        });
-        setStep(1);
+      // STEP 2: User signs createToken with their MetaMask wallet
+      console.log('[Upload] Step 2: Please sign the transaction in MetaMask...');
+      alert('Files uploaded! Please sign the transaction in MetaMask to mint your NFT.\n\nYou will be the on-chain owner and receive payments directly when your item sells.');
+
+      // Import web3Service dynamically to avoid circular deps
+      const { web3Service } = await import('@/services/web3Service');
+
+      // Get category ID (simple mapping)
+      const categoryMap: Record<string, number> = {
+        'Electronics': 1, 'Collectibles': 2, 'Art': 3, 'Music': 4, 'Gaming': 5,
+        'Sports': 6, 'Photography': 7, 'Virtual Real Estate': 8, 'Domain Names': 9, 'Utility': 10,
+        'Automotive': 10, 'Mechanical': 10, 'Aerospace': 10, 'Industrial': 10, 'Other': 10
+      };
+      const categoryId = categoryMap[uploadData.category] || 10;
+
+      const mintResult = await web3Service.createItem(
+        tokenURI,
+        parseFloat(uploadData.price),
+        categoryId,
+        0 // royalty percentage (can be made configurable)
+      );
+
+      if (!mintResult.transactionHash) {
+        throw new Error('Transaction was cancelled or failed.');
+      }
+
+      console.log('[Upload] Mint transaction:', mintResult.transactionHash);
+
+      // Extract tokenId from the receipt
+      // The receipt should have logs with the MarketItemCreated event
+      let tokenId: number | null = null;
+      if (mintResult.receipt?.logs) {
+        const { ethers } = await import('ethers');
+        const { MARKETPLACE_ABI } = await import('@/lib/constants');
+        const iface = new ethers.Interface(MARKETPLACE_ABI);
+
+        for (const log of mintResult.receipt.logs) {
+          try {
+            const parsed = iface.parseLog(log);
+            if (parsed?.name === 'MarketItemCreated') {
+              tokenId = Number(parsed.args.tokenId);
+              break;
+            }
+          } catch {
+            continue;
+          }
+        }
+      }
+
+      if (!tokenId) {
+        throw new Error('Could not find Token ID in transaction. Please check Etherscan and try syncing manually.');
+      }
+
+      console.log('[Upload] Token ID:', tokenId);
+
+      // STEP 3: Sync to backend database
+      console.log('[Upload] Step 3: Syncing to database...');
+      const syncResponse = await apiService.syncCreation({
+        tokenId,
+        transactionHash: mintResult.transactionHash,
+        walletAddress,
+        title: uploadData.modelName,
+        description: uploadData.description,
+        category: uploadData.category,
+        price: uploadData.price,
+        imageUrl,
+        images,
+        modelUrl,
+        tokenURI,
+        username
+      });
+
+      if (!syncResponse.success) {
+        // Blockchain succeeded but DB sync failed - warn but don't fail
+        console.warn('[Upload] DB sync failed:', syncResponse);
+        alert(`NFT created on blockchain! Token ID: ${tokenId}\nTx: ${mintResult.transactionHash}\n\nNote: Database sync failed. Your NFT exists but may not appear immediately.`);
       } else {
-        throw new Error(response.error || response.message || 'Upload failed');
+        alert(`🎉 NFT Created Successfully!\n\nToken ID: ${tokenId}\nYou are now the on-chain owner.\nWhen someone purchases this item, YOU will receive the payment directly!\n\nTx: ${mintResult.transactionHash}`);
       }
+
+      // Reset form
+      setUploadData({
+        modelName: '',
+        description: '',
+        category: '',
+        price: '',
+        files: [],
+        images: [],
+        tags: [],
+      });
+      setStep(1);
+
     } catch (error: any) {
       console.error('Upload error:', error);
-      const errorMessage = error.message || 'Unknown error occurred';
-      alert(`Upload failed: ${errorMessage}`);
+      // Handle MetaMask rejection specifically
+      if (error.code === 'ACTION_REJECTED' || error.message?.includes('user rejected')) {
+        alert('Transaction cancelled. You can try again when ready.');
+      } else {
+        alert(`Upload failed: ${error.message || 'Unknown error occurred'}`);
+      }
     } finally {
       setIsUploading(false);
     }

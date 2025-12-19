@@ -28,6 +28,7 @@ contract ChainTorqueMarketplace is ERC721URIStorage, Ownable, ReentrancyGuard, P
         bool sold;
         address seller;
         address owner;
+        address creator; // Added to track original creator for royalties
     }
 
     mapping(uint256 => MarketItem) private _marketItems;
@@ -39,6 +40,7 @@ contract ChainTorqueMarketplace is ERC721URIStorage, Ownable, ReentrancyGuard, P
     // Events
     event MarketItemCreated(uint256 indexed tokenId, address indexed seller, uint128 indexed price, uint32 category, uint256 timestamp);
     event MarketItemSold(uint256 indexed tokenId, address indexed seller, address indexed buyer, uint128 price);
+    event MarketItemRelisted(uint256 indexed tokenId, address indexed seller, uint128 indexed price);
     event BatchItemsCreated(uint256 indexed startTokenId, uint256 indexed count, address indexed seller);
     event CreatorAuthorized(address indexed creator, bool authorized);
     event RoyaltyUpdated(uint256 indexed tokenId, uint24 royalty);
@@ -120,7 +122,8 @@ contract ChainTorqueMarketplace is ERC721URIStorage, Ownable, ReentrancyGuard, P
                 royalty: royalties[i],
                 sold: false,
                 seller: seller,
-                owner: address(this)
+                owner: address(this),
+                creator: seller // Set original creator
             });
 
             _transfer(seller, address(this), newTokenId);
@@ -164,7 +167,8 @@ contract ChainTorqueMarketplace is ERC721URIStorage, Ownable, ReentrancyGuard, P
             royalty: royalty,
             sold: false,
             seller: seller,
-            owner: address(this)
+            owner: address(this),
+            creator: seller // Set original creator
         });
 
         _transfer(seller, address(this), newTokenId);
@@ -178,6 +182,32 @@ contract ChainTorqueMarketplace is ERC721URIStorage, Ownable, ReentrancyGuard, P
         return newTokenId;
     }
 
+    // Relist token for sale (Resell)
+    function relistToken(uint256 tokenId, uint128 price) external payable nonReentrant whenNotPaused validTokenId(tokenId) {
+        require(_isApprovedOrOwner(msg.sender, tokenId), "Not owner nor approved");
+        require(_marketItems[tokenId].sold, "Item already listed");
+        require(price > 0, "Price must be positive");
+        require(msg.value == LISTING_PRICE, "Incorrect listing fee");
+
+        MarketItem storage item = _marketItems[tokenId];
+        
+        // Transfer NFT from owner back to marketplace contract
+        _transfer(msg.sender, address(this), tokenId);
+
+        item.sold = false;
+        item.price = price;
+        item.seller = msg.sender;
+        item.owner = address(this);
+        
+        // Remove from user's "owned" list logic if we were tracking strictly ownership here, 
+        // but since we transfer it to the contract, 'ownerOf' becomes contract.
+        // We rely on contract ownership for marketplace display.
+
+        _totalItemsSold--; 
+
+        emit MarketItemRelisted(tokenId, msg.sender, price);
+    }
+
     // Purchase single token
     function purchaseToken(uint256 tokenId) external payable nonReentrant whenNotPaused validTokenId(tokenId) {
         MarketItem storage item = _marketItems[tokenId];
@@ -188,6 +218,7 @@ contract ChainTorqueMarketplace is ERC721URIStorage, Ownable, ReentrancyGuard, P
         address buyer = msg.sender;
         uint128 price = item.price;
         uint24 royalty = item.royalty;
+        address creator = item.creator; // Original creator
 
         item.owner = buyer;
         item.sold = true;
@@ -197,13 +228,22 @@ contract ChainTorqueMarketplace is ERC721URIStorage, Ownable, ReentrancyGuard, P
 
         uint256 platformFee = (price * PLATFORM_FEE_BPS) / BASIS_POINTS;
         uint256 royaltyAmount = (price * royalty) / BASIS_POINTS;
+        
+        // Seller gets Price - Fee - Royalty
         uint256 sellerAmount = price - platformFee - royaltyAmount;
 
+        // 1. Pay Seller (Current owner selling)
         if (sellerAmount > 0) {
             _safeTransferETH(seller, sellerAmount);
         }
-        if (royaltyAmount > 0) {
-            _safeTransferETH(seller, royaltyAmount);
+
+        // 2. Pay Royalty to Creator (Original Artist)
+        if (royaltyAmount > 0 && creator != address(0)) {
+            _safeTransferETH(creator, royaltyAmount);
+        } else if (royaltyAmount > 0) {
+            // If creator address is somehow lost (unlikely with this struct), fallback to platform or seller?
+            // For now, if creator invalid, give to seller to avoid stuck funds.
+            _safeTransferETH(seller, royaltyAmount); 
         }
 
         _userTokens[buyer].push(tokenId);

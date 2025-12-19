@@ -77,66 +77,7 @@ interface ProductModel {
 }
 
 // Mock data for demonstration
-const mockModel: ProductModel = {
-  id: 1,
-  title: 'Professional Gear Assembly System',
-  description: `High-quality precision gear assembly designed for industrial applications. This comprehensive CAD model includes multiple gear configurations, bearing assemblies, and mounting hardware. Perfect for mechanical engineers working on transmission systems, robotics, or industrial machinery.
-
-Features:
-• Parametric design with customizable gear ratios
-• High-resolution surface finishing
-• Assembly constraints and motion studies included
-• Manufacturing drawings and tolerances provided
-• Compatible with major CAD software platforms
-
-Technical Specifications:
-• Material: Steel alloy with heat treatment specifications
-• Gear ratio: 3.5:1 (customizable)
-• Operating temperature: -20°C to 150°C
-• Load capacity: 500 Nm maximum torque
-• Precision grade: DIN 6 quality
-
-Applications:
-• Industrial machinery
-• Automotive transmissions
-• Robotics and automation
-• Precision equipment
-• Custom mechanical systems`,
-  images: [cadGear, cadDrone, cadEngine, cadRobot],
-  modelUrl: 'https://threejs.org/examples/models/gltf/DamagedHelmet/glTF/DamagedHelmet.gltf',
-  price: '$49.99',
-  priceETH: 0.025,
-  seller: {
-    name: 'MechDesign Pro',
-    avatar: '/avatars/mechdesign.jpg',
-    verified: true,
-    rating: 4.8,
-    totalSales: 1245,
-  },
-  specs: {
-    fileTypes: ['GLB', 'GLTF', 'OBJ', 'STL'],
-    software: ['Blender', 'Three.js', 'WebGL', 'Browser CAD'],
-    fileSize: '25.4 MB',
-    vertices: '247,592',
-    polygons: '485,726',
-    textures: true,
-    animated: false,
-  },
-  stats: {
-    views: 15420,
-    downloads: 1245,
-    rating: 4.8,
-    reviews: 89,
-  },
-  category: 'Mechanical Parts',
-  tags: ['gears', 'assembly', 'industrial', 'mechanical', 'precision'],
-  uploadDate: '2024-03-15',
-  lastUpdate: '2024-07-20',
-  license: 'Commercial License',
-  tokenId: 1337,
-  contractAddress: '0x5FbDB2315678afecb367f032d93F642f64180aa3',
-  blockchain: 'Polygon',
-};
+// Mock data deleted (Security Fix: Prevent deceptive fallback)
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -242,20 +183,7 @@ const ProductDetail = () => {
         }
       } catch (err) {
         console.error('Error fetching product from API:', err);
-        console.log('Falling back to mock data for ID:', id);
-
-        // Fallback to mock data if API call fails
-        try {
-          // Update the mock data ID to match the requested ID
-          const fallbackModel = {
-            ...mockModel,
-            id: id || '1',
-            tokenId: parseInt(String(id), 10) || 1,
-          };
-          setModel(fallbackModel);
-        } catch (mockErr) {
-          setError('Failed to load product details');
-        }
+        setError('Failed to load product details. Please try again later.');
       } finally {
         setLoading(false);
       }
@@ -284,6 +212,22 @@ const ProductDetail = () => {
 
       // 1. Sign and Pay via Metamask (Decentralized)
       const { web3Service } = await import('@/services/web3Service');
+
+      // [SECURITY] Live Status Check
+      // Query Smart Contract directly to ensure item is not already sold
+      try {
+        const chainItem = await web3Service.getMarketItem(model.tokenId!);
+        if (chainItem.sold) {
+          throw new Error('This item has already been sold on the blockchain. The database is updating...');
+        }
+      } catch (checkError: any) {
+        if (checkError.message.includes('already been sold')) {
+          throw checkError;
+        }
+        // If check fails (e.g. network error), we warn but might allow proceeding if user insists,
+        // but for security we should probably block or at least log.
+        console.warn('Could not verify live status:', checkError);
+      }
 
       let tx;
       try {

@@ -72,6 +72,21 @@ class Web3Service {
             receipt
         };
     }
+
+    async getMarketItem(tokenId: number) {
+        if (!this.contract) await this.connect();
+        if (!this.contract) throw new Error("Contract not initialized");
+
+        // Verify the item status directly from the contract
+        const item = await this.contract.getMarketItem(tokenId);
+        return {
+            tokenId: Number(item.tokenId),
+            price: item.price,
+            sold: item.sold,
+            seller: item.seller,
+            owner: item.owner
+        };
+    }
 }
 
 export const web3Service = new Web3Service();

@@ -58,15 +58,18 @@ class ApiService {
       baseUrl: this.baseUrl,
     });
 
-    const config = {
+    // Don't set Content-Type for FormData - browser sets it automatically with boundary
+    const isFormData = options.body instanceof FormData;
+
+    const config: RequestInit = {
+      ...options,
       headers: {
-        'Content-Type': 'application/json',
+        ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
         'Cache-Control': 'no-cache, no-store, must-revalidate',
         Pragma: 'no-cache',
         Expires: '0',
         ...options.headers,
       },
-      ...options,
     };
 
     try {
@@ -139,7 +142,7 @@ class ApiService {
   async createMarketplaceItem(formData: FormData, authToken: string): Promise<ApiResponse<{ tokenId: number }>> {
     // For FormData, we must NOT set Content-Type header; browser sets it with boundary
     const headers: any = { Authorization: `Bearer ${authToken}` };
-    
+
     return this.request('/marketplace/create', {
       method: 'POST',
       headers,
@@ -162,6 +165,48 @@ class ApiService {
     });
   }
 
+  /**
+   * DECENTRALIZED FLOW: Upload files to IPFS only (no blockchain minting)
+   * Returns tokenURI that user will use when calling createToken from their wallet
+   */
+  async uploadFilesToIPFS(formData: FormData): Promise<ApiResponse<{
+    tokenURI: string;
+    imageUrl: string;
+    images: string[];
+    modelUrl: string;
+    metadataUrl: string;
+  }>> {
+    // For FormData, we must NOT set Content-Type header; browser sets it with boundary
+    return this.request('/marketplace/upload-files', {
+      method: 'POST',
+      body: formData,
+    });
+  }
+
+  /**
+   * DECENTRALIZED FLOW: Sync NFT creation after user mints from frontend
+   * Called after user successfully calls createToken from their wallet
+   */
+  async syncCreation(data: {
+    tokenId: number;
+    transactionHash: string;
+    walletAddress: string;
+    title: string;
+    description: string;
+    category: string;
+    price: string;
+    imageUrl: string;
+    images: string[];
+    modelUrl: string;
+    tokenURI: string;
+    username?: string;
+  }): Promise<ApiResponse<{ tokenId: number; seller: string }>> {
+    return this.request('/marketplace/sync-creation', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
   // User NFT endpoints
   async getUserNFTs(userAddress: string): Promise<ApiResponse<any[]>> {
     return this.request(`/user/${userAddress}/nfts`, { method: 'GET' });
@@ -180,18 +225,8 @@ class ApiService {
   }
 
   /**
-   * Legacy method: Server attempts to purchase (deprecated in favor of client-side purchase + sync)
+   * legacy method removed. Use purchaseItem (web3) + syncPurchase (api) instead.
    */
-  async purchaseNFT(tokenId: number | string, buyerAddress: string, price: number): Promise<ApiResponse<any>> {
-    return this.request('/marketplace/purchase', {
-      method: 'POST',
-      body: JSON.stringify({
-        tokenId: Number(tokenId),
-        buyerAddress,
-        price
-      }),
-    });
-  }
 
   async getUserProfile(authToken: string): Promise<ApiResponse<any>> {
     return this.request('/user/profile', {
@@ -255,7 +290,7 @@ export const {
   getMarketplaceStats,
   createMarketplaceItem,
   syncPurchase,
-  purchaseNFT,
+
   getUserProfile,
   uploadFile,
   isBackendConnected,

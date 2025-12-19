@@ -29,7 +29,15 @@ app.use(cors({
   ].filter(Boolean),
   credentials: true,
 }));
-app.use(express.json());
+// JSON body parser - skip multipart/form-data (file uploads handled by multer)
+app.use((req, res, next) => {
+  const contentType = req.headers['content-type'] || '';
+  if (contentType.includes('multipart/form-data')) {
+    return next(); // Skip JSON parsing for file uploads
+  }
+  express.json({ limit: '50mb' })(req, res, next);
+});
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Health Check
@@ -48,8 +56,7 @@ const userRoutes = require('./routes/user');
 app.use('/api/marketplace', marketplaceRoutes);
 app.use('/api/user', userRoutes);
 
-// Web3 status endpoint (kept here or move to separate route?)
-// Let's keep it here for now or ideally in a web3 route.
+// Web3 status endpoint
 app.get('/api/web3/status', (req, res) => {
   try {
     if (web3.isReady()) {
@@ -71,7 +78,7 @@ app.get('/api/web3/status', (req, res) => {
   }
 });
 
-// Balance endpoint (Simpler to keep here or move to user?)
+// Balance endpoint
 app.get('/api/web3/balance/:address', async (req, res) => {
   const userAddress = req.params.address;
   try {
