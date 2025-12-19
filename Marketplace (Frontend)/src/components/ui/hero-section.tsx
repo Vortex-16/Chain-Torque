@@ -5,6 +5,9 @@ import { Button } from '@/components/ui/button';
 import { useMarketplace } from '@/hooks/useWeb3';
 import { useEffect, useState } from 'react';
 import { WalletConnectionDialog } from '@/components/ui/wallet-connection-dialog';
+import { Gear3D } from '@/components/ui/Gear3D';
+import { AutoCadGearSvg } from '@/components/ui/GearSvg';
+import { EngineSvg, WrenchSvg, PistonSvg, CircuitSvg, CogSvg, BlueprintSvg } from '@/components/ui/AnimatedCadSvgs';
 
 // Import fallback images
 import cadGear from '@/assets/cad-gear.jpg';
@@ -74,6 +77,28 @@ export function HeroSection() {
           <div className='grid lg:grid-cols-3 gap-6'>
             {/* Main Hero Card */}
             <div className='lg:col-span-2 relative rounded-2xl overflow-hidden bg-gradient-to-br from-indigo-600 to-purple-700 p-8 min-h-[300px] flex flex-col justify-end'>
+              {/* Animated CAD SVG Icons - continuous animation */}
+              <div className='absolute top-4 right-4 opacity-40'>
+                <EngineSvg size={70} color='white' />
+              </div>
+              <div className='absolute top-8 right-24 opacity-35'>
+                <PistonSvg size={50} color='white' />
+              </div>
+              <div className='absolute top-24 right-8 opacity-40'>
+                <CogSvg size={45} color='white' />
+              </div>
+              <div className='absolute bottom-24 right-6 opacity-35'>
+                <CircuitSvg size={55} color='white' />
+              </div>
+              <div className='absolute bottom-32 right-28 opacity-30'>
+                <WrenchSvg size={40} color='white' />
+              </div>
+              <div className='absolute top-16 right-[140px] opacity-25'>
+                <BlueprintSvg size={55} color='white' />
+              </div>
+              <div className='absolute bottom-16 right-[100px] opacity-20'>
+                <AutoCadGearSvg size={50} color='white' />
+              </div>
               <div className='absolute inset-0 opacity-20'>
                 <div className='absolute top-10 right-10 w-40 h-40 rounded-full bg-white/20 blur-2xl' />
                 <div className='absolute bottom-10 left-10 w-32 h-32 rounded-full bg-white/20 blur-2xl' />
@@ -99,18 +124,9 @@ export function HeroSection() {
               </div>
             </div>
 
-            {/* Side Cards */}
-            <div className='flex flex-col gap-4'>
-              <div className='rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 p-5 flex-1'>
-                <div className='text-white/80 text-xs font-medium mb-2'>Today's Deal</div>
-                <div className='text-white font-bold text-xl mb-1'>30% Off</div>
-                <div className='text-white/70 text-sm'>First purchase discount</div>
-              </div>
-              <div className='rounded-xl bg-gradient-to-br from-orange-500 to-rose-500 p-5 flex-1'>
-                <div className='text-white/80 text-xs font-medium mb-2'>New Arrivals</div>
-                <div className='text-white font-bold text-xl mb-1'>50+ Models</div>
-                <div className='text-white/70 text-sm'>Added this week</div>
-              </div>
+            {/* 3D Gear Display */}
+            <div className='rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900 overflow-hidden min-h-[300px] flex items-center justify-center border border-slate-200 dark:border-white/10'>
+              <Gear3D size='medium' />
             </div>
           </div>
         </div>
@@ -237,17 +253,9 @@ export function HeroSection() {
               <Link to='#' className='text-xs text-primary mt-3 inline-block hover:underline'>See more</Link>
             </div>
 
-            {/* Deals Card */}
-            <div className='bg-gradient-to-br from-indigo-500/10 to-purple-500/10 rounded-xl p-5 border border-primary/20'>
-              <div className='flex items-center gap-2 mb-4'>
-                <Zap className='h-4 w-4 text-primary' />
-                <h3 className='font-semibold text-foreground'>Today's Deals</h3>
-              </div>
-              <div className='text-center py-4'>
-                <div className='text-4xl font-bold text-primary mb-2'>30%</div>
-                <div className='text-sm text-muted-foreground mb-4'>Off your first purchase</div>
-                <Button size='sm' className='w-full'>Claim Now</Button>
-              </div>
+            {/* 3D Gear Showcase Card */}
+            <div className='bg-gradient-to-br from-slate-100/80 to-slate-200/80 dark:from-slate-800/80 dark:to-slate-900/80 rounded-xl overflow-hidden border border-slate-200 dark:border-primary/20 flex items-center justify-center min-h-[200px]'>
+              <Gear3D size='small' />
             </div>
           </div>
         </div>
@@ -263,9 +271,39 @@ export function HeroSection() {
             </Button>
           </div>
           <div className='grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4'>
-            {[...displayItems, ...displayItems].slice(0, 5).map((model, index) => (
+            {(items && items.length > 0 ? items.slice(0, 5).map((item: any, index: number) => {
+              const model = {
+                id: item.tokenId || index,
+                tokenId: item.tokenId || index,
+                title: item.title || item.name || `Model #${item.tokenId}`,
+                image: item.imageUrl && item.imageUrl !== '/placeholder.jpg'
+                  ? item.imageUrl.startsWith('http') ? item.imageUrl : `http://localhost:5001${item.imageUrl}`
+                  : featuredModels[index % featuredModels.length].image,
+                price: item.price ? `${parseFloat(item.price).toFixed(4)} ETH` : '0.01 ETH',
+                seller: item.username || 'Creator',
+                rating: 4.5 + Math.random() * 0.5,
+                downloads: parseInt(item.downloads) || Math.floor(Math.random() * 1000) + 100,
+                fileTypes: ['GLB', 'STL'],
+                software: ['Blender', 'Three.js'],
+              };
+              return (
+                <CadCard
+                  key={`recommended-${model.id}-${index}`}
+                  id={model.tokenId}
+                  title={model.title}
+                  image={model.image}
+                  price={model.price}
+                  seller={model.seller}
+                  rating={model.rating}
+                  downloads={model.downloads}
+                  fileTypes={model.fileTypes}
+                  software={model.software}
+                  onWalletRequired={() => setShowWalletDialog(true)}
+                />
+              );
+            }) : displayItems.slice(0, 5).map((model, index) => (
               <CadCard
-                key={`recommended-${model.id}-${index}`}
+                key={`recommended-fallback-${model.id}-${index}`}
                 id={model.tokenId}
                 title={model.title}
                 image={model.image}
@@ -277,7 +315,7 @@ export function HeroSection() {
                 software={model.software}
                 onWalletRequired={() => setShowWalletDialog(true)}
               />
-            ))}
+            )))}
           </div>
         </div>
       </section>
