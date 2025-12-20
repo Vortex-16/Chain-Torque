@@ -13,7 +13,7 @@ const getBackendUrl = () => {
   if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
     return 'http://localhost:5001';
   }
-  return 'https://chaintorque-backend.onrender.com';
+  return 'https://chaintorque-backend-wjx4.onrender.com';
 };
 
 export const useSystemStatus = () => {

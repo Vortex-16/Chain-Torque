@@ -49,7 +49,7 @@ const getApiBaseUrl = () => {
     return 'http://localhost:5001/api';
   }
   // 3. Otherwise, use production Render backend
-  return 'https://chaintorque-backend.onrender.com/api';
+  return 'https://chaintorque-backend-wjx4.onrender.com/api';
 };
 
 const API_BASE_URL = getApiBaseUrl();
