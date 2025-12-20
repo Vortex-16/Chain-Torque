@@ -38,8 +38,21 @@ export interface MarketplaceItem {
   format?: string;
 }
 
-// Use environment variable or fallback to localhost
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+// Use environment variable, or detect production vs development
+const getApiBaseUrl = () => {
+  // 1. Environment variable takes priority
+  if (import.meta.env.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL;
+  }
+  // 2. If running on localhost, use local backend
+  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+    return 'http://localhost:5001/api';
+  }
+  // 3. Otherwise, use production Render backend
+  return 'https://chain-torque.onrender.com/api';
+};
+
+const API_BASE_URL = getApiBaseUrl();
 
 class ApiService {
   public baseUrl: string;
