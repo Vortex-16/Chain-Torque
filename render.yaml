@@ -1,0 +1,73 @@
+services:
+  # ---------------------------------------
+  # 1. Backend Service (Node.js/Express)
+  # ---------------------------------------
+  - type: web
+    name: chaintorque-backend
+    env: node
+    plan: free
+    buildCommand: cd backend && npm install && npm run compile
+    startCommand: cd backend && npm start
+    branch: main
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI
+        sync: false # User must enter this in Render Dashboard
+      - key: RPC_URL
+        sync: false
+      - key: PRIVATE_KEY
+        sync: false
+      - key: CONTRACT_ADDRESS
+        sync: false # Will be set after deployment or sync
+      - key: CLERK_PUBLISHABLE_KEY
+        sync: false
+
+  # ---------------------------------------
+  # 2. Marketplace Frontend (Static Site)
+  # ---------------------------------------
+  - type: static
+    name: chaintorque-marketplace
+    env: static
+    buildCommand: cd "Marketplace (Frontend)" && npm install && npm run build
+    publishDir: "Marketplace (Frontend)/dist"
+    branch: main
+    routes:
+      - type: rewrite
+        source: /**
+        destination: /index.html
+    envVars:
+      - key: VITE_API_URL
+        fromService:
+          type: web
+          name: chaintorque-backend
+          property: url
+      - key: VITE_CLERK_PUBLISHABLE_KEY
+        sync: false
+
+  # ---------------------------------------
+  # 3. Landing Page Frontend (Static Site)
+  # ---------------------------------------
+  - type: static
+    name: chaintorque-landing
+    env: static
+    buildCommand: cd "Landing Page (Frontend)" && npm install && npm run build
+    publishDir: "Landing Page (Frontend)/dist"
+    branch: main
+    envVars:
+      - key: VITE_CLERK_PUBLISHABLE_KEY
+        sync: false
+
+  # ---------------------------------------
+  # 4. CAD Frontend (Static Site - CRA)
+  # ---------------------------------------
+  - type: static
+    name: chaintorque-cad
+    env: static
+    buildCommand: cd "CAD (Frontend)" && npm install && npm run build
+    publishDir: "CAD (Frontend)/build"
+    branch: main
+    routes:
+      - type: rewrite
+        source: /**
+        destination: /index.html
