@@ -9,7 +9,6 @@ import {
 } from '@/contexts/StatusPanelContext';
 import {
   ClerkProvider,
-  RedirectToSignIn,
   SignedIn,
   SignedOut,
 } from '@clerk/clerk-react';
