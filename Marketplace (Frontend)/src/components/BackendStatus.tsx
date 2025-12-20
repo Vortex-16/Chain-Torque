@@ -20,7 +20,7 @@ const BackendStatus: React.FC<BackendStatusProps> = ({
           <div className='fixed inset-0 bg-black/20 z-40' onClick={onClose} />
 
           {/* Status panel */}
-          <div className='fixed top-4 right-4 bg-gray-900 text-white p-4 rounded-lg shadow-xl z-50 min-w-[280px]'>
+          <div className='fixed top-20 right-4 bg-gray-900 text-white p-4 rounded-lg shadow-xl z-50 min-w-[280px]'>
             <div className='flex justify-between items-center mb-3'>
               <h3 className='text-lg font-semibold'>System Status</h3>
               <button
