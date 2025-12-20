@@ -31,32 +31,35 @@ export function WalletConnectionDialog({ isOpen, onClose, onConnect }: WalletCon
     try {
       setLoading(true);
       setStatus('Connecting to MetaMask...');
-      
+
       const accounts = await window.ethereum.request({
         method: 'eth_requestAccounts',
       }) as string[];
-      
+
       if (!accounts || accounts.length === 0) {
         setStatus('No accounts found. Please check your MetaMask wallet.');
         return;
       }
-      
+
       const address = accounts[0];
       setStatus('Saving wallet address...');
 
       if (user) {
+        // Save to localStorage for immediate access
+        localStorage.setItem('walletAddress', address);
+
         await user.update({
           unsafeMetadata: {
             walletAddress: address,
           },
         });
         setStatus('Wallet connected successfully!');
-        
+
         // Call the onConnect callback if provided
         if (onConnect) {
           onConnect();
         }
-        
+
         // Close dialog after a brief delay
         setTimeout(() => {
           onClose();
@@ -115,8 +118,8 @@ export function WalletConnectionDialog({ isOpen, onClose, onConnect }: WalletCon
           {/* Action Buttons */}
           <div className="space-y-2">
             {window.ethereum ? (
-              <Button 
-                onClick={connectWallet} 
+              <Button
+                onClick={connectWallet}
                 className="w-full bg-gradient-primary hover:bg-primary-hover"
                 disabled={loading}
               >
@@ -133,8 +136,8 @@ export function WalletConnectionDialog({ isOpen, onClose, onConnect }: WalletCon
                 )}
               </Button>
             ) : (
-              <Button 
-                onClick={handleInstallMetaMask} 
+              <Button
+                onClick={handleInstallMetaMask}
                 variant="outline"
                 className="w-full"
               >
@@ -142,10 +145,10 @@ export function WalletConnectionDialog({ isOpen, onClose, onConnect }: WalletCon
                 Install MetaMask
               </Button>
             )}
-            
-            <Button 
-              onClick={onClose} 
-              variant="outline" 
+
+            <Button
+              onClick={onClose}
+              variant="outline"
               className="w-full"
               disabled={loading}
             >

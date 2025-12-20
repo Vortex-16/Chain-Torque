@@ -40,128 +40,111 @@ const Dashboard = () => {
   }, [user]);
 
   const loadDashboardData = async () => {
-    if (!user) {
-      setLoading(false);
-      return;
-    }
+    setLoading(true);
+    setError(null);
 
     try {
-      setLoading(true);
-      setError(null);
+      // 1. Determine Wallet Address (Priority: LocalStorage > Clerk Web3 > Clerk Metadata > Fallback)
+      // This ensures consistency with ProductDetail's purchase flow
+      const connectedWallet = localStorage.getItem('walletAddress');
+      const clerkWallet = user?.primaryWeb3Wallet?.web3Wallet;
+      const metadataWallet = user?.unsafeMetadata?.walletAddress as string;
+      const fallbackWallet = '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266';
 
-      // Get user's wallet address from metadata or use default for demo
-      const walletAddress =
-        user.unsafeMetadata?.walletAddress ||
-        '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266'; // Default wallet address for Archis
+      const walletAddress = connectedWallet || clerkWallet || metadataWallet || fallbackWallet;
+
+      console.log('Dashboard loading for wallet:', walletAddress);
 
       const promises = [
         // Get marketplace stats
         apiService.getMarketplaceStats(),
-        // Get user's NFTs if wallet address is available
+        // Get user's NFTs (Owned/Created)
         walletAddress
           ? apiService.getUserNFTs(walletAddress)
           : Promise.resolve({ success: true, data: [], total: 0 }),
-        // Get wallet balance if address is available
+        // Get wallet balance
         walletAddress
-          ? apiService
-              .getBalance(walletAddress)
-              .catch(() => ({ success: false, balance: '0' }))
+          ? apiService.getBalance(walletAddress).catch(() => ({ success: false, balance: '0' }))
           : Promise.resolve({ success: false, balance: '0' }),
+        // Get user purchases (Real Transaction History)
+        walletAddress
+          ? apiService.getUserPurchases(walletAddress)
+          : Promise.resolve({ success: true, purchases: [] }),
       ];
 
-      const [marketplaceResponse, userNFTsResponse, balanceResponse] =
+      const [marketplaceResponse, userNFTsResponse, balanceResponse, purchasesResponse] =
         await Promise.all(promises);
 
-      // Process user NFTs data - backend returns {success: true, nfts: [...]}
+      // Process user NFTs
       const userNFTs =
         userNFTsResponse.success && Array.isArray(userNFTsResponse.nfts)
           ? userNFTsResponse.nfts
           : [];
 
-      // Calculate user stats from NFTs
+      // Process Purchases
+      const userPurchases =
+        purchasesResponse.success && Array.isArray(purchasesResponse.purchases)
+          ? purchasesResponse.purchases
+          : [];
+
+      // Process Transactions (Sales & Purchases mixed)
+      // For now, we only have purchases endpoint, but we can infer sales from NFTs where seller == wallet
+      // Ideal: apiService.getUserSales(walletAddress)
+      const recentTransactions = userPurchases.map((p: any) => ({
+        id: p._id || p.transactionHash,
+        type: 'purchase',
+        title: p.metadata?.title || `Item #${p.tokenId}`,
+        amount: `-${p.price} ETH`,
+        date: new Date(p.confirmedAt || p.createdAt).toLocaleDateString(),
+        hash: p.transactionHash
+      }));
+
+      // Calculate user stats
       const totalModels = userNFTs.length;
       const totalSales = userNFTs.reduce(
-        (acc, nft) => acc + (nft.sold ? 1 : 0),
+        (acc, nft) => acc + (nft.sold && nft.seller?.toLowerCase() === walletAddress?.toLowerCase() ? 1 : 0),
         0
       );
+      // Rough earnings calc (real logic should come from backend sales endpoint)
+      const totalEarningsVal = userNFTs.reduce(
+        (acc, nft) => acc + (nft.sold && nft.seller?.toLowerCase() === walletAddress?.toLowerCase() ? parseFloat(nft.price) : 0),
+        0
+      );
+      const totalEarnings = `${totalEarningsVal.toFixed(4)} ETH`;
+
       const totalViews = userNFTs.reduce(
         (acc, nft) => acc + (nft.views || 0),
         0
       );
 
-      // Get balance - backend returns {success: true, data: {address: "...", balance: "...", balanceETH: "...", balanceWei: "..."}}
+      // Balance
       const balance =
-        balanceResponse.success &&
-        balanceResponse.data &&
-        balanceResponse.data.balance
-          ? `${balanceResponse.data.balance} ETH`
-          : '0 ETH';
+        balanceResponse.success && balanceResponse.data && balanceResponse.data.balance
+          ? `${parseFloat(balanceResponse.data.balance).toFixed(4)} ETH`
+          : '0.0000 ETH';
 
       setDashboardData({
         stats: {
           totalModels,
           totalSales,
-          totalEarnings: balance,
+          totalEarnings,
           totalViews,
           balance,
         },
-        userNFTs: userNFTs.slice(0, 5), // Show only recent 5
+        userNFTs: userNFTs.slice(0, 5),
+        userPurchases: userPurchases.slice(0, 5),
+        recentTransactions: recentTransactions.slice(0, 5),
         marketplaceStats: marketplaceResponse.success
           ? marketplaceResponse.stats
           : null,
       });
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error loading dashboard data:', err);
       setError(err.message || 'Failed to load dashboard data');
     } finally {
       setLoading(false);
     }
   };
-
-  // Mock data for demonstration when no real data is available
-  const getMockData = () => ({
-    recentPurchases: [
-      {
-        id: 1,
-        title: 'Industrial Robot Arm',
-        price: '0.12 ETH',
-        date: '2024-03-15',
-        seller: 'TechDesigner',
-      },
-      {
-        id: 2,
-        title: 'Automotive Part',
-        price: '0.07 ETH',
-        date: '2024-03-12',
-        seller: 'CarParts3D',
-      },
-    ],
-    recentTransactions: [
-      {
-        id: 1,
-        type: 'sale',
-        title: 'Gear Assembly',
-        amount: '+0.05 ETH',
-        date: '2024-03-16',
-      },
-      {
-        id: 2,
-        type: 'purchase',
-        title: 'Robot Arm',
-        amount: '-0.12 ETH',
-        date: '2024-03-15',
-      },
-      {
-        id: 3,
-        type: 'sale',
-        title: 'Drone Frame',
-        amount: '+0.03 ETH',
-        date: '2024-03-14',
-      },
-    ],
-  });
-
-  const mockData = getMockData();
 
   if (loading) {
     return (
@@ -261,10 +244,10 @@ const Dashboard = () => {
                 <div className='flex items-center justify-between'>
                   <div>
                     <p className='text-sm font-medium text-muted-foreground'>
-                      Wallet Balance
+                      Estimated Earnings
                     </p>
                     <p className='text-2xl font-bold'>
-                      {dashboardData.stats.balance}
+                      {dashboardData.stats.totalEarnings}
                     </p>
                   </div>
                   <DollarSign className='h-8 w-8 text-yellow-500' />
@@ -304,14 +287,14 @@ const Dashboard = () => {
               <CardContent>
                 <div className='space-y-4'>
                   {dashboardData.userNFTs.length > 0 ? (
-                    dashboardData.userNFTs.map(nft => (
+                    dashboardData.userNFTs.map((nft: any) => (
                       <div
-                        key={nft.tokenId || nft.id}
+                        key={nft.tokenId || nft._id}
                         className='flex items-center justify-between p-4 border rounded-lg'
                       >
                         <div className='flex-1'>
                           <h4 className='font-medium'>
-                            {nft.name || nft.title || `Model #${nft.tokenId}`}
+                            {nft.title || `Model #${nft.tokenId}`}
                           </h4>
                           <div className='flex items-center gap-4 mt-2 text-sm text-muted-foreground'>
                             <span className='flex items-center gap-1'>
@@ -362,28 +345,38 @@ const Dashboard = () => {
               </CardHeader>
               <CardContent>
                 <div className='space-y-4'>
-                  {mockData.recentPurchases.map(purchase => (
-                    <div
-                      key={purchase.id}
-                      className='flex items-center justify-between p-4 border rounded-lg'
-                    >
-                      <div className='flex-1'>
-                        <h4 className='font-medium'>{purchase.title}</h4>
-                        <p className='text-sm text-muted-foreground'>
-                          by {purchase.seller}
-                        </p>
-                        <p className='text-xs text-muted-foreground mt-1'>
-                          {purchase.date}
-                        </p>
+                  {dashboardData.userPurchases && dashboardData.userPurchases.length > 0 ? (
+                    dashboardData.userPurchases.map((purchase: any) => (
+                      <div
+                        key={purchase._id || purchase.transactionHash}
+                        className='flex items-center justify-between p-4 border rounded-lg'
+                      >
+                        <div className='flex-1'>
+                          <h4 className='font-medium'>{purchase.metadata?.title || `Item #${purchase.tokenId}`}</h4>
+                          <p className='text-sm text-muted-foreground'>
+                            Tx: {purchase.transactionHash.substring(0, 8)}...
+                          </p>
+                          <p className='text-xs text-muted-foreground mt-1'>
+                            {new Date(purchase.confirmedAt || purchase.createdAt).toLocaleDateString()}
+                          </p>
+                        </div>
+                        <div className='text-right'>
+                          <p className='font-medium'>{purchase.price} ETH</p>
+                          <Button size='sm' variant='outline' className='mt-2'>
+                            Download
+                          </Button>
+                        </div>
                       </div>
-                      <div className='text-right'>
-                        <p className='font-medium'>{purchase.price}</p>
-                        <Button size='sm' variant='outline' className='mt-2'>
-                          Download
-                        </Button>
-                      </div>
+                    ))
+                  ) : (
+                    <div className='text-center py-8 text-muted-foreground'>
+                      <ShoppingBag className='h-12 w-12 mx-auto mb-4 opacity-50' />
+                      <p>No purchases yet</p>
+                      <p className='text-sm'>
+                        Explore the marketplace to buy your first model!
+                      </p>
                     </div>
-                  ))}
+                  )}
                 </div>
                 <Button variant='outline' className='w-full mt-4'>
                   View All Purchases
@@ -402,48 +395,49 @@ const Dashboard = () => {
             </CardHeader>
             <CardContent>
               <div className='space-y-4'>
-                {mockData.recentTransactions.map(transaction => (
-                  <div
-                    key={transaction.id}
-                    className='flex items-center justify-between p-4 border rounded-lg'
-                  >
-                    <div className='flex items-center gap-3'>
-                      <div
-                        className={`p-2 rounded-full ${
-                          transaction.type === 'sale'
-                            ? 'bg-green-100 text-green-600'
-                            : 'bg-red-100 text-red-600'
-                        }`}
-                      >
-                        {transaction.type === 'sale' ? (
-                          <TrendingUp className='h-4 w-4' />
-                        ) : (
-                          <ShoppingBag className='h-4 w-4' />
-                        )}
-                      </div>
-                      <div>
-                        <h4 className='font-medium'>{transaction.title}</h4>
-                        <p className='text-sm text-muted-foreground flex items-center gap-1'>
-                          <Clock className='h-3 w-3' />
-                          {transaction.date}
-                        </p>
-                      </div>
-                    </div>
+                {dashboardData.recentTransactions && dashboardData.recentTransactions.length > 0 ? (
+                  dashboardData.recentTransactions.map((transaction: any) => (
                     <div
-                      className={`font-medium ${
-                        transaction.type === 'sale'
-                          ? 'text-green-600'
-                          : 'text-red-600'
-                      }`}
+                      key={transaction.id}
+                      className='flex items-center justify-between p-4 border rounded-lg'
                     >
-                      {transaction.amount}
+                      <div className='flex-1 flex items-center gap-3'>
+                        <div
+                          className={`p-2 rounded-full ${transaction.type === 'sale'
+                              ? 'bg-green-100 text-green-600'
+                              : 'bg-red-100 text-red-600'
+                            }`}
+                        >
+                          {transaction.type === 'sale' ? (
+                            <TrendingUp className='h-4 w-4' />
+                          ) : (
+                            <ShoppingBag className='h-4 w-4' />
+                          )}
+                        </div>
+                        <div>
+                          <h4 className='font-medium'>{transaction.title}</h4>
+                          <p className='text-sm text-muted-foreground flex items-center gap-1'>
+                            <Clock className='h-3 w-3' />
+                            {transaction.date}
+                          </p>
+                        </div>
+                      </div>
+                      <div
+                        className={`font-medium ${transaction.type === 'sale'
+                            ? 'text-green-600'
+                            : 'text-red-600'
+                          }`}
+                      >
+                        {transaction.amount}
+                      </div>
                     </div>
+                  ))
+                ) : (
+                  <div className='text-center py-4 text-muted-foreground'>
+                    No transactions found
                   </div>
-                ))}
+                )}
               </div>
-              <Button variant='outline' className='w-full mt-4'>
-                View All Transactions
-              </Button>
             </CardContent>
           </Card>
         </div>

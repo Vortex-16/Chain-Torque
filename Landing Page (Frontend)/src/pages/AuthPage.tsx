@@ -5,17 +5,6 @@ import './AuthPage.css'
 const CLERK_PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
 const MARKETPLACE_URL = import.meta.env.VITE_MARKETPLACE_URL || 'http://localhost:8080'
 
-declare global {
-    interface Window {
-        Clerk?: {
-            load: () => Promise<void>
-            user?: unknown
-            mountSignIn: (element: HTMLElement | null, options: unknown) => void
-            mountSignUp: (element: HTMLElement | null, options: unknown) => void
-        }
-    }
-}
-
 const clerkAppearance = {
     baseTheme: 'dark',
     variables: {

@@ -71,28 +71,41 @@ class Web3Manager {
 
       if (!fs.existsSync(contractArtifactPath)) {
         console.warn('⚠️  Contract artifact not found. Blockchain features will be disabled.');
-        console.warn('   Run `npx hardhat compile` locally and ensure artifacts are deployed.');
         this.contract = null;
-        return; // Don't throw - allow server to start without blockchain features
+        return;
       }
 
       const contractArtifact = JSON.parse(fs.readFileSync(contractArtifactPath, 'utf8'));
       const abi = contractArtifact.abi;
 
+      // Try loading from contract-address.json first
       const deploymentPath = path.join(__dirname, 'contract-address.json');
       if (fs.existsSync(deploymentPath)) {
-        const deployment = JSON.parse(fs.readFileSync(deploymentPath, 'utf8'));
-        this.contractAddress = deployment.ChainTorqueMarketplace;
+        try {
+          const deployment = JSON.parse(fs.readFileSync(deploymentPath, 'utf8'));
+          this.contractAddress = deployment.ChainTorqueMarketplace;
+          console.log('✅ Loaded contract address from file:', this.contractAddress);
+        } catch (e) {
+          console.warn('⚠️  Failed to parse contract-address.json:', e.message);
+        }
+      }
+
+      // Fallback to environment variable if not set
+      if (!this.contractAddress && process.env.CONTRACT_ADDRESS) {
+        this.contractAddress = process.env.CONTRACT_ADDRESS;
+        console.log('✅ Loaded contract address from ENV:', this.contractAddress);
+      }
+
+      if (this.contractAddress) {
         this.contract = new ethers.Contract(this.contractAddress, abi, this.signer);
-        console.log('✅ Contract loaded:', this.contractAddress);
+        console.log('✅ Contract initialized successfully');
       } else {
-        // Contract not deployed yet; keep contract as null for checks elsewhere
-        console.warn('⚠️  contract-address.json not found. Contract not deployed.');
+        console.warn('⚠️  No contract address found (checked file and ENV). Contract not deployed.');
         this.contract = null;
       }
     } catch (error) {
-      console.error('Error loading contract:', error.message);
-      this.contract = null; // Don't throw - allow server to continue
+      console.error('❌ Error loading contract:', error.message);
+      this.contract = null;
     }
   }
 
