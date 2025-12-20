@@ -6,7 +6,7 @@
   "workspaces": [
     "Landing Page (Frontend)",
     "Marketplace (Frontend)",
-    "Marketplace (Backend)",
+    "backend",
     "CAD (Frontend)"
   ],
   "scripts": {
@@ -18,17 +18,17 @@
     "format": "bun x prettier --write \"**/*.{js,jsx,ts,tsx,json,css,md}\"",
     "clean": "bun x rimraf node_modules **/node_modules",
     "update": "bun update",
-    "deploy:local": "cd \"Marketplace (Backend)\" && bun x hardhat run scripts/deploy.js --network hardhat",
-    "deploy:sepolia": "cd \"Marketplace (Backend)\" && bun x hardhat run scripts/deploy.js --network sepolia",
+    "deploy:local": "cd backend && bun x hardhat run scripts/deploy.js --network hardhat",
+    "deploy:sepolia": "cd backend && bun x hardhat run scripts/deploy.js --network sepolia",
     "dev:landing": "cd \"Landing Page (Frontend)\" && PORT=5000 bun run dev",
     "dev:marketplace": "cd \"Marketplace (Frontend)\" && bun run dev",
-    "dev:backend": "cd \"Marketplace (Backend)\" && PORT=5001 bun run dev",
+    "dev:backend": "cd backend && PORT=5001 bun run dev",
     "dev:cad": "cd \"CAD (Frontend)\" && cross-env PORT=3001 GENERATE_SOURCEMAP=false bun run start",
     "build:landing": "cd \"Landing Page (Frontend)\" && bun run build",
     "build:marketplace": "cd \"Marketplace (Frontend)\" && bun run build",
-    "build:backend": "cd \"Marketplace (Backend)\" && bun run build",
+    "build:backend": "cd backend && bun run build",
     "build:cad": "cd \"CAD (Frontend)\" && GENERATE_SOURCEMAP=false bun run build",
-    "test:contracts": "cd \"Marketplace (Backend)\" && bun x hardhat test",
+    "test:contracts": "cd backend && bun x hardhat test",
     "lint:frontend": "bun x eslint \"*/src/**/*.{js,jsx,ts,tsx}\" --report-unused-disable-directives --max-warnings 0"
   },
   "keywords": [
