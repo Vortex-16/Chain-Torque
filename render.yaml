@@ -23,11 +23,12 @@ services:
       - key: CLERK_PUBLISHABLE_KEY
         sync: false
 
-staticSites:
   # ---------------------------------------
-  # 2. Marketplace Frontend
+  # 2. Marketplace Frontend (Static Site)
   # ---------------------------------------
-  - name: chaintorque-marketplace
+  - type: web
+    name: chaintorque-marketplace
+    env: static
     buildCommand: cd "Marketplace (Frontend)" && bun install && bun run build
     publishDir: "Marketplace (Frontend)/dist"
     branch: main
@@ -45,9 +46,11 @@ staticSites:
         sync: false
 
   # ---------------------------------------
-  # 3. Landing Page Frontend
+  # 3. Landing Page Frontend (Static Site)
   # ---------------------------------------
-  - name: chaintorque-landing
+  - type: web
+    name: chaintorque-landing
+    env: static
     buildCommand: cd "Landing Page (Frontend)" && bun install && bun run build
     publishDir: "Landing Page (Frontend)/dist"
     branch: main
@@ -56,9 +59,11 @@ staticSites:
         sync: false
 
   # ---------------------------------------
-  # 4. CAD Frontend
+  # 4. CAD Frontend (Static Site - CRA)
   # ---------------------------------------
-  - name: chaintorque-cad
+  - type: web
+    name: chaintorque-cad
+    env: static
     buildCommand: cd "CAD (Frontend)" && bun install && bun run build
     publishDir: "CAD (Frontend)/build"
     branch: main
