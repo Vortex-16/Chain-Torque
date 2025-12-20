@@ -85,7 +85,10 @@ export default function AuthPage({ type }: AuthPageProps) {
 
         const mountClerk = async () => {
             try {
-                await window.Clerk!.load()
+                // Load Clerk with allowed redirect origins
+                await window.Clerk!.load({
+                    allowedRedirectOrigins: [MARKETPLACE_URL, window.location.origin],
+                })
 
                 // Redirect if already logged in
                 if (window.Clerk!.user) {
