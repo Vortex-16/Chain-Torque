@@ -1178,7 +1178,7 @@ ChainTorque is more than a platform—it's a movement toward democratizing engin
 
 **Building the Future of Engineering, One Block at a Time**
 
-[![GitHub Stars](https://img.shields.io/github/stars/Dealer-09/ChainTorque?style=social)](https://github.com/Dealer-09/ChainTorque)
+[![GitHub Stars](https://img.shields.io/github/stars/Dealer-09/ChainTorque?style=social)](https://github.com/Dealer-09/Chain-Torque)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Made with Bun](https://img.shields.io/badge/Made%20with-Bun-black)](https://bun.sh)
 [![Web3](https://img.shields.io/badge/Web3-Enabled-blue)](https://ethereum.org/)
