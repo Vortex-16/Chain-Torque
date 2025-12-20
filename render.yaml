@@ -4,10 +4,10 @@ services:
   # ---------------------------------------
   - type: web
     name: chaintorque-backend
-    env: node
+    env: bun
     plan: free
-    buildCommand: cd backend && npm install && npm run compile
-    startCommand: cd backend && npm start
+    buildCommand: cd backend && bun install && bun run compile
+    startCommand: cd backend && bun run start
     branch: main
     envVars:
       - key: NODE_ENV
@@ -29,7 +29,7 @@ services:
   - type: static
     name: chaintorque-marketplace
     env: static
-    buildCommand: cd "Marketplace (Frontend)" && npm install && npm run build
+    buildCommand: cd "Marketplace (Frontend)" && bun install && bun run build
     publishDir: "Marketplace (Frontend)/dist"
     branch: main
     routes:
@@ -51,7 +51,7 @@ services:
   - type: static
     name: chaintorque-landing
     env: static
-    buildCommand: cd "Landing Page (Frontend)" && npm install && npm run build
+    buildCommand: cd "Landing Page (Frontend)" && bun install && bun run build
     publishDir: "Landing Page (Frontend)/dist"
     branch: main
     envVars:
@@ -64,7 +64,7 @@ services:
   - type: static
     name: chaintorque-cad
     env: static
-    buildCommand: cd "CAD (Frontend)" && npm install && npm run build
+    buildCommand: cd "CAD (Frontend)" && bun install && bun run build
     publishDir: "CAD (Frontend)/build"
     branch: main
     routes:
