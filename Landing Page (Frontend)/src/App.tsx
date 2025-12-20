@@ -40,29 +40,28 @@ function App() {
 
     // Check for Clerk auth and redirect logged-in users to marketplace
     useEffect(() => {
-        // Check if returning from Clerk auth (handshake in URL)
-        const hasHandshake = window.location.search.includes('__clerk_handshake')
+        if (!CLERK_PUBLISHABLE_KEY) return
 
-        if (CLERK_PUBLISHABLE_KEY && hasHandshake) {
-            // Load Clerk and check auth
-            const script = document.createElement('script')
-            script.src = 'https://cdn.jsdelivr.net/npm/@clerk/clerk-js@latest/dist/clerk.browser.js'
-            script.async = true
-            script.crossOrigin = 'anonymous'
-            script.setAttribute('data-clerk-publishable-key', CLERK_PUBLISHABLE_KEY)
+        // Load Clerk and check auth for any authenticated user on the landing page
+        const script = document.createElement('script')
+        script.src = 'https://cdn.jsdelivr.net/npm/@clerk/clerk-js@latest/dist/clerk.browser.js'
+        script.async = true
+        script.crossOrigin = 'anonymous'
+        script.setAttribute('data-clerk-publishable-key', CLERK_PUBLISHABLE_KEY)
 
-            script.onload = async () => {
-                if (window.Clerk) {
-                    await window.Clerk.load()
-                    if (window.Clerk.user) {
-                        // User is logged in, redirect to marketplace
-                        window.location.href = MARKETPLACE_URL
-                    }
+        script.onload = async () => {
+            if (window.Clerk) {
+                await window.Clerk.load({
+                    allowedRedirectOrigins: [MARKETPLACE_URL, window.location.origin],
+                })
+                // If user is logged in, redirect to marketplace
+                if (window.Clerk.user) {
+                    window.location.href = MARKETPLACE_URL
                 }
             }
-
-            document.head.appendChild(script)
         }
+
+        document.head.appendChild(script)
     }, [])
 
     useEffect(() => {
