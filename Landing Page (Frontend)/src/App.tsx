@@ -13,6 +13,18 @@ import Footer from './components/Footer'
 import BackToTop from './components/BackToTop'
 import { useScrollReveal } from './hooks/useScrollReveal'
 
+const CLERK_PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
+const MARKETPLACE_URL = import.meta.env.VITE_MARKETPLACE_URL || 'http://localhost:8080'
+
+declare global {
+    interface Window {
+        Clerk?: {
+            load: () => Promise<void>
+            user?: unknown
+        }
+    }
+}
+
 function App() {
     const [darkMode, setDarkMode] = useState(() => {
         if (typeof window !== 'undefined') {
@@ -23,6 +35,33 @@ function App() {
 
     // Initialize scroll reveal animations
     useScrollReveal()
+
+    // Check for Clerk auth and redirect logged-in users to marketplace
+    useEffect(() => {
+        // Check if returning from Clerk auth (handshake in URL)
+        const hasHandshake = window.location.search.includes('__clerk_handshake')
+
+        if (CLERK_PUBLISHABLE_KEY && hasHandshake) {
+            // Load Clerk and check auth
+            const script = document.createElement('script')
+            script.src = 'https://cdn.jsdelivr.net/npm/@clerk/clerk-js@latest/dist/clerk.browser.js'
+            script.async = true
+            script.crossOrigin = 'anonymous'
+            script.setAttribute('data-clerk-publishable-key', CLERK_PUBLISHABLE_KEY)
+
+            script.onload = async () => {
+                if (window.Clerk) {
+                    await window.Clerk.load()
+                    if (window.Clerk.user) {
+                        // User is logged in, redirect to marketplace
+                        window.location.href = MARKETPLACE_URL
+                    }
+                }
+            }
+
+            document.head.appendChild(script)
+        }
+    }, [])
 
     useEffect(() => {
         if (darkMode) {

@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom'
+
 export default function Hero() {
     const scrollToLibrary = () => {
         document.getElementById('library')?.scrollIntoView({ behavior: 'smooth' })
@@ -35,10 +37,10 @@ export default function Hero() {
 
                 {/* CTA Buttons */}
                 <div className="flex flex-wrap gap-6 justify-center animate-fade-in-up">
-                    <a href="#" className="glass-button hover-lift">
+                    <Link to="/sign-up" className="glass-button hover-lift">
                         Get Started Free
                         <i className="fas fa-rocket ml-2" />
-                    </a>
+                    </Link>
                     <button
                         onClick={scrollToLibrary}
                         className="px-8 py-3.5 rounded-full text-slate-700 dark:text-white font-semibold border border-slate-200 dark:border-white/10 backdrop-blur-md bg-white/5 hover:bg-white/10 transition-all duration-300 hover-lift"

@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom'
+
 interface HeaderProps {
     darkMode: boolean
     toggleDarkMode: () => void
@@ -10,12 +12,12 @@ export default function Header({ darkMode, toggleDarkMode }: HeaderProps) {
             <nav className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 transition-all duration-500">
                 <div className="navbar-pill flex items-center gap-2 px-3 py-2 rounded-full">
                     {/* Logo */}
-                    <a href="/" className="flex items-center gap-2 px-3 py-1.5 rounded-full hover:bg-white/10 transition-all duration-300">
+                    <Link to="/" className="flex items-center gap-2 px-3 py-1.5 rounded-full hover:bg-white/10 transition-all duration-300">
                         <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
                             <span className="text-white font-bold text-sm">CT</span>
                         </div>
                         <span className="text-lg font-bold text-gradient hidden sm:inline">ChainTorque</span>
-                    </a>
+                    </Link>
 
                     {/* Divider */}
                     <div className="w-px h-6 bg-slate-200 dark:bg-white/20 hidden sm:block" />
@@ -47,10 +49,13 @@ export default function Header({ darkMode, toggleDarkMode }: HeaderProps) {
                         </button>
 
                         {/* Login Button */}
-                        <a href="#" className="nav-login-btn flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-semibold text-white transition-all duration-300">
+                        <Link
+                            to="/sign-in"
+                            className="nav-login-btn flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-semibold text-white transition-all duration-300"
+                        >
                             <span>Login</span>
                             <i className="fas fa-arrow-right text-xs" />
-                        </a>
+                        </Link>
                     </div>
                 </div>
             </nav>
