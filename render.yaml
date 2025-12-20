@@ -4,14 +4,16 @@ services:
   # ---------------------------------------
   - type: web
     name: chaintorque-backend
-    env: bun
+    runtime: node
     plan: free
-    buildCommand: cd backend && bun install && bun run compile
-    startCommand: cd backend && bun run start
+    buildCommand: cd backend && npm install && npm run compile
+    startCommand: cd backend && npm start
     branch: main
     envVars:
       - key: NODE_ENV
         value: production
+      - key: BUN_VERSION
+        value: "1.0.0"
       - key: MONGODB_URI
         sync: false
       - key: RPC_URL
@@ -24,48 +26,42 @@ services:
         sync: false
 
   # ---------------------------------------
-  # 2. Marketplace Frontend (Web Wrapper)
+  # 2. Marketplace Frontend
   # ---------------------------------------
   - type: web
     name: chaintorque-marketplace
-    env: bun
+    runtime: node
     plan: free
-    buildCommand: cd "Marketplace (Frontend)" && bun install && bun run build
-    # Serve dist folder on port 10000 (Render default) or $PORT if available. 
-    # --single supports SPA routing (rewrites 404 to index.html)
-    startCommand: cd "Marketplace (Frontend)" && bun x serve dist --single --listen ${PORT:-10000}
+    buildCommand: cd "Marketplace (Frontend)" && npm install && npm run build
+    startCommand: cd "Marketplace (Frontend)" && npx serve dist --single --listen ${PORT:-10000}
     branch: main
     envVars:
       - key: VITE_API_URL
-        fromService:
-          type: web
-          name: chaintorque-backend
-          property: url
+        sync: false
       - key: VITE_CLERK_PUBLISHABLE_KEY
         sync: false
 
   # ---------------------------------------
-  # 3. Landing Page Frontend (Web Wrapper)
+  # 3. Landing Page Frontend
   # ---------------------------------------
   - type: web
     name: chaintorque-landing
-    env: bun
+    runtime: node
     plan: free
-    buildCommand: cd "Landing Page (Frontend)" && bun install && bun run build
-    startCommand: cd "Landing Page (Frontend)" && bun x serve dist --single --listen ${PORT:-10000}
+    buildCommand: cd "Landing Page (Frontend)" && npm install && npm run build
+    startCommand: cd "Landing Page (Frontend)" && npx serve dist --single --listen ${PORT:-10000}
     branch: main
     envVars:
       - key: VITE_CLERK_PUBLISHABLE_KEY
         sync: false
 
   # ---------------------------------------
-  # 4. CAD Frontend (Web Wrapper)
+  # 4. CAD Frontend
   # ---------------------------------------
   - type: web
     name: chaintorque-cad
-    env: bun
+    runtime: node
     plan: free
-    buildCommand: cd "CAD (Frontend)" && bun install && bun run build
-    # CRA builds to 'build' folder, not 'dist'
-    startCommand: cd "CAD (Frontend)" && bun x serve build --single --listen ${PORT:-10000}
+    buildCommand: cd "CAD (Frontend)" && npm install && npm run build
+    startCommand: cd "CAD (Frontend)" && npx serve build --single --listen ${PORT:-10000}
     branch: main
