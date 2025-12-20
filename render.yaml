@@ -1,0 +1,67 @@
+services:
+  # ---------------------------------------
+  # 1. Backend Service
+  # ---------------------------------------
+  - type: web
+    name: chaintorque-backend
+    runtime: node
+    plan: free
+    buildCommand: npm install && echo "Backend ready"
+    startCommand: cd backend && node server.js
+    branch: main
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI
+        sync: false
+      - key: RPC_URL
+        sync: false
+      - key: PRIVATE_KEY
+        sync: false
+      - key: CONTRACT_ADDRESS
+        sync: false
+      - key: CLERK_PUBLISHABLE_KEY
+        sync: false
+      - key: LIGHTHOUSE_API_KEY
+        sync: false
+
+  # ---------------------------------------
+  # 2. Marketplace Frontend
+  # ---------------------------------------
+  - type: web
+    name: chaintorque-marketplace
+    runtime: node
+    plan: free
+    buildCommand: npm install && cd "Marketplace (Frontend)" && npm run build
+    startCommand: cd "Marketplace (Frontend)" && npx serve dist -s -l ${PORT:-10000}
+    branch: main
+    envVars:
+      - key: VITE_API_URL
+        sync: false
+      - key: VITE_CLERK_PUBLISHABLE_KEY
+        sync: false
+
+  # ---------------------------------------
+  # 3. Landing Page Frontend
+  # ---------------------------------------
+  - type: web
+    name: chaintorque-landing
+    runtime: node
+    plan: free
+    buildCommand: npm install && cd "Landing Page (Frontend)" && npm run build
+    startCommand: cd "Landing Page (Frontend)" && npx serve dist -s -l ${PORT:-10000}
+    branch: main
+    envVars:
+      - key: VITE_CLERK_PUBLISHABLE_KEY
+        sync: false
+
+  # ---------------------------------------
+  # 4. CAD Frontend
+  # ---------------------------------------
+  - type: web
+    name: chaintorque-cad
+    runtime: node
+    plan: free
+    buildCommand: npm install && cd "CAD (Frontend)" && npm run build
+    startCommand: cd "CAD (Frontend)" && npx serve build -s -l ${PORT:-10000}
+    branch: main

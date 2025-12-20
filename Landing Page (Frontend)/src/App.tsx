@@ -16,15 +16,6 @@ import { useScrollReveal } from './hooks/useScrollReveal'
 const CLERK_PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
 const MARKETPLACE_URL = import.meta.env.VITE_MARKETPLACE_URL || 'http://localhost:8080'
 
-declare global {
-    interface Window {
-        Clerk?: {
-            load: () => Promise<void>
-            user?: unknown
-        }
-    }
-}
-
 function App() {
     const [darkMode, setDarkMode] = useState(() => {
         if (typeof window !== 'undefined') {

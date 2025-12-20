@@ -409,11 +409,34 @@ router.get('/stats', async (req, res) => {
     }
 });
 
-// Single Item
+// Single Item - Auto-healing
 router.get('/:id', async (req, res) => {
     const paramTokenId = req.params.id;
     try {
-        const item = await MarketItem.findOne({ tokenId: paramTokenId });
+        let item = await MarketItem.findOne({ tokenId: paramTokenId });
+
+        // Auto-heal: If item is active locally, check chain to ensure it hasn't been sold
+        // This handles cases where the backend missed the 'MarketItemSold' event
+        if (item && item.status === 'active' && web3.isReady()) {
+            try {
+                const chainItem = await web3.contract.getMarketItem(paramTokenId);
+                // Contract returns struct, 'sold' is boolean
+                if (chainItem.sold) {
+                    console.log(`[Auto-Heal] Item #${paramTokenId} found SOLD on chain but ACTIVE in DB. Updating...`);
+                    item.status = 'sold';
+                    item.owner = chainItem.owner.toLowerCase();
+                    item.seller = null; // Marketplace logic: seller is null when sold? Or keep history?
+                    // Keeping seller for history might be better, but previous logic nulled it. 
+                    // Let's update soldAt.
+                    item.soldAt = new Date();
+                    await item.save();
+                }
+            } catch (e) {
+                // Ignore chain errors (e.g. temporary RPC failure) and return DB data
+                console.warn(`[Auto-Heal] Failed to check chain for #${paramTokenId}:`, e.message);
+            }
+        }
+
         if (item) {
             res.json({ success: true, data: item });
         } else {
