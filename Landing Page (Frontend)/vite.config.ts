@@ -9,6 +9,7 @@ export default defineConfig({
     server: {
         host: '::',
         port: 5000,
+        allowedHosts: true, // Allow all hosts (Render, etc.)
     },
     plugins: [react()],
     // Load .env from monorepo root (parent directory)

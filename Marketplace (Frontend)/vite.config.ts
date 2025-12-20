@@ -10,6 +10,7 @@ export default defineConfig(() => ({
   server: {
     host: '::',
     port: 8080,
+    allowedHosts: true, // Allow all hosts (Render, etc.)
   },
   plugins: [react()],
   resolve: {
