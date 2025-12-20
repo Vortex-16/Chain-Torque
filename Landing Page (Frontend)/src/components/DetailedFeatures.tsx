@@ -1,4 +1,4 @@
-import { Boxes, Lock, Share2, ArrowRight } from 'lucide-react'
+import { Boxes, Lock, Share2 } from 'lucide-react'
 
 const detailedFeatures = [
     { icon: Boxes, title: 'Real-time 3D Previews', desc: 'Instantly visualize your CAD models online with zero lag.' },
