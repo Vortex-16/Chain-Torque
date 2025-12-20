@@ -19,11 +19,57 @@ import { useState, useEffect } from 'react';
 import { useAuthContext } from '@/hooks/useAuth';
 import apiService from '@/services/apiService';
 
+interface NFT {
+  tokenId: string;
+  _id?: string;
+  title?: string; // Made optional as it might be missing
+  price: string;
+  sold: boolean;
+  seller: string;
+  owner: string;
+  views?: number;
+  downloads?: number;
+  metadata?: any;
+}
+
+interface Purchase {
+  _id?: string;
+  transactionHash: string;
+  metadata?: { title: string };
+  tokenId: string;
+  confirmedAt?: string;
+  createdAt?: string;
+  price: string;
+}
+
+interface Transaction {
+  id: string;
+  type: 'purchase' | 'sale';
+  title: string;
+  amount: string;
+  date: string;
+  hash: string;
+}
+
+interface DashboardState {
+  stats: {
+    totalModels: number;
+    totalSales: number;
+    totalEarnings: string;
+    totalViews: number;
+    balance: string;
+  };
+  userNFTs: NFT[];
+  userPurchases: Purchase[];
+  recentTransactions: Transaction[];
+  marketplaceStats: any;
+}
+
 const Dashboard = () => {
   const { user } = useAuthContext();
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [dashboardData, setDashboardData] = useState({
+  const [error, setError] = useState<string | null>(null);
+  const [dashboardData, setDashboardData] = useState<DashboardState>({
     stats: {
       totalModels: 0,
       totalSales: 0,
@@ -32,6 +78,8 @@ const Dashboard = () => {
       balance: '0 ETH',
     },
     userNFTs: [],
+    userPurchases: [],
+    recentTransactions: [],
     marketplaceStats: null,
   });
 
@@ -61,7 +109,7 @@ const Dashboard = () => {
         // Get user's NFTs (Owned/Created)
         walletAddress
           ? apiService.getUserNFTs(walletAddress)
-          : Promise.resolve({ success: true, data: [], total: 0 }),
+          : Promise.resolve({ success: true, nfts: [], total: 0 }),
         // Get wallet balance
         walletAddress
           ? apiService.getBalance(walletAddress).catch(() => ({ success: false, balance: '0' }))
@@ -76,52 +124,54 @@ const Dashboard = () => {
         await Promise.all(promises);
 
       // Process user NFTs
-      const userNFTs =
-        userNFTsResponse.success && Array.isArray(userNFTsResponse.nfts)
-          ? userNFTsResponse.nfts
+      const userNFTs: NFT[] =
+        (userNFTsResponse as any).success && Array.isArray((userNFTsResponse as any).nfts)
+          ? (userNFTsResponse as any).nfts
           : [];
 
       // Process Purchases
-      const userPurchases =
-        purchasesResponse.success && Array.isArray(purchasesResponse.purchases)
-          ? purchasesResponse.purchases
+      const userPurchases: Purchase[] =
+        (purchasesResponse as any).success && Array.isArray((purchasesResponse as any).purchases)
+          ? (purchasesResponse as any).purchases
           : [];
 
       // Process Transactions (Sales & Purchases mixed)
       // For now, we only have purchases endpoint, but we can infer sales from NFTs where seller == wallet
       // Ideal: apiService.getUserSales(walletAddress)
-      const recentTransactions = userPurchases.map((p: any) => ({
+      const recentTransactions: Transaction[] = userPurchases.map((p) => ({
         id: p._id || p.transactionHash,
         type: 'purchase',
         title: p.metadata?.title || `Item #${p.tokenId}`,
         amount: `-${p.price} ETH`,
-        date: new Date(p.confirmedAt || p.createdAt).toLocaleDateString(),
+        date: new Date(p.confirmedAt || p.createdAt || Date.now()).toLocaleDateString(),
         hash: p.transactionHash
       }));
 
       // Calculate user stats
       const totalModels = userNFTs.length;
       const totalSales = userNFTs.reduce(
-        (acc, nft) => acc + (nft.sold && nft.seller?.toLowerCase() === walletAddress?.toLowerCase() ? 1 : 0),
+        (acc: number, nft: NFT) => acc + (nft.sold && nft.seller?.toLowerCase() === walletAddress?.toLowerCase() ? 1 : 0),
         0
       );
       // Rough earnings calc (real logic should come from backend sales endpoint)
       const totalEarningsVal = userNFTs.reduce(
-        (acc, nft) => acc + (nft.sold && nft.seller?.toLowerCase() === walletAddress?.toLowerCase() ? parseFloat(nft.price) : 0),
+        (acc: number, nft: NFT) => acc + (nft.sold && nft.seller?.toLowerCase() === walletAddress?.toLowerCase() ? parseFloat(nft.price) : 0),
         0
       );
       const totalEarnings = `${totalEarningsVal.toFixed(4)} ETH`;
 
       const totalViews = userNFTs.reduce(
-        (acc, nft) => acc + (nft.views || 0),
+        (acc: number, nft: NFT) => acc + (nft.views || 0),
         0
       );
 
       // Balance
       const balance =
-        balanceResponse.success && balanceResponse.data && balanceResponse.data.balance
-          ? `${parseFloat(balanceResponse.data.balance).toFixed(4)} ETH`
-          : '0.0000 ETH';
+        (balanceResponse as any).success && (balanceResponse as any).balance
+          ? `${parseFloat((balanceResponse as any).balance).toFixed(4)} ETH`
+          : ((balanceResponse as any).data && (balanceResponse as any).data.balance)
+            ? `${parseFloat((balanceResponse as any).data.balance).toFixed(4)} ETH`
+            : '0.0000 ETH';
 
       setDashboardData({
         stats: {
@@ -134,8 +184,8 @@ const Dashboard = () => {
         userNFTs: userNFTs.slice(0, 5),
         userPurchases: userPurchases.slice(0, 5),
         recentTransactions: recentTransactions.slice(0, 5),
-        marketplaceStats: marketplaceResponse.success
-          ? marketplaceResponse.stats
+        marketplaceStats: (marketplaceResponse as any).success
+          ? (marketplaceResponse as any).stats
           : null,
       });
     } catch (err: any) {
@@ -404,8 +454,8 @@ const Dashboard = () => {
                       <div className='flex-1 flex items-center gap-3'>
                         <div
                           className={`p-2 rounded-full ${transaction.type === 'sale'
-                              ? 'bg-green-100 text-green-600'
-                              : 'bg-red-100 text-red-600'
+                            ? 'bg-green-100 text-green-600'
+                            : 'bg-red-100 text-red-600'
                             }`}
                         >
                           {transaction.type === 'sale' ? (
@@ -424,8 +474,8 @@ const Dashboard = () => {
                       </div>
                       <div
                         className={`font-medium ${transaction.type === 'sale'
-                            ? 'text-green-600'
-                            : 'text-red-600'
+                          ? 'text-green-600'
+                          : 'text-red-600'
                           }`}
                       >
                         {transaction.amount}
