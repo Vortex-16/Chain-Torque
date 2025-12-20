@@ -3,7 +3,7 @@
 declare global {
     interface Window {
         Clerk?: {
-            load: () => Promise<void>
+            load: (options?: { allowedRedirectOrigins?: string[] }) => Promise<void>
             user?: unknown
             mountSignIn: (element: HTMLElement | null, options: unknown) => void
             mountSignUp: (element: HTMLElement | null, options: unknown) => void
