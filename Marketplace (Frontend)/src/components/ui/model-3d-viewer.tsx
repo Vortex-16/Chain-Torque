@@ -9,8 +9,8 @@ import * as THREE from 'three';
 import { Button } from '@/components/ui/button';
 
 // Error Boundary for 3D components
-class Model3DErrorBoundary extends Component<{children: ReactNode}, {hasError: boolean, error?: Error}> {
-  constructor(props: {children: ReactNode}) {
+class Model3DErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean, error?: Error }> {
+  constructor(props: { children: ReactNode }) {
     super(props);
     this.state = { hasError: false };
   }
@@ -48,12 +48,12 @@ function getFileExtension(url: string, fileType?: string): string {
   if (fileType) {
     const normalizedType = fileType.toLowerCase();
     const supportedFormats = ['glb', 'gltf', 'stl', 'obj'];
-    
+
     // If it's a supported format, use it
     if (supportedFormats.includes(normalizedType)) {
       return normalizedType;
     }
-    
+
     // If it's a generic term like 'CAD', try to find a supported format in the URL
     // or default to a common format
     if (normalizedType === 'cad' || normalizedType === 'step' || normalizedType === 'iges') {
@@ -66,14 +66,39 @@ function getFileExtension(url: string, fileType?: string): string {
       return 'glb';
     }
   }
-  
+
+  // Check for IPFS URLs (lighthouse, pinata, ipfs.io, dweb.link, etc.)
+  // IPFS CIDs don't have file extensions, so default to GLB
+  const ipfsPatterns = [
+    'gateway.lighthouse.storage',
+    'ipfs.io',
+    'dweb.link',
+    'pinata.cloud',
+    'cloudflare-ipfs.com',
+    '/ipfs/'
+  ];
+
+  const isIpfsUrl = ipfsPatterns.some(pattern => url.includes(pattern));
+  if (isIpfsUrl) {
+    // Check if URL has a recognizable extension at the end anyway
+    const urlExtension = url.split('.').pop()?.toLowerCase() || '';
+    const supportedFormats = ['glb', 'gltf', 'stl', 'obj'];
+    if (supportedFormats.includes(urlExtension)) {
+      console.log(`📦 IPFS URL detected with extension: ${urlExtension}`);
+      return urlExtension;
+    }
+    // No extension found, default to GLB (most common 3D format on IPFS)
+    console.log('📦 IPFS URL detected without extension, defaulting to GLB format');
+    return 'glb';
+  }
+
   // Fallback to URL-based detection
   return url.split('.').pop()?.toLowerCase() || '';
 }
 
 function Model({ url, fileType }: { url: string; fileType?: string }) {
   const extension = getFileExtension(url, fileType);
-  
+
   // Debug logging
   console.log('🔍 Model Debug Info:', {
     url,
@@ -81,7 +106,7 @@ function Model({ url, fileType }: { url: string; fileType?: string }) {
     detectedExtension: extension,
     supportedFormats: ['glb', 'gltf', 'stl', 'obj']
   });
-  
+
   // Handle different file formats
   switch (extension) {
     case 'glb':
@@ -89,7 +114,7 @@ function Model({ url, fileType }: { url: string; fileType?: string }) {
       // eslint-disable-next-line react-hooks/rules-of-hooks
       const gltfResult = useGLTF(url);
       console.log('✅ GLB/GLTF loaded successfully:', gltfResult);
-      
+
       if (!gltfResult || !gltfResult.scene) {
         console.error('❌ GLB/GLTF scene is null or undefined', gltfResult);
         return (
@@ -99,55 +124,55 @@ function Model({ url, fileType }: { url: string; fileType?: string }) {
           </mesh>
         );
       }
-      
+
       // Ensure the scene has some content
       if (gltfResult.scene.children.length === 0) {
         console.warn('⚠️ GLB/GLTF scene has no children');
       }
-      
+
       return <primitive object={gltfResult.scene} />;
-        
-      case 'stl':
-        // eslint-disable-next-line react-hooks/rules-of-hooks
-        const stlGeometry = useLoader(STLLoader, url);
-        const stlMaterial = new THREE.MeshStandardMaterial({ 
-          color: '#60a5fa', 
-          metalness: 0.3, 
-          roughness: 0.4 
-        });
-        return <mesh geometry={stlGeometry} material={stlMaterial} />;
-        
-      case 'obj':
-        // eslint-disable-next-line react-hooks/rules-of-hooks
-        const objGroup = useLoader(OBJLoader, url);
-        // Apply default material to OBJ if it doesn't have one
-        objGroup.traverse((child: any) => {
-          if (child.isMesh && !child.material) {
-            child.material = new THREE.MeshStandardMaterial({ 
-              color: '#60a5fa', 
-              metalness: 0.3, 
-              roughness: 0.4 
-            });
-          }
-        });
-        return <primitive object={objGroup} />;
-        
-      default:
-        // Fallback for unsupported formats - show error message
-        console.warn(`Unsupported 3D file format: ${extension}. Supported formats: GLB, GLTF, STL, OBJ`);
-        return (
-          <mesh>
-            <boxGeometry args={[2, 0.5, 0.1]} />
-            <meshStandardMaterial color="#ff6b6b" />
-          </mesh>
-        );
+
+    case 'stl':
+      // eslint-disable-next-line react-hooks/rules-of-hooks
+      const stlGeometry = useLoader(STLLoader, url);
+      const stlMaterial = new THREE.MeshStandardMaterial({
+        color: '#60a5fa',
+        metalness: 0.3,
+        roughness: 0.4
+      });
+      return <mesh geometry={stlGeometry} material={stlMaterial} />;
+
+    case 'obj':
+      // eslint-disable-next-line react-hooks/rules-of-hooks
+      const objGroup = useLoader(OBJLoader, url);
+      // Apply default material to OBJ if it doesn't have one
+      objGroup.traverse((child: any) => {
+        if (child.isMesh && !child.material) {
+          child.material = new THREE.MeshStandardMaterial({
+            color: '#60a5fa',
+            metalness: 0.3,
+            roughness: 0.4
+          });
+        }
+      });
+      return <primitive object={objGroup} />;
+
+    default:
+      // Fallback for unsupported formats - show error message
+      console.warn(`Unsupported 3D file format: ${extension}. Supported formats: GLB, GLTF, STL, OBJ`);
+      return (
+        <mesh>
+          <boxGeometry args={[2, 0.5, 0.1]} />
+          <meshStandardMaterial color="#ff6b6b" />
+        </mesh>
+      );
   }
 }
 
 export function Model3DViewer({ modelUrl, className = '', fileType }: Model3DViewerProps) {
   const controlsRef = useRef<any>(null);
   const [rotation, setRotation] = useState(0);
-  
+
   // Validate file format
   const extension = getFileExtension(modelUrl, fileType);
   const supportedFormats = ['glb', 'gltf', 'stl', 'obj'];
