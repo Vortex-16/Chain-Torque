@@ -9,7 +9,6 @@ import {
 } from '@/contexts/StatusPanelContext';
 import {
   ClerkProvider,
-  RedirectToSignIn,
   SignedIn,
   SignedOut,
 } from '@clerk/clerk-react';
@@ -122,6 +121,9 @@ const App = () => (
     afterSignOutUrl={LANDING_URL}
     signInUrl={`${LANDING_URL}/sign-in`}
     signUpUrl={`${LANDING_URL}/sign-up`}
+    signInFallbackRedirectUrl="/"
+    signUpFallbackRedirectUrl="/"
+
   >
     <QueryClientProvider client={queryClient}>
       <ThemeProvider

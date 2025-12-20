@@ -93,12 +93,17 @@ export default function AuthPage({ type }: AuthPageProps) {
                     return
                 }
 
-                // Mount the Clerk component
+                // Mount the Clerk component with redirect to marketplace
                 if (clerkMountRef.current) {
+                    const mountOptions = {
+                        appearance: clerkAppearance,
+                        forceRedirectUrl: MARKETPLACE_URL,
+                        fallbackRedirectUrl: MARKETPLACE_URL,
+                    }
                     if (type === 'sign-in') {
-                        window.Clerk!.mountSignIn(clerkMountRef.current, { appearance: clerkAppearance })
+                        window.Clerk!.mountSignIn(clerkMountRef.current, mountOptions)
                     } else {
-                        window.Clerk!.mountSignUp(clerkMountRef.current, { appearance: clerkAppearance })
+                        window.Clerk!.mountSignUp(clerkMountRef.current, mountOptions)
                     }
                 }
 
