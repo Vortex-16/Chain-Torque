@@ -14,7 +14,11 @@ const dotenv = require('dotenv');
 const { web3Manager: web3, utils: web3Utils } = require('./web3');
 
 // Load environment variables
-dotenv.config({ path: path.join(__dirname, '..', '.env') });
+// In production (Render), env vars are injected directly
+// In development, load from parent folder's .env
+if (process.env.NODE_ENV !== 'production') {
+  dotenv.config({ path: path.join(__dirname, '..', '.env') });
+}
 
 const app = express();
 const PORT = process.env.PORT || 5000;
