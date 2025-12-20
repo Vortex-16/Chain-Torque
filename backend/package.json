@@ -20,12 +20,12 @@
   "author": "ChainTorque Team",
   "license": "ISC",
   "devDependencies": {
-    "@nomiclabs/hardhat-ethers": "^2.2.3",
-    "ethers": "^6.16.0"
+    "@nomiclabs/hardhat-ethers": "^2.2.3"
   },
   "dependencies": {
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
+    "ethers": "^6.16.0",
     "express": "^5.2.1",
     "mongoose": "^9.0.1",
     "multer": "^2.0.2"
