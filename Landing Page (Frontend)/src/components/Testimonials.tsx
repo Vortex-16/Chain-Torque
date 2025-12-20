@@ -4,19 +4,19 @@ const reviews = [
     {
         name: 'Arjun Mehta',
         role: 'Mechanical Engineer',
-        img: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face',
+        img: '/images/user1.jpg',
         text: 'ChainTorque has completely redefined my workflow. The integration of 3D previews with blockchain ownership is a game-changer.',
     },
     {
         name: 'Rhea Das',
         role: '3D Model Artist',
-        img: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop&crop=face',
+        img: '/images/user2.jpg',
         text: 'Finally, a platform that respects creators. The UI is gorgeous, and the community is incredibly supportive and professional.',
     },
     {
         name: 'Imran Shaikh',
         role: 'Product Designer',
-        img: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face',
+        img: '/images/user3.jpg',
         text: "The speed and security of this platform are unmatched. It's the only marketplace I trust for my high-fidelity CAD assets.",
     },
 ]
