@@ -32,9 +32,9 @@ app.use(cors({
     'http://localhost:5173',
     'http://localhost:5000',
     // Production (Render)
-    'https://chaintorque-landing.onrender.com',
-    'https://chaintorque-marketplace.onrender.com',
-    'https://chaintorque-cad.onrender.com',
+    'https://chaintorque-landing-t9pf.onrender.com',
+    'https://chaintorque-marketplace-zpn3.onrender.com',
+    'https://chaintorque-cad-wfti.onrender.com',
     process.env.FRONTEND_URL
   ].filter(Boolean),
   credentials: true,
