@@ -8,6 +8,14 @@ interface SystemStatus {
   marketplaceItems: number;
 }
 
+// Detect production vs development
+const getBackendUrl = () => {
+  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+    return 'http://localhost:5001';
+  }
+  return 'https://chaintorque-backend.onrender.com';
+};
+
 export const useSystemStatus = () => {
   const [status, setStatus] = useState<SystemStatus>({
     backend: 'checking...',
@@ -18,12 +26,13 @@ export const useSystemStatus = () => {
   });
 
   const [isLoading, setIsLoading] = useState(true);
+  const backendUrl = getBackendUrl();
 
   const checkBackend = async () => {
     setIsLoading(true);
     try {
       // Check basic health
-      const healthResponse = await fetch('http://localhost:5001/health');
+      const healthResponse = await fetch(`${backendUrl}/health`);
       const backendStatus = healthResponse.ok ? 'connected' : 'error';
 
       // Check web3 status
@@ -31,7 +40,7 @@ export const useSystemStatus = () => {
       let contractStatus = 'not deployed';
       try {
         const web3Response = await fetch(
-          'http://localhost:5001/api/web3/status'
+          `${backendUrl}/api/web3/status`
         );
         if (web3Response.ok) {
           const web3Data = await web3Response.json();
@@ -49,7 +58,7 @@ export const useSystemStatus = () => {
       let itemCount = 0;
       try {
         const marketplaceResponse = await fetch(
-          'http://localhost:5001/api/marketplace'
+          `${backendUrl}/api/marketplace`
         );
         if (marketplaceResponse.ok) {
           const marketplaceData = await marketplaceResponse.json();

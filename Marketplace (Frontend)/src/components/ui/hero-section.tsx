@@ -8,6 +8,7 @@ import { WalletConnectionDialog } from '@/components/ui/wallet-connection-dialog
 import { Gear3D } from '@/components/ui/Gear3D';
 import { AutoCadGearSvg } from '@/components/ui/GearSvg';
 import { EngineSvg, WrenchSvg, PistonSvg, CircuitSvg, CogSvg, BlueprintSvg } from '@/components/ui/AnimatedCadSvgs';
+import { resolveAssetUrl } from '@/lib/urls';
 
 // Import fallback images
 import cadGear from '@/assets/cad-gear.jpg';
@@ -56,7 +57,7 @@ export function HeroSection() {
         tokenId: item.tokenId || index,
         title: item.title || item.name || `Model #${item.tokenId}`,
         image: item.imageUrl && item.imageUrl !== '/placeholder.jpg'
-          ? item.imageUrl.startsWith('http') ? item.imageUrl : `http://localhost:5001${item.imageUrl}`
+          ? resolveAssetUrl(item.imageUrl)
           : featuredModels[index % featuredModels.length].image,
         price: item.price ? `${parseFloat(item.price).toFixed(4)} ETH` : '0.01 ETH',
         seller: item.username || 'Creator',
@@ -277,7 +278,7 @@ export function HeroSection() {
                 tokenId: item.tokenId || index,
                 title: item.title || item.name || `Model #${item.tokenId}`,
                 image: item.imageUrl && item.imageUrl !== '/placeholder.jpg'
-                  ? item.imageUrl.startsWith('http') ? item.imageUrl : `http://localhost:5001${item.imageUrl}`
+                  ? resolveAssetUrl(item.imageUrl)
                   : featuredModels[index % featuredModels.length].image,
                 price: item.price ? `${parseFloat(item.price).toFixed(4)} ETH` : '0.01 ETH',
                 seller: item.username || 'Creator',

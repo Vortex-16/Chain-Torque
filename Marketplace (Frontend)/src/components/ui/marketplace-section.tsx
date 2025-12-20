@@ -5,6 +5,7 @@ import { useMarketplace, useWeb3Status } from '@/hooks/useWeb3';
 import { useEffect, useState } from 'react';
 import type { MarketplaceItem } from '@/hooks/useWeb3';
 import { WalletConnectionDialog } from '@/components/ui/wallet-connection-dialog';
+import { resolveAssetUrl } from '@/lib/urls';
 
 // Import fallback images
 import cadGear from '@/assets/cad-gear.jpg';
@@ -87,9 +88,7 @@ export function MarketplaceSection() {
         id: item.tokenId || index,
         title: item.title || item.name || `NFT Model #${item.tokenId}`,
         image: item.imageUrl && item.imageUrl !== '/placeholder.jpg'
-          ? item.imageUrl.startsWith('http') || item.imageUrl.startsWith('ipfs://')
-            ? item.imageUrl
-            : `http://localhost:5001${item.imageUrl}`
+          ? resolveAssetUrl(item.imageUrl)
           : featuredModels[index % featuredModels.length].image,
         price: item.price ? `${parseFloat(item.price).toFixed(4)} ETH` : '0.001 ETH',
         seller: item.username || (item.seller ? `${item.seller.slice(0, 6)}...${item.seller.slice(-4)}` : 'Creator'),
@@ -100,11 +99,7 @@ export function MarketplaceSection() {
         category: item.category || '3D Model',
         tokenId: item.tokenId,
         modelHash: item.modelHash,
-        modelUrl: item.modelUrl
-          ? item.modelUrl.startsWith('http') || item.modelUrl.startsWith('ipfs://')
-            ? item.modelUrl
-            : `http://localhost:5001${item.modelUrl}`
-          : null,
+        modelUrl: item.modelUrl ? resolveAssetUrl(item.modelUrl) : null,
         isBlockchain: true,
       }));
       setDisplayItems(nftItems);
@@ -146,8 +141,8 @@ export function MarketplaceSection() {
               key={cat}
               onClick={() => setActiveCategory(cat)}
               className={`px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-all ${activeCategory === cat
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-muted/50 text-muted-foreground hover:bg-muted'
+                ? 'bg-primary text-primary-foreground'
+                : 'bg-muted/50 text-muted-foreground hover:bg-muted'
                 }`}
             >
               {cat}

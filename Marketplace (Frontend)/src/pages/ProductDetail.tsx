@@ -29,6 +29,7 @@ import {
   Wallet,
 } from 'lucide-react';
 
+import { resolveAssetUrl } from '@/lib/urls';
 
 // Import fallback images
 import cadGear from '@/assets/cad-gear.jpg';
@@ -102,15 +103,9 @@ const ProductDetail = () => {
     // Prefer backendData.images array if present and non-empty
     let actualImages: string[] = [];
     if (Array.isArray(backendData.images) && backendData.images.length > 0) {
-      actualImages = backendData.images.map((url: string) =>
-        url.startsWith('http') ? url : `http://localhost:5001${url}`
-      );
+      actualImages = backendData.images.map((url: string) => resolveAssetUrl(url));
     } else if (backendData.imageUrl && backendData.imageUrl !== '/placeholder.jpg') {
-      actualImages = [
-        backendData.imageUrl.startsWith('http')
-          ? backendData.imageUrl
-          : `http://localhost:5001${backendData.imageUrl}`,
-      ];
+      actualImages = [resolveAssetUrl(backendData.imageUrl)];
     } else {
       actualImages = fallbackImages;
     }
@@ -121,7 +116,7 @@ const ProductDetail = () => {
       description: backendData.description,
       images: actualImages,
       modelUrl: backendData.modelUrl
-        ? (backendData.modelUrl.startsWith('http') ? backendData.modelUrl : `http://localhost:5001${backendData.modelUrl}`)
+        ? resolveAssetUrl(backendData.modelUrl)
         : '/models/sample.obj',
       price: `$${parseFloat(backendData.price) * 2000}`,
       priceETH: parseFloat(backendData.price),

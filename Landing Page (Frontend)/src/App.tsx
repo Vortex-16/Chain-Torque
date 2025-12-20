@@ -14,7 +14,18 @@ import BackToTop from './components/BackToTop'
 import { useScrollReveal } from './hooks/useScrollReveal'
 
 const CLERK_PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
-const MARKETPLACE_URL = import.meta.env.VITE_MARKETPLACE_URL || 'http://localhost:8080'
+
+// Detect production vs development for marketplace URL
+const getMarketplaceUrl = () => {
+    if (import.meta.env.VITE_MARKETPLACE_URL) {
+        return import.meta.env.VITE_MARKETPLACE_URL;
+    }
+    if (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
+        return 'http://localhost:8080';
+    }
+    return 'https://chaintorque-marketplace.onrender.com';
+};
+const MARKETPLACE_URL = getMarketplaceUrl();
 
 function App() {
     const [darkMode, setDarkMode] = useState(() => {

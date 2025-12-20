@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { WalletConnectionDialog } from '@/components/ui/wallet-connection-dialog';
 import { Plus, Loader2, AlertCircle, Download, Star, Edit3, Wallet } from 'lucide-react';
 import apiService from '@/services/apiService';
+import { getCadUrl } from '@/lib/urls';
 
 // Import fallback images
 import cadGear from '@/assets/cad-gear.jpg';
@@ -56,9 +57,9 @@ const Edit = () => {
     try {
       setLoading(true);
       setError(null);
-      
+
       const response = await apiService.getUserPurchases(walletAddress);
-      
+
       if (response.success && response.data) {
         // Transform the API response to match our interface
         const items: PurchasedItem[] = response.data.map((item: any, index: number) => ({
@@ -76,7 +77,7 @@ const Edit = () => {
           modelUrl: item.modelUrl,
           isBlockchain: item.isBlockchain || true
         }));
-        
+
         setPurchasedItems(items);
       } else {
         // If no purchases or API fails, show empty state
@@ -93,7 +94,7 @@ const Edit = () => {
 
   const handleCreateNew = () => {
     // Navigate to the CAD editor for creating a new model
-    window.open('http://localhost:3001', '_blank'); // CAD Frontend URL
+    window.open(getCadUrl(), '_blank');
   };
 
   const handleWalletConnected = () => {
@@ -103,14 +104,13 @@ const Edit = () => {
 
   const handleEditModel = (item: PurchasedItem) => {
     // Navigate to the CAD editor with the model loaded
-    // For now, open the CAD editor in a new tab. In future, we could pass model data
-    const cadUrl = `http://localhost:3001?model=${encodeURIComponent(item.modelUrl || '')}&title=${encodeURIComponent(item.title)}`;
+    const cadUrl = `${getCadUrl()}?model=${encodeURIComponent(item.modelUrl || '')}&title=${encodeURIComponent(item.title)}`;
     window.open(cadUrl, '_blank');
   };
 
   // Create New Card Component
   const CreateNewCard = () => (
-    <Card 
+    <Card
       className="group cursor-pointer bg-gradient-to-br from-primary/5 to-primary/10 border-dashed border-2 border-primary/30 hover:border-primary/50 transition-all duration-300 hover:shadow-lg"
       onClick={handleCreateNew}
     >
@@ -122,9 +122,9 @@ const Edit = () => {
         <p className="text-sm text-muted-foreground text-center">
           Start a new sketch with our CAD editor
         </p>
-        <Button 
-          variant="outline" 
-          size="sm" 
+        <Button
+          variant="outline"
+          size="sm"
           className="mt-4 border-primary text-primary hover:bg-primary hover:text-primary-foreground"
         >
           Open Editor
@@ -242,7 +242,7 @@ const Edit = () => {
                   <p className="text-sm text-blue-700 dark:text-blue-300 mb-3">
                     You can use the CAD editor to create new sketches without a wallet. To view and edit models you've purchased from the marketplace, please connect your wallet.
                   </p>
-                  <Button 
+                  <Button
                     onClick={() => setShowWalletDialog(true)}
                     size="sm"
                     className="bg-blue-600 hover:bg-blue-700 text-white"
@@ -293,7 +293,7 @@ const Edit = () => {
                     </div>
                   </CardContent>
                 </Card>
-                
+
                 <Card>
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between">
@@ -305,7 +305,7 @@ const Edit = () => {
                     </div>
                   </CardContent>
                 </Card>
-                
+
                 <Card>
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between">
@@ -325,12 +325,12 @@ const Edit = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {/* Create New Card - Always first */}
                 <CreateNewCard />
-                
+
                 {/* Purchased Items */}
                 {purchasedItems.map(item => (
-                  <PurchasedItemCard 
-                    key={`${item.tokenId}-${item.id}`} 
-                    item={item} 
+                  <PurchasedItemCard
+                    key={`${item.tokenId}-${item.id}`}
+                    item={item}
                   />
                 ))}
               </div>

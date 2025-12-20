@@ -23,8 +23,10 @@ import Edit from './pages/Edit';
 import NotFound from './pages/NotFound';
 import BackendStatus from './components/BackendStatus';
 import SignUp from './pages/SignUp';
+import { getLandingUrl } from '@/lib/urls';
 
 const queryClient = new QueryClient();
+const LANDING_URL = getLandingUrl();
 
 // Get Clerk publishable key from environment
 const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
@@ -101,7 +103,7 @@ const AppContent = () => {
                 Please sign in to access the marketplace
               </p>
               <a
-                href='http://localhost:5000/login'
+                href={`${LANDING_URL}/sign-in`}
                 className='bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700'
               >
                 Sign In
@@ -117,9 +119,9 @@ const AppContent = () => {
 const App = () => (
   <ClerkProvider
     publishableKey={clerkPubKey}
-    afterSignOutUrl='http://localhost:5000'
-    signInUrl='http://localhost:5000/login'
-    signUpUrl='http://localhost:5000/signup'
+    afterSignOutUrl={LANDING_URL}
+    signInUrl={`${LANDING_URL}/sign-in`}
+    signUpUrl={`${LANDING_URL}/sign-up`}
   >
     <QueryClientProvider client={queryClient}>
       <ThemeProvider
