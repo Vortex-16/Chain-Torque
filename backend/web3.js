@@ -70,7 +70,10 @@ class Web3Manager {
       );
 
       if (!fs.existsSync(contractArtifactPath)) {
-        throw new Error('Contract artifact not found. Please compile the contract first.');
+        console.warn('⚠️  Contract artifact not found. Blockchain features will be disabled.');
+        console.warn('   Run `npx hardhat compile` locally and ensure artifacts are deployed.');
+        this.contract = null;
+        return; // Don't throw - allow server to start without blockchain features
       }
 
       const contractArtifact = JSON.parse(fs.readFileSync(contractArtifactPath, 'utf8'));
@@ -81,13 +84,15 @@ class Web3Manager {
         const deployment = JSON.parse(fs.readFileSync(deploymentPath, 'utf8'));
         this.contractAddress = deployment.ChainTorqueMarketplace;
         this.contract = new ethers.Contract(this.contractAddress, abi, this.signer);
+        console.log('✅ Contract loaded:', this.contractAddress);
       } else {
         // Contract not deployed yet; keep contract as null for checks elsewhere
+        console.warn('⚠️  contract-address.json not found. Contract not deployed.');
         this.contract = null;
       }
     } catch (error) {
       console.error('Error loading contract:', error.message);
-      throw error;
+      this.contract = null; // Don't throw - allow server to continue
     }
   }
 
