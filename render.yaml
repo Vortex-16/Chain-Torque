@@ -1,6 +1,6 @@
 services:
   # ---------------------------------------
-  # 1. Backend Service (Node.js/Express)
+  # 1. Backend Service (Web Service)
   # ---------------------------------------
   - type: web
     name: chaintorque-backend
@@ -13,22 +13,21 @@ services:
       - key: NODE_ENV
         value: production
       - key: MONGODB_URI
-        sync: false # User must enter this in Render Dashboard
+        sync: false
       - key: RPC_URL
         sync: false
       - key: PRIVATE_KEY
         sync: false
       - key: CONTRACT_ADDRESS
-        sync: false # Will be set after deployment or sync
+        sync: false
       - key: CLERK_PUBLISHABLE_KEY
         sync: false
 
+staticSites:
   # ---------------------------------------
-  # 2. Marketplace Frontend (Static Site)
+  # 2. Marketplace Frontend
   # ---------------------------------------
-  - type: static
-    name: chaintorque-marketplace
-    env: static
+  - name: chaintorque-marketplace
     buildCommand: cd "Marketplace (Frontend)" && bun install && bun run build
     publishDir: "Marketplace (Frontend)/dist"
     branch: main
@@ -46,11 +45,9 @@ services:
         sync: false
 
   # ---------------------------------------
-  # 3. Landing Page Frontend (Static Site)
+  # 3. Landing Page Frontend
   # ---------------------------------------
-  - type: static
-    name: chaintorque-landing
-    env: static
+  - name: chaintorque-landing
     buildCommand: cd "Landing Page (Frontend)" && bun install && bun run build
     publishDir: "Landing Page (Frontend)/dist"
     branch: main
@@ -59,11 +56,9 @@ services:
         sync: false
 
   # ---------------------------------------
-  # 4. CAD Frontend (Static Site - CRA)
+  # 4. CAD Frontend
   # ---------------------------------------
-  - type: static
-    name: chaintorque-cad
-    env: static
+  - name: chaintorque-cad
     buildCommand: cd "CAD (Frontend)" && bun install && bun run build
     publishDir: "CAD (Frontend)/build"
     branch: main
