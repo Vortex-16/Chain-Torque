@@ -6,8 +6,8 @@ services:
     name: chaintorque-backend
     runtime: node
     plan: free
-    buildCommand: npm install && echo "Backend ready"
-    startCommand: cd backend && node server.js
+    buildCommand: npm install --legacy-peer-deps
+    startCommand: npm run --workspace=chaintorque-backend start
     branch: main
     envVars:
       - key: NODE_ENV
@@ -32,8 +32,8 @@ services:
     name: chaintorque-marketplace
     runtime: node
     plan: free
-    buildCommand: npm install && cd "Marketplace (Frontend)" && npm run build
-    startCommand: cd "Marketplace (Frontend)" && npx serve dist -s -l ${PORT:-10000}
+    buildCommand: npm install --legacy-peer-deps && npm run --workspace=chaintorque-marketplace build
+    startCommand: npx serve "Marketplace (Frontend)/dist" -s -l ${PORT:-10000}
     branch: main
     envVars:
       - key: VITE_API_URL
@@ -48,8 +48,8 @@ services:
     name: chaintorque-landing
     runtime: node
     plan: free
-    buildCommand: npm install && cd "Landing Page (Frontend)" && npm run build
-    startCommand: cd "Landing Page (Frontend)" && npx serve dist -s -l ${PORT:-10000}
+    buildCommand: npm install --legacy-peer-deps && npm run --workspace=chaintorque-landing build
+    startCommand: npx serve "Landing Page (Frontend)/dist" -s -l ${PORT:-10000}
     branch: main
     envVars:
       - key: VITE_CLERK_PUBLISHABLE_KEY
@@ -62,6 +62,6 @@ services:
     name: chaintorque-cad
     runtime: node
     plan: free
-    buildCommand: npm install && cd "CAD (Frontend)" && npm run build
-    startCommand: cd "CAD (Frontend)" && npx serve build -s -l ${PORT:-10000}
+    buildCommand: npm install --legacy-peer-deps && npm run --workspace=chaintorque-cad-frontend build
+    startCommand: npx serve "CAD (Frontend)/build" -s -l ${PORT:-10000}
     branch: main
