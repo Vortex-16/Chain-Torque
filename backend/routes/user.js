@@ -101,7 +101,7 @@ router.get('/:address/purchases', async (req, res) => {
     const userAddress = req.params.address.toLowerCase();
     try {
         // PRIMARY SOURCE: Get all MarketItems owned by this user (these are purchased items)
-        // After purchase: owner = buyer, seller = null, status = sold
+        // After purchase: owner = buyer, seller = original seller (preserved), status = sold
         const ownedItems = await MarketItem.find({
             owner: userAddress,
             status: 'sold'
@@ -116,10 +116,12 @@ router.get('/:address/purchases', async (req, res) => {
 
         const allOwnedItems = [...ownedItems, ...additionalOwned];
 
-        // Filter out items user created themselves (seller was originally this user)
-        // Note: After sale, seller is nullified, so we use creator field or check transactionHash
+        // Filter out items user created themselves
+        // Check both seller (now preserved) and creator fields
         const purchases = allOwnedItems.filter(item => {
-            // If item has a creator field and it matches, it's their own creation
+            // If seller is this user, they created it - not a purchase
+            if (item.seller && item.seller.toLowerCase() === userAddress) return false;
+            // Also check creator field as backup
             if (item.creator && item.creator.toLowerCase() === userAddress) return false;
             // Otherwise it's a purchase
             return true;

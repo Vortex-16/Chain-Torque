@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { useUser } from '@clerk/clerk-react';
 import { Navigation } from '@/components/ui/navigation';
 import { Footer } from '@/components/ui/footer';
 import { Card, CardContent } from '@/components/ui/card';
@@ -9,6 +8,7 @@ import { WalletConnectionDialog } from '@/components/ui/wallet-connection-dialog
 import { Plus, Loader2, AlertCircle, Download, Star, Edit3, Wallet } from 'lucide-react';
 import apiService from '@/services/apiService';
 import { getCadUrl } from '@/lib/urls';
+import { useWalletAddress } from '@/hooks/useWalletAddress';
 
 // Import fallback images
 import cadGear from '@/assets/cad-gear.jpg';
@@ -33,14 +33,12 @@ interface PurchasedItem {
 }
 
 const Edit = () => {
-  const { user } = useUser();
+  // Use centralized wallet hook for consistent address resolution
+  const { walletAddress } = useWalletAddress();
   const [purchasedItems, setPurchasedItems] = useState<PurchasedItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showWalletDialog, setShowWalletDialog] = useState(false);
-
-  // Get user's wallet address from Clerk metadata
-  const walletAddress = user?.unsafeMetadata?.walletAddress as string;
 
   useEffect(() => {
     loadPurchasedItems();
@@ -109,6 +107,16 @@ const Edit = () => {
     // Navigate to the CAD editor with the model loaded
     const cadUrl = `${getCadUrl()}?model=${encodeURIComponent(item.modelUrl || '')}&title=${encodeURIComponent(item.title)}`;
     window.open(cadUrl, '_blank');
+  };
+
+  const handleDownloadModel = (item: PurchasedItem, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!item.modelUrl) {
+      alert('Model file not available for download.');
+      return;
+    }
+    // Open the IPFS URL in a new tab for download
+    window.open(item.modelUrl, '_blank');
   };
 
   // Create New Card Component
@@ -201,17 +209,30 @@ const Edit = () => {
                 {item.downloads} downloads
               </span>
             </div>
-            <Button
-              size="sm"
-              className="bg-gradient-primary hover:bg-primary-hover transition-all hover:scale-105"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleEditModel(item);
-              }}
-            >
-              <Edit3 className="h-4 w-4 mr-1" />
-              Edit
-            </Button>
+            <div className="flex gap-2">
+              {item.modelUrl && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="hover:bg-primary/10 transition-all"
+                  onClick={(e) => handleDownloadModel(item, e)}
+                >
+                  <Download className="h-4 w-4 mr-1" />
+                  Download
+                </Button>
+              )}
+              <Button
+                size="sm"
+                className="bg-gradient-primary hover:bg-primary-hover transition-all hover:scale-105"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleEditModel(item);
+                }}
+              >
+                <Edit3 className="h-4 w-4 mr-1" />
+                Edit
+              </Button>
+            </div>
           </div>
         </div>
       </CardContent>

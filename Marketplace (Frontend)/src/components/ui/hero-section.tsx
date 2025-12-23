@@ -49,26 +49,58 @@ export function HeroSection() {
   const { items, loading } = useMarketplace();
   const [displayItems, setDisplayItems] = useState<DisplayItem[]>(featuredModels);
   const [showWalletDialog, setShowWalletDialog] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
+  // Transform backend items to display format
+  const transformItem = (item: any, index: number): DisplayItem => ({
+    id: item.tokenId || index,
+    tokenId: item.tokenId || index,
+    title: item.title || item.name || `Model #${item.tokenId}`,
+    image: item.imageUrl && item.imageUrl !== '/placeholder.jpg'
+      ? resolveAssetUrl(item.imageUrl)
+      : featuredModels[index % featuredModels.length].image,
+    price: item.price ? `${parseFloat(item.price).toFixed(4)} ETH` : '0.01 ETH',
+    seller: item.username || 'Creator',
+    rating: item.rating || 4.5,
+    downloads: item.downloads || 0,
+    fileTypes: ['GLB', 'STL'],
+    software: ['Blender', 'Three.js'],
+  });
+
+  // Filter items based on search and category
   useEffect(() => {
     if (items && items.length > 0) {
-      const nftItems = items.slice(0, 4).map((item: any, index: number) => ({
-        id: item.tokenId || index,
-        tokenId: item.tokenId || index,
-        title: item.title || item.name || `Model #${item.tokenId}`,
-        image: item.imageUrl && item.imageUrl !== '/placeholder.jpg'
-          ? resolveAssetUrl(item.imageUrl)
-          : featuredModels[index % featuredModels.length].image,
-        price: item.price ? `${parseFloat(item.price).toFixed(4)} ETH` : '0.01 ETH',
-        seller: item.username || 'Creator',
-        rating: 4.5 + Math.random() * 0.5,
-        downloads: Math.floor(Math.random() * 1000) + 100,
-        fileTypes: ['GLB', 'STL'],
-        software: ['Blender', 'Three.js'],
-      }));
-      setDisplayItems(nftItems.length > 0 ? nftItems : featuredModels);
+      let filtered = items.map(transformItem);
+
+      // Apply search filter
+      if (searchQuery.trim()) {
+        const query = searchQuery.toLowerCase();
+        filtered = filtered.filter(item =>
+          item.title.toLowerCase().includes(query) ||
+          item.seller.toLowerCase().includes(query)
+        );
+      }
+
+      // Apply category filter (match against title for now)
+      if (selectedCategory) {
+        const cat = selectedCategory.toLowerCase();
+        filtered = filtered.filter(item =>
+          item.title.toLowerCase().includes(cat) ||
+          categories.find(c => c.name === selectedCategory)?.name.toLowerCase() === cat
+        );
+      }
+
+      setDisplayItems(filtered.length > 0 ? filtered.slice(0, 8) : featuredModels);
+    } else {
+      setDisplayItems(featuredModels);
     }
-  }, [items]);
+  }, [items, searchQuery, selectedCategory]);
+
+  const handleSearch = () => {
+    // Trigger re-filter (already handled by useEffect)
+    console.log('Searching for:', searchQuery);
+  };
 
   return (
     <>
@@ -141,11 +173,17 @@ export function HeroSection() {
               <Search className='absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground' />
               <input
                 type='text'
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                 placeholder='Search for 3D models, CAD files, designs...'
                 className='w-full pl-11 pr-4 py-2.5 rounded-lg bg-muted/50 border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all'
               />
             </div>
-            <Button className='px-5'>Search</Button>
+            <Button className='px-5' onClick={handleSearch}>Search</Button>
+            {searchQuery && (
+              <Button variant='ghost' size='sm' onClick={() => setSearchQuery('')}>Clear</Button>
+            )}
           </div>
         </div>
       </section>
@@ -154,15 +192,29 @@ export function HeroSection() {
       <section className='bg-muted/30 border-b border-border/50 py-4'>
         <div className='container mx-auto px-4'>
           <div className='flex items-center gap-6 overflow-x-auto pb-2'>
+            <button
+              onClick={() => setSelectedCategory(null)}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-all whitespace-nowrap ${!selectedCategory
+                ? 'bg-primary text-primary-foreground border-primary'
+                : 'bg-background border-border/50 hover:border-primary/30 hover:bg-primary/5'
+                }`}
+            >
+              <span className='text-lg'>🏠</span>
+              <div className='text-sm font-medium'>All</div>
+            </button>
             {categories.map((cat) => (
               <button
                 key={cat.name}
-                className='flex items-center gap-2 px-4 py-2 rounded-lg bg-background border border-border/50 hover:border-primary/30 hover:bg-primary/5 transition-all whitespace-nowrap group'
+                onClick={() => setSelectedCategory(cat.name === selectedCategory ? null : cat.name)}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-all whitespace-nowrap group ${selectedCategory === cat.name
+                  ? 'bg-primary text-primary-foreground border-primary'
+                  : 'bg-background border-border/50 hover:border-primary/30 hover:bg-primary/5'
+                  }`}
               >
                 <span className='text-lg'>{cat.icon}</span>
                 <div className='text-left'>
-                  <div className='text-sm font-medium text-foreground group-hover:text-primary transition-colors'>{cat.name}</div>
-                  <div className='text-xs text-muted-foreground'>{cat.count} models</div>
+                  <div className={`text-sm font-medium transition-colors ${selectedCategory === cat.name ? '' : 'text-foreground group-hover:text-primary'}`}>{cat.name}</div>
+                  <div className={`text-xs ${selectedCategory === cat.name ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>{cat.count} models</div>
                 </div>
               </button>
             ))}
@@ -178,7 +230,7 @@ export function HeroSection() {
               <TrendingUp className='h-5 w-5 text-primary' />
               <h2 className='text-xl font-semibold text-foreground'>Trending Now</h2>
             </div>
-            <Link to='#' className='text-sm text-primary hover:text-primary/80 flex items-center gap-1'>
+            <Link to='#library' className='text-sm text-primary hover:text-primary/80 flex items-center gap-1'>
               See all <ChevronRight className='h-4 w-4' />
             </Link>
           </div>
@@ -219,7 +271,7 @@ export function HeroSection() {
                   </Link>
                 ))}
               </div>
-              <Link to='#' className='text-xs text-primary mt-3 inline-block hover:underline'>See more</Link>
+              <Link to='#library' className='text-xs text-primary mt-3 inline-block hover:underline'>See more</Link>
             </div>
 
             {/* New Arrivals Card */}
@@ -235,7 +287,7 @@ export function HeroSection() {
                   </Link>
                 ))}
               </div>
-              <Link to='#' className='text-xs text-primary mt-3 inline-block hover:underline'>See more</Link>
+              <Link to='#library' className='text-xs text-primary mt-3 inline-block hover:underline'>See more</Link>
             </div>
 
             {/* Top Rated Card */}
@@ -251,7 +303,7 @@ export function HeroSection() {
                   </Link>
                 ))}
               </div>
-              <Link to='#' className='text-xs text-primary mt-3 inline-block hover:underline'>See more</Link>
+              <Link to='#library' className='text-xs text-primary mt-3 inline-block hover:underline'>See more</Link>
             </div>
 
             {/* 3D Gear Showcase Card */}

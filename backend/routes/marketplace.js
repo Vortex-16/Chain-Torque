@@ -330,7 +330,7 @@ router.post('/sync-creation', async (req, res) => {
             return res.json({ success: true, message: 'Item already synced (Idempotent)', tokenId });
         }
 
-        // Save to database with correct seller address
+        // Save to database with correct seller and creator address
         const newItem = new MarketItem({
             tokenId: parseInt(tokenId),
             title: title || `NFT #${tokenId}`,
@@ -342,6 +342,8 @@ router.post('/sync-creation', async (req, res) => {
             modelUrl: modelUrl || '',
             tokenURI: tokenURI || '',
             seller: walletAddress.toLowerCase(), // User's wallet address - they will receive payments!
+            creator: walletAddress.toLowerCase(), // Original creator - for royalties and filtering
+            owner: walletAddress.toLowerCase(), // Initially owner = seller = creator
             username: username || 'Creator',
             createdAt: new Date(),
             isPermanent: true,
@@ -519,7 +521,8 @@ router.post('/sync-purchase', async (req, res) => {
         }
 
         item.owner = buyerAddress.toLowerCase();
-        item.seller = null;
+        // Note: Keep original seller address for historical records (seller is required in schema)
+        // The status='sold' indicates the item is no longer for sale
         item.status = 'sold';
         item.soldAt = new Date();
         await item.save();
@@ -535,6 +538,7 @@ router.post('/sync-purchase', async (req, res) => {
             currency: 'ETH',
             buyer: buyerAddress.toLowerCase(),
             seller: soldEvent.args.seller.toLowerCase(), // Use event seller for truth
+            gasUsed: receipt.gasUsed.toString(), // Required field - from blockchain receipt
             status: 'confirmed',
             metadata: {
                 tokenURI: item.tokenURI,
