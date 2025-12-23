@@ -60,27 +60,30 @@ const Edit = () => {
 
       const response = await apiService.getUserPurchases(walletAddress);
 
-      if (response.success && response.data) {
+      // Handle response - backend now returns full MarketItem data with modelUrl
+      const rawItems = response.success ? (response.data || (response as any).purchases || []) : [];
+
+      if (rawItems.length > 0) {
         // Transform the API response to match our interface
-        const items: PurchasedItem[] = response.data.map((item: any, index: number) => ({
-          id: item.tokenId || item.id || index,
+        const items: PurchasedItem[] = rawItems.map((item: any, index: number) => ({
+          id: item.tokenId || item._id || index,
           tokenId: item.tokenId || index,
-          title: item.title || `Model #${item.tokenId || index}`,
-          image: item.image || [cadGear, cadDrone, cadEngine, cadRobot][index % 4],
-          price: item.price || 'Purchased',
+          title: item.title || item.metadata?.title || `Model #${item.tokenId || index}`,
+          image: item.imageUrl || item.image || item.metadata?.image || [cadGear, cadDrone, cadEngine, cadRobot][index % 4],
+          price: item.price ? `${item.price} ETH` : 'Purchased',
           seller: item.seller || item.creator || 'Unknown Creator',
           rating: item.rating || 4.5,
           downloads: item.downloads || 0,
           fileTypes: item.fileTypes || ['GLB', 'STL'],
           software: item.software || ['CAD'],
-          purchaseDate: item.purchaseDate || new Date().toISOString(),
-          modelUrl: item.modelUrl,
-          isBlockchain: item.isBlockchain || true
+          purchaseDate: item.purchasedAt || item.purchaseDate || new Date().toISOString(),
+          modelUrl: item.modelUrl || item.metadata?.modelUrl, // Now properly available from backend
+          isBlockchain: true
         }));
 
         setPurchasedItems(items);
       } else {
-        // If no purchases or API fails, show empty state
+        // If no purchases, show empty state
         setPurchasedItems([]);
       }
     } catch (err) {

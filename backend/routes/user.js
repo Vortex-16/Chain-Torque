@@ -96,51 +96,90 @@ router.get('/:address/nfts', async (req, res) => {
     }
 });
 
-// Get user purchases (Transactions + Owned Items)
+// Get user purchases (Transactions + Owned Items) - Returns FULL MarketItem data for CAD editing
 router.get('/:address/purchases', async (req, res) => {
     const userAddress = req.params.address.toLowerCase();
     try {
-        const Transaction = require('../models/Transaction');
-
-        // 1. Get explicit transactions
-        const transactions = await Transaction.find({
-            buyer: userAddress,
-            type: 'purchase',
-            status: 'confirmed'
-        }).sort({ confirmedAt: -1 }).lean();
-
-        // 2. Get implicit purchases (Items owned but not created by user)
-        // This covers cases where transaction sync failed but ownership is correct
+        // PRIMARY SOURCE: Get all MarketItems owned by this user (these are purchased items)
+        // After purchase: owner = buyer, seller = null, status = sold
         const ownedItems = await MarketItem.find({
             owner: userAddress,
-            creator: { $ne: userAddress } // If I own it but didn't create it, I bought it
+            status: 'sold'
         }).lean();
 
-        // 3. Merge and Deduplicate
-        // Create a map of tokenId -> transaction to check existence
-        const txTokenIds = new Set(transactions.map(t => t.tokenId));
+        // Also check items where user is explicitly marked as owner even if status is different
+        const additionalOwned = await MarketItem.find({
+            owner: userAddress,
+            status: { $ne: 'active' }, // Not actively listed = owned
+            _id: { $nin: ownedItems.map(i => i._id) } // Avoid duplicates
+        }).lean();
 
-        const syntheticTransactions = ownedItems
-            .filter(item => !txTokenIds.has(item.tokenId))
-            .map(item => ({
-                _id: 'synth_' + item._id,
-                transactionHash: item.transactionHash || '0x', // Fallback if missing
-                tokenId: item.tokenId,
+        const allOwnedItems = [...ownedItems, ...additionalOwned];
+
+        // Filter out items user created themselves (seller was originally this user)
+        // Note: After sale, seller is nullified, so we use creator field or check transactionHash
+        const purchases = allOwnedItems.filter(item => {
+            // If item has a creator field and it matches, it's their own creation
+            if (item.creator && item.creator.toLowerCase() === userAddress) return false;
+            // Otherwise it's a purchase
+            return true;
+        });
+
+        // Get transaction records for additional metadata (purchase date, hash, etc.)
+        const Transaction = require('../models/Transaction');
+        const txMap = new Map();
+
+        const purchaseTokenIds = purchases.map(p => p.tokenId);
+        if (purchaseTokenIds.length > 0) {
+            const txRecords = await Transaction.find({
                 buyer: userAddress,
+                tokenId: { $in: purchaseTokenIds },
+                type: 'purchase',
+                status: 'confirmed'
+            }).lean();
+
+            txRecords.forEach(tx => txMap.set(tx.tokenId, tx));
+        }
+
+        // Format response with FULL item data including modelUrl
+        const formattedPurchases = purchases.map(item => {
+            const tx = txMap.get(item.tokenId);
+            return {
+                // Full MarketItem data for CAD access
+                _id: item._id,
+                tokenId: item.tokenId,
+                title: item.title || `Model #${item.tokenId}`,
+                description: item.description,
                 price: item.price,
-                status: 'confirmed',
-                confirmedAt: item.soldAt || item.updatedAt,
+                category: item.category,
+                imageUrl: item.imageUrl,
+                images: item.images || [],
+                modelUrl: item.modelUrl, // CRITICAL: This enables CAD editing
+                tokenURI: item.tokenURI,
+                seller: item.seller,
+                owner: item.owner,
+                status: item.status,
+
+                // Transaction metadata
+                transactionHash: tx?.transactionHash || item.transactionHash || '0x',
+                purchasedAt: tx?.confirmedAt || item.soldAt || item.updatedAt,
+                blockNumber: tx?.blockNumber || item.blockNumber,
+
+                // Legacy compatibility fields
                 metadata: {
                     title: item.title,
-                    image: item.imageUrl
-                },
-                isSynthetic: true // Flag for frontend if needed
-            }));
+                    image: item.imageUrl,
+                    modelUrl: item.modelUrl
+                }
+            };
+        }).sort((a, b) => new Date(b.purchasedAt) - new Date(a.purchasedAt));
 
-        const allPurchases = [...transactions, ...syntheticTransactions]
-            .sort((a, b) => new Date(b.confirmedAt) - new Date(a.confirmedAt));
-
-        res.json({ success: true, purchases: allPurchases });
+        res.json({
+            success: true,
+            purchases: formattedPurchases,
+            data: formattedPurchases, // Alternate key for frontend compatibility
+            count: formattedPurchases.length
+        });
     } catch (error) {
         console.error('Error fetching user purchases:', error.message);
         res.status(500).json({ success: false, error: error.message });
