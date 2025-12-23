@@ -427,9 +427,7 @@ router.get('/:id', async (req, res) => {
                     console.log(`[Auto-Heal] Item #${paramTokenId} found SOLD on chain but ACTIVE in DB. Updating...`);
                     item.status = 'sold';
                     item.owner = chainItem.owner.toLowerCase();
-                    item.seller = null; // Marketplace logic: seller is null when sold? Or keep history?
-                    // Keeping seller for history might be better, but previous logic nulled it. 
-                    // Let's update soldAt.
+                    // Keep original seller for history (seller is required field)
                     item.soldAt = new Date();
                     await item.save();
                 }

@@ -9,7 +9,7 @@ const UserSchema = new mongoose.Schema({
     lowercase: true,
     index: true
   },
-  
+
   // Profile information
   username: {
     type: String,
@@ -28,7 +28,7 @@ const UserSchema = new mongoose.Schema({
   avatar: {
     type: String // URL to avatar image
   },
-  
+
   // Contact and social
   email: {
     type: String,
@@ -47,7 +47,7 @@ const UserSchema = new mongoose.Schema({
     instagram: String,
     linkedin: String
   },
-  
+
   // User preferences
   preferences: {
     notifications: {
@@ -63,7 +63,7 @@ const UserSchema = new mongoose.Schema({
       showCollection: { type: Boolean, default: true }
     }
   },
-  
+
   // Activity tracking
   stats: {
     totalCreated: { type: Number, default: 0 },
@@ -72,7 +72,7 @@ const UserSchema = new mongoose.Schema({
     totalEarned: { type: Number, default: 0 },
     totalSpent: { type: Number, default: 0 }
   },
-  
+
   // User status
   isVerified: {
     type: Boolean,
@@ -86,7 +86,7 @@ const UserSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
-  
+
   // Metadata
   firstTransactionDate: {
     type: Date
@@ -95,7 +95,7 @@ const UserSchema = new mongoose.Schema({
     type: Date,
     default: Date.now
   },
-  
+
   // Following/Followers (for future social features)
   following: [{
     type: mongoose.Schema.Types.ObjectId,
@@ -116,29 +116,33 @@ UserSchema.index({ isCreator: 1, 'stats.totalCreated': -1 });
 UserSchema.index({ lastActive: -1 });
 
 // Virtual for follower count
-UserSchema.virtual('followerCount').get(function() {
+UserSchema.virtual('followerCount').get(function () {
   return this.followers.length;
 });
 
-UserSchema.virtual('followingCount').get(function() {
+UserSchema.virtual('followingCount').get(function () {
   return this.following.length;
 });
 
 // Instance methods
-UserSchema.methods.updateLastActive = function() {
+UserSchema.methods.updateLastActive = function () {
   this.lastActive = new Date();
   return this.save();
 };
 
-UserSchema.methods.incrementStat = function(statName, value = 1) {
-  if (this.stats[statName] !== undefined) {
-    this.stats[statName] += value;
-    return this.save();
+UserSchema.methods.incrementStat = async function (statName, value = 1) {
+  const validStats = ['totalCreated', 'totalSold', 'totalPurchased', 'totalEarned', 'totalSpent'];
+  if (!validStats.includes(statName)) {
+    throw new Error(`Invalid stat name: ${statName}`);
   }
-  throw new Error(`Invalid stat name: ${statName}`);
+  // Use updateOne with $inc to avoid save() middleware conflicts
+  return this.constructor.updateOne(
+    { _id: this._id },
+    { $inc: { [`stats.${statName}`]: value } }
+  );
 };
 
-UserSchema.methods.follow = function(userToFollow) {
+UserSchema.methods.follow = function (userToFollow) {
   if (!this.following.includes(userToFollow._id)) {
     this.following.push(userToFollow._id);
     userToFollow.followers.push(this._id);
@@ -146,39 +150,39 @@ UserSchema.methods.follow = function(userToFollow) {
   }
 };
 
-UserSchema.methods.unfollow = function(userToUnfollow) {
+UserSchema.methods.unfollow = function (userToUnfollow) {
   this.following.pull(userToUnfollow._id);
   userToUnfollow.followers.pull(this._id);
   return Promise.all([this.save(), userToUnfollow.save()]);
 };
 
 // Static methods
-UserSchema.statics.findByWallet = function(walletAddress) {
+UserSchema.statics.findByWallet = function (walletAddress) {
   return this.findOne({ walletAddress: walletAddress.toLowerCase() });
 };
 
-UserSchema.statics.getTopCreators = function(limit = 10) {
+UserSchema.statics.getTopCreators = function (limit = 10) {
   return this.find({ isCreator: true })
     .sort({ 'stats.totalCreated': -1, 'stats.totalEarned': -1 })
     .limit(limit)
     .select('walletAddress username displayName avatar stats isVerified');
 };
 
-UserSchema.statics.getActiveUsers = function(days = 30, limit = 50) {
+UserSchema.statics.getActiveUsers = function (days = 30, limit = 50) {
   const cutoffDate = new Date();
   cutoffDate.setDate(cutoffDate.getDate() - days);
-  
-  return this.find({ 
+
+  return this.find({
     lastActive: { $gte: cutoffDate },
     isBanned: false
   })
-  .sort({ lastActive: -1 })
-  .limit(limit)
-  .select('walletAddress username displayName avatar lastActive');
+    .sort({ lastActive: -1 })
+    .limit(limit)
+    .select('walletAddress username displayName avatar lastActive');
 };
 
 // Pre-save middleware
-UserSchema.pre('save', function(next) {
+UserSchema.pre('save', function (next) {
   if (this.isNew && !this.firstTransactionDate) {
     this.firstTransactionDate = new Date();
   }
