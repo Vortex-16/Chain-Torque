@@ -651,7 +651,7 @@ router.post('/purchase', async (req, res) => {
         await transaction.save();
 
         item.owner = buyerAddress.toLowerCase();
-        item.seller = null;
+        // Keep original seller for history (seller is required field)
         item.status = 'sold';
         await item.save();
 
@@ -698,7 +698,7 @@ router.get('/sync-status/:id', async (req, res) => {
             console.log(`[Healing] Item #${tokenId} is SOLD on-chain but ACTIVE in DB. Healing...`);
             dbItem.status = 'sold';
             dbItem.owner = item.owner.toLowerCase();
-            dbItem.seller = null;
+            // Keep original seller for history (seller is required field)
             dbItem.soldAt = new Date();
             await dbItem.save();
             updated = true;
