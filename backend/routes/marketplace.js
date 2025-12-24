@@ -302,10 +302,13 @@ router.post('/sync-creation', async (req, res) => {
 
         // Verify MarketItemCreated event exists in the transaction
         let foundEvent = null;
+        console.log(`[Sync Creation] Checking ${receipt.logs.length} logs for contract ${web3.contractAddress}`);
         for (const log of receipt.logs) {
             try {
+                console.log(`[Sync Creation] Log address: ${log.address}, expected: ${web3.contractAddress}`);
                 if (log.address.toLowerCase() !== web3.contractAddress.toLowerCase()) continue;
                 const parsed = web3.contract.interface.parseLog(log);
+                console.log(`[Sync Creation] Parsed event: ${parsed?.name}, tokenId: ${parsed?.args?.tokenId}`);
                 if (parsed && parsed.name === 'MarketItemCreated') {
                     if (parsed.args.tokenId.toString() === tokenId.toString()) {
                         foundEvent = parsed;
@@ -313,6 +316,7 @@ router.post('/sync-creation', async (req, res) => {
                     }
                 }
             } catch (e) {
+                console.log(`[Sync Creation] Parse error: ${e.message}`);
                 continue;
             }
         }
@@ -355,17 +359,26 @@ router.post('/sync-creation', async (req, res) => {
 
         await newItem.save();
 
-        // Update user stats
-        let user = await User.findByWallet(walletAddress);
-        if (!user) {
-            user = new User({
-                walletAddress: walletAddress.toLowerCase(),
-                isCreator: true,
-                lastActive: new Date()
-            });
-            await user.save();
+        // Update user stats (non-blocking - don't let stat update fail the sync)
+        try {
+            let user = await User.findByWallet(walletAddress);
+            if (!user) {
+                user = new User({
+                    walletAddress: walletAddress.toLowerCase(),
+                    isCreator: true,
+                    lastActive: new Date()
+                });
+                await user.save();
+            }
+            // Use direct updateOne instead of instance method to avoid middleware issues
+            await User.updateOne(
+                { _id: user._id },
+                { $inc: { 'stats.totalCreated': 1 } }
+            );
+        } catch (statError) {
+            console.warn('[Sync Creation] Failed to update user stats:', statError.message);
+            // Don't fail the sync just because stats update failed
         }
-        await user.incrementStat('totalCreated', 1);
 
         console.log(`[Sync Creation] Successfully saved Token ID ${tokenId} for seller ${walletAddress}`);
 

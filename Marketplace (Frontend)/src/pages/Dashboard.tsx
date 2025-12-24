@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import {
-  User,
   ShoppingBag,
   Upload,
   DollarSign,
@@ -97,7 +96,7 @@ const Dashboard = () => {
       const connectedWallet = localStorage.getItem('walletAddress');
       const clerkWallet = user?.primaryWeb3Wallet?.web3Wallet;
       const metadataWallet = user?.unsafeMetadata?.walletAddress as string;
-      const fallbackWallet = '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266';
+      const fallbackWallet = ''; // No fallback - user must connect wallet
 
       const walletAddress = connectedWallet || clerkWallet || metadataWallet || fallbackWallet;
 

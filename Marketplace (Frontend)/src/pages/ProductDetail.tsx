@@ -10,6 +10,7 @@ import { Separator } from '@/components/ui/separator';
 import { Model3DViewer } from '@/components/ui/model-3d-viewer';
 import { WalletConnectionDialog } from '@/components/ui/wallet-connection-dialog';
 import apiService from '@/services/apiService';
+import { CONTRACT_ADDRESS } from '@/lib/constants';
 import { useUser } from '@clerk/clerk-react';
 import {
   ArrowLeft,
@@ -154,7 +155,7 @@ const ProductDetail = () => {
       lastUpdate: new Date().toISOString().split('T')[0],
       license: 'Standard License',
       tokenId: backendData.tokenId ? parseInt(backendData.tokenId, 10) : undefined,
-      contractAddress: '0x742d35Cc4Bf5C6BA53550e2C7a4C0D7F5a56B8f1',
+      contractAddress: CONTRACT_ADDRESS,
       blockchain: 'Ethereum',
     };
   };
