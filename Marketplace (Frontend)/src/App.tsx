@@ -115,7 +115,13 @@ const AppContent = () => {
   );
 };
 
+// Check if we're in production (satellite mode)
+const isProduction = typeof window !== 'undefined' &&
+  window.location.hostname !== 'localhost' &&
+  window.location.hostname !== '127.0.0.1';
+
 const App = () => (
+  // @ts-expect-error - Clerk types are complex but isSatellite/domain props work at runtime
   <ClerkProvider
     publishableKey={clerkPubKey}
     afterSignOutUrl={LANDING_URL}
@@ -123,7 +129,8 @@ const App = () => (
     signUpUrl={`${LANDING_URL}/sign-up`}
     signInFallbackRedirectUrl="/"
     signUpFallbackRedirectUrl="/"
-
+    isSatellite={isProduction}
+    domain={isProduction ? 'chaintorque-landing.onrender.com' : undefined}
   >
     <QueryClientProvider client={queryClient}>
       <ThemeProvider
