@@ -3,9 +3,10 @@ import { useState, useEffect } from 'react';
 
 /**
  * Centralized hook for getting the user's wallet address with consistent priority:
- * 1. localStorage (explicitly connected wallet)
- * 2. Clerk Web3 Wallet
- * 3. Clerk unsafeMetadata.walletAddress
+ * 1. MetaMask signer (currently connected wallet)
+ * 2. localStorage (explicitly connected wallet)
+ * 3. Clerk Web3 Wallet
+ * 4. Clerk unsafeMetadata.walletAddress
  * 
  * This ensures all pages use the same wallet address.
  */
@@ -14,21 +15,38 @@ export function useWalletAddress() {
     const [walletAddress, setWalletAddress] = useState<string | null>(null);
 
     useEffect(() => {
-        if (!isLoaded) return;
+        const resolveWallet = async () => {
+            if (!isLoaded) return;
 
-        // Priority 1: localStorage (user explicitly connected this wallet)
-        const connectedWallet = localStorage.getItem('walletAddress');
+            // Priority 0: Get from MetaMask if connected (most reliable for recent transactions)
+            let metamaskAddress: string | null = null;
+            if (typeof window !== 'undefined' && window.ethereum) {
+                try {
+                    const accounts = await window.ethereum.request({ method: 'eth_accounts' }) as string[];
+                    if (accounts && accounts.length > 0) {
+                        metamaskAddress = accounts[0];
+                    }
+                } catch (e) {
+                    // MetaMask not available or not connected
+                }
+            }
 
-        // Priority 2: Clerk's Web3 wallet
-        const clerkWeb3Wallet = user?.primaryWeb3Wallet?.web3Wallet;
+            // Priority 1: localStorage (user explicitly connected this wallet)
+            const connectedWallet = localStorage.getItem('walletAddress');
 
-        // Priority 3: Saved in Clerk metadata during signup
-        const metadataWallet = user?.unsafeMetadata?.walletAddress as string | undefined;
+            // Priority 2: Clerk's Web3 wallet
+            const clerkWeb3Wallet = user?.primaryWeb3Wallet?.web3Wallet;
 
-        // Use first available in priority order
-        const resolvedAddress = connectedWallet || clerkWeb3Wallet || metadataWallet || null;
+            // Priority 3: Saved in Clerk metadata during signup
+            const metadataWallet = user?.unsafeMetadata?.walletAddress as string | undefined;
 
-        setWalletAddress(resolvedAddress?.toLowerCase() || null);
+            // Use first available in priority order
+            const resolvedAddress = metamaskAddress || connectedWallet || clerkWeb3Wallet || metadataWallet || null;
+
+            setWalletAddress(resolvedAddress?.toLowerCase() || null);
+        };
+
+        resolveWallet();
     }, [user, isLoaded]);
 
     return {

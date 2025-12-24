@@ -46,7 +46,7 @@ const categories = [
 ];
 
 export function HeroSection() {
-  const { items, loading } = useMarketplace();
+  const { items } = useMarketplace();
   const [displayItems, setDisplayItems] = useState<DisplayItem[]>(featuredModels);
   const [showWalletDialog, setShowWalletDialog] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -91,9 +91,14 @@ export function HeroSection() {
         );
       }
 
-      setDisplayItems(filtered.length > 0 ? filtered.slice(0, 8) : featuredModels);
-    } else {
+      // When searching/filtering, show filtered results (even if empty - don't show fallback)
+      setDisplayItems(filtered.slice(0, 8));
+    } else if (items.length === 0) {
+      // Only show fallback when there are NO items at all (empty marketplace)
       setDisplayItems(featuredModels);
+    } else {
+      // Show actual items when no search/filter
+      setDisplayItems(items.map(transformItem).slice(0, 8));
     }
   }, [items, searchQuery, selectedCategory]);
 

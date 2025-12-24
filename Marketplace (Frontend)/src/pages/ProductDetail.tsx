@@ -237,8 +237,9 @@ const ProductDetail = () => {
         throw new Error(`Blockchain transaction failed: ${web3Error.message}`);
       }
 
-      // 2. Sync with Backend
-      const userAddress = user?.primaryWeb3Wallet?.web3Wallet || localStorage.getItem('walletAddress') || '';
+      // 2. Sync with Backend - get buyer address from the signer that just made the purchase
+      const signerAddress = await web3Service.signer?.getAddress();
+      const userAddress = signerAddress || user?.primaryWeb3Wallet?.web3Wallet || localStorage.getItem('walletAddress') || '';
 
       console.log('Syncing purchase with backend...');
       const syncResponse = await apiService.syncPurchase(

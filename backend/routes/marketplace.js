@@ -465,7 +465,10 @@ router.post('/sync-purchase', async (req, res) => {
     try {
         const { tokenId, transactionHash, buyerAddress, price } = req.body;
 
+        console.log('[Sync Purchase] Received:', { tokenId, transactionHash, buyerAddress, price });
+
         if (!tokenId || !transactionHash || !buyerAddress) {
+            console.log('[Sync Purchase] Missing fields - tokenId:', !!tokenId, 'transactionHash:', !!transactionHash, 'buyerAddress:', !!buyerAddress);
             return res.status(400).json({ success: false, message: 'Missing required fields' });
         }
 
@@ -562,25 +565,32 @@ router.post('/sync-purchase', async (req, res) => {
 
         await transaction.save();
 
-        // 5. Update User Stats
-        let buyer = await User.findByWallet(buyerAddress);
-        if (!buyer) {
-            buyer = new User({ walletAddress: buyerAddress.toLowerCase() });
-            await buyer.save();
-        }
-        await buyer.incrementStat('totalPurchased', 1);
-        await buyer.incrementStat('totalSpent', parseFloat(truePrice));
-
-        // Use event seller to credit the correct person
-        const eventSellerAddress = soldEvent.args.seller.toLowerCase();
-        if (eventSellerAddress && eventSellerAddress !== '0x0000000000000000000000000000000000000000') {
-            let seller = await User.findByWallet(eventSellerAddress);
-            if (seller) {
-                await seller.incrementStat('totalSold', 1);
-                // 97.5% is the seller's cut (Platform fee 2.5%)
-                // We should strictly calculate this based on contract constant, but 0.975 is hardcoded here matching contract
-                await seller.incrementStat('totalEarned', parseFloat(truePrice) * 0.975);
+        // 5. Update User Stats (non-blocking - don't let stats fail the sync)
+        try {
+            let buyer = await User.findByWallet(buyerAddress);
+            if (!buyer) {
+                buyer = new User({ walletAddress: buyerAddress.toLowerCase() });
+                await buyer.save();
             }
+            await User.updateOne(
+                { _id: buyer._id },
+                { $inc: { 'stats.totalPurchased': 1, 'stats.totalSpent': parseFloat(truePrice) } }
+            );
+
+            // Use event seller to credit the correct person
+            const eventSellerAddress = soldEvent.args.seller.toLowerCase();
+            if (eventSellerAddress && eventSellerAddress !== '0x0000000000000000000000000000000000000000') {
+                let seller = await User.findByWallet(eventSellerAddress);
+                if (seller) {
+                    await User.updateOne(
+                        { _id: seller._id },
+                        { $inc: { 'stats.totalSold': 1, 'stats.totalEarned': parseFloat(truePrice) * 0.975 } }
+                    );
+                }
+            }
+        } catch (statsError) {
+            console.warn('[Sync Purchase] Failed to update user stats:', statsError.message);
+            // Don't fail the sync just because stats update failed
         }
 
         res.json({ success: true, message: 'Purchase synced successfully with on-chain verification' });
