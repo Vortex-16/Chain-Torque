@@ -18,10 +18,10 @@ ChainTorque is a comprehensive Web3 platform that solves critical problems in th
 
 ```
 ChainTorque/
-├── Landing Page (Frontend)/     # Next.js marketing site
-├── Marketplace (Frontend)/      # React + Vite marketplace 
-├── Marketplace (Backend)/       # Node.js API + Smart contracts
-└── CAD (Frontend)/              # React CAD editor with Torquy AI
+├── Landing Page (Frontend)/     # Vite + React marketing site (Port 5000)
+├── Marketplace (Frontend)/      # Vite + React NFT marketplace (Port 8080)
+├── backend/                     # Express API + Smart contracts (Port 5001)
+└── CAD (Frontend)/              # React CAD editor with Torquy AI (Port 3001)
 ```
 
 ## 🛠️ **Technologies Used**
@@ -68,9 +68,9 @@ bun run dev
 
 # Or run individual services
 bun run dev:landing      # Landing page (Port 5000)
-bun run dev:marketplace  # Marketplace frontend (Port 5173)
+bun run dev:marketplace  # Marketplace frontend (Port 8080)
 bun run dev:backend      # Backend API (Port 5001)
-bun run dev:cad          # CAD editor with Torquy (Port 3000)
+bun run dev:cad          # CAD editor with Torquy (Port 3001)
 ```
 
 > **Why Bun?** This project uses [Bun](https://bun.sh) for lightning-fast performance, smaller footprint, and native TypeScript support. No more slow installs! 🚀
@@ -98,22 +98,30 @@ bun run dev:cad          # CAD editor with Torquy (Port 3000)
 ## 🗺️ **Development Status**
 
 **✅ Completed**
-- Project architecture and setup
-- 3D marketplace with NFT integration
+- Project architecture (Bun monorepo)
+- 3D marketplace with NFT minting & purchasing
+- Decentralized purchase flow (MetaMask → Smart Contract → IPFS)
+- ETH payments: 97.5% to seller, 2.5% platform fee
 - CAD editor with Three.js visualization
 - "Torquy" AI assistant interface
-- Smart contract deployment
-- IPFS storage integration
+- Smart contract on Sepolia testnet
+- IPFS storage via Lighthouse
+- Search & category filtering
+- Purchased items display with download
+- Wallet address consistency across pages
+- Dashboard with user stats
 
 **🔄 In Progress**
-- AI-powered CAD operations
-- Advanced geometry optimization
-- Native Mobile Marketplace App
+- Render.com deployment
+- Relist/resale functionality
+- Wishlist & cart persistence
 
 **📋 Planned**
-- Multi-chain support
-- AR/VR integration
-- Enterprise partnerships
+- User profile pages
+- Sales history view
+- Multi-chain support (Polygon)
+- AR/VR model preview
+- Mobile app
 
 ## 🤝 **Contributing**
 

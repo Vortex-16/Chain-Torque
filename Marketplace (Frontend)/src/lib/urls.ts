@@ -15,7 +15,7 @@ export const getBackendUrl = (): string => {
         return 'http://localhost:5001';
     }
     // 3. Production Render backend
-    return 'https://chaintorque-backend-wjx4.onrender.com';
+    return 'https://chaintorque-backend.onrender.com';
 };
 
 /**
@@ -29,7 +29,7 @@ export const getCadUrl = (): string => {
         (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
         return 'http://localhost:3001';
     }
-    return 'https://chaintorque-cad-wfti.onrender.com';
+    return 'https://chaintorque-cad.onrender.com';
 };
 
 /**
@@ -43,7 +43,7 @@ export const getLandingUrl = (): string => {
         (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
         return 'http://localhost:5000';
     }
-    return 'https://chaintorque-landing-t9pf.onrender.com';
+    return 'https://chaintorque-landing.onrender.com';
 };
 
 /**
@@ -57,7 +57,7 @@ export const getMarketplaceUrl = (): string => {
         (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
         return 'http://localhost:8080';
     }
-    return 'https://chaintorque-marketplace-zpn3.onrender.com';
+    return 'https://chaintorque-marketplace.onrender.com';
 };
 
 /**
