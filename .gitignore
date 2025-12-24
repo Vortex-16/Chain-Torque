@@ -53,11 +53,12 @@ Thumbs.db
 # Docker
 .dockerignore
 
-# Blockchain artifacts
+# Blockchain artifacts (but allow backend/artifacts for contract ABI)
 services/blockchain/artifacts/
 services/blockchain/cache/
 services/blockchain/typechain/
-**/artifacts/
+# Keep backend/artifacts - it contains compiled contract ABI needed for deployment
+!backend/artifacts/
 **/cache/
 **/typechain/
 contracts/artifacts/
